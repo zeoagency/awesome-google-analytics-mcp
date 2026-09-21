@@ -1,0 +1,317 @@
+{
+  "googleanalytics__google-analytics-mcp": {
+    "repo_slug": "googleanalytics__google-analytics-mcp",
+    "repository": "googleanalytics/google-analytics-mcp",
+    "description": "Google's reference Python implementation exposing Data API v1beta and Admin API via 5 modal tools supporting dual Service Account and interactive OAuth 2.0 PKCE."
+  },
+  "surendranb__google-analytics-mcp": {
+    "repo_slug": "surendranb__google-analytics-mcp",
+    "repository": "surendranb/google-analytics-mcp",
+    "description": "Python MCP server offering 11 modal tools with runtime schema introspection and property metadata caching over Service Account authentication."
+  },
+  "eiiot__ga4-mcp": {
+    "repo_slug": "eiiot__ga4-mcp",
+    "repository": "eiiot/ga4-mcp",
+    "description": "Python server bundling Data API v1beta reporting, funnel analysis, and dimension introspection into 5 consolidated tools with dual OAuth and Service Account support."
+  },
+  "CUTolu2021__ga4-mcp-server": {
+    "repo_slug": "CUTolu2021__ga4-mcp-server",
+    "repository": "CUTolu2021/ga4-mcp-server",
+    "description": "Node.js server executing standard and realtime GA4 reports through 3 consolidated modal tools with session token extraction and Service Account auth."
+  },
+  "mharnett__mcp-ga4": {
+    "repo_slug": "mharnett__mcp-ga4",
+    "repository": "mharnett/mcp-ga4",
+    "description": "TypeScript MCP server providing 8 client-aware query tools with custom dimension creation and context persistence over dual OAuth/Service Account credentials."
+  },
+  "fujii-yuji__GA4-MCP-Remote": {
+    "repo_slug": "fujii-yuji__GA4-MCP-Remote",
+    "repository": "fujii-yuji/GA4-MCP-Remote",
+    "description": "Remote Python MCP server delivering real-time streaming queries and dynamic schema metadata lookup across multiple GA4 properties."
+  },
+  "Newsstate__ga4-mcp": {
+    "repo_slug": "Newsstate__ga4-mcp",
+    "repository": "Newsstate/ga4-mcp",
+    "description": "TypeScript implementation providing automated GA4 dimension and metric schema introspection with interactive browser OAuth authentication."
+  },
+  "gviollaz__iita-ga4-mcp": {
+    "repo_slug": "gviollaz__iita-ga4-mcp",
+    "repository": "gviollaz/iita-ga4-mcp",
+    "description": "FastAPI-based Python MCP server focusing on high-speed GA4 report execution and realtime active-user telemetry via OAuth 2.0 PKCE."
+  },
+  "paulsign-lab__ga4-mcp": {
+    "repo_slug": "paulsign-lab__ga4-mcp",
+    "repository": "paulsign-lab/ga4-mcp",
+    "description": "Python server providing batch report execution and realtime telemetry streaming through 5 lightweight tool definitions with dual auth."
+  },
+  "Leanpicazoo__ga4-mcp": {
+    "repo_slug": "Leanpicazoo__ga4-mcp",
+    "repository": "Leanpicazoo/ga4-mcp",
+    "description": "Minimalist Python bridge querying core GA4 metrics, active users, and traffic channels via Data API v1beta."
+  },
+  "mamaladze22__ga4-mcp": {
+    "repo_slug": "mamaladze22__ga4-mcp",
+    "repository": "mamaladze22/ga4-mcp",
+    "description": "TypeScript reporting bridge wrapping GA4 Data API v1beta with dual authentication and structured JSON output for AI assistants."
+  },
+  "scalably-io__ga4-mcp": {
+    "repo_slug": "scalably-io__ga4-mcp",
+    "repository": "scalably-io/ga4-mcp",
+    "description": "Python server exposing 17 modular reporting tools for custom dimension extraction, data stream auditing, and metric aggregation."
+  },
+  "luminarylane__ga4-mcp": {
+    "repo_slug": "luminarylane__ga4-mcp",
+    "repository": "luminarylane/ga4-mcp",
+    "description": "Python bridge providing opinionated query wrappers for top pages, traffic acquisition sources, and audience demographics."
+  },
+  "thesyedyahya__ga4-mcp": {
+    "repo_slug": "thesyedyahya__ga4-mcp",
+    "repository": "thesyedyahya/ga4-mcp",
+    "description": "Python server pairing GA4 Data API reporting with property annotation history and custom metric extraction over Service Account JSON."
+  },
+  "yusofansari__google-analytics-mcp": {
+    "repo_slug": "yusofansari__google-analytics-mcp",
+    "repository": "yusofansari/google-analytics-mcp",
+    "description": "Clean Python MCP server wrapping GA4 report execution and realtime telemetry via standard OAuth 2.0 user credentials."
+  },
+  "CamilaBarbareschi__cafedelirante-ga4-mcp": {
+    "repo_slug": "CamilaBarbareschi__cafedelirante-ga4-mcp",
+    "repository": "CamilaBarbareschi/cafedelirante-ga4-mcp",
+    "description": "Specialized Python reporting bridge configured for e-commerce conversion tracking and session telemetry via OAuth 2.0 PKCE."
+  },
+  "K41R0N__ga4-mcp": {
+    "repo_slug": "K41R0N__ga4-mcp",
+    "repository": "K41R0N/ga4-mcp",
+    "description": "Lightweight TypeScript server exposing clean Data API v1beta reporting and realtime visitor monitoring over Service Account JSON."
+  },
+  "Hasim-cim__ga4-mcp": {
+    "repo_slug": "Hasim-cim__ga4-mcp",
+    "repository": "Hasim-cim/ga4-mcp",
+    "description": "Streamlined Python bridge delivering direct Data API v1beta reporting and realtime active user telemetry for local agent workflows."
+  },
+  "aline-delmain__delmain-ga4-mcp": {
+    "repo_slug": "aline-delmain__delmain-ga4-mcp",
+    "repository": "aline-delmain/delmain-ga4-mcp",
+    "description": "Python MCP server providing agency client reporting wrappers with pre-configured dimension presets over OAuth 2.0."
+  },
+  "devli13__mcp-ga4": {
+    "repo_slug": "devli13__mcp-ga4",
+    "repository": "devli13/mcp-ga4",
+    "description": "JavaScript implementation providing 4 core reporting endpoints for fast dimension slicing and conversion rate calculations."
+  },
+  "administrator-prog__ga4-mcp": {
+    "repo_slug": "administrator-prog__ga4-mcp",
+    "repository": "administrator-prog/ga4-mcp",
+    "description": "Compact TypeScript bridge offering headless GA4 Data API execution and raw JSON output for multi-agent analytical pipelines."
+  },
+  "sednalabs__ga4-mcp": {
+    "repo_slug": "sednalabs__ga4-mcp",
+    "repository": "sednalabs/ga4-mcp",
+    "description": "High-performance Rust MCP server ingesting GA4 API reports into an embedded in-memory DuckDB OLAP database for sub-millisecond local SQL queries."
+  },
+  "fenjo26__OpenGSC": {
+    "repo_slug": "fenjo26__OpenGSC",
+    "repository": "fenjo26/OpenGSC",
+    "description": "TypeScript MCP suite caching GA4 and Search Console telemetry into an embedded SQLite database with 68 SQL analytical and inspection tools."
+  },
+  "cdatasoftware__google-analytics-mcp-server-by-cdata": {
+    "repo_slug": "cdatasoftware__google-analytics-mcp-server-by-cdata",
+    "repository": "CDataSoftware/google-analytics-mcp-server-by-cdata",
+    "description": "Enterprise Java server projecting live GA4 Data API endpoints as virtual SQL relational tables via CData JDBC driver technology."
+  },
+  "rablab-mtl__mcp-ga4-gsc": {
+    "repo_slug": "rablab-mtl__mcp-ga4-gsc",
+    "repository": "rablab-mtl/mcp-ga4-gsc",
+    "description": "TypeScript multi-platform server exposing 21 tools that unify GA4 engagement metrics with Google Search Console organic search impressions."
+  },
+  "peliter__google-gsc-ga4-mcp-setup": {
+    "repo_slug": "peliter__google-gsc-ga4-mcp-setup",
+    "repository": "peliter/google-gsc-ga4-mcp-setup",
+    "description": "Python orchestration bridge configuring dual GA4 Data API and Search Console query workflows with synchronized date ranges."
+  },
+  "delaren47__gsc-ga4-mcp": {
+    "repo_slug": "delaren47__gsc-ga4-mcp",
+    "repository": "delaren47/gsc-ga4-mcp",
+    "description": "TypeScript MCP server executing coordinated landing-page attribution by merging Search Console click queries with GA4 conversion events."
+  },
+  "shailrajsinh-rathod-seo__gsc-ga4-mcp": {
+    "repo_slug": "shailrajsinh-rathod-seo__gsc-ga4-mcp",
+    "repository": "shailrajsinh-rathod-seo/gsc-ga4-mcp",
+    "description": "Python SEO intelligence server joining Search Console keyword ranking telemetry with GA4 page engagement and bounce rates."
+  },
+  "CreativeMetrics__gtm-ga4-mcp": {
+    "repo_slug": "CreativeMetrics__gtm-ga4-mcp",
+    "repository": "CreativeMetrics/gtm-ga4-mcp",
+    "description": "Full-featured JavaScript MCP server with 47 tools auditing Google Tag Manager container tags and verifying live GA4 measurement schemas."
+  },
+  "kb223__gtm-ga4-mcp": {
+    "repo_slug": "kb223__gtm-ga4-mcp",
+    "repository": "kb223/gtm-ga4-mcp",
+    "description": "Python bridge correlating GTM tag firing triggers with GA4 property measurement streams and custom event parameters."
+  },
+  "irinabuht12-oss__google-meta-ads-ga4-mcp": {
+    "repo_slug": "irinabuht12-oss__google-meta-ads-ga4-mcp",
+    "repository": "irinabuht12-oss/google-meta-ads-ga4-mcp",
+    "description": "TypeScript suite featuring 25 tools spanning Google Ads campaign management, Meta Ads audiences, and GA4 attribution reporting."
+  },
+  "ibnuhatim12__https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp": {
+    "repo_slug": "ibnuhatim12__https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp",
+    "repository": "ibnuhatim12/https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp",
+    "description": "TypeScript fork providing multi-network campaign synchronization and GA4 cross-channel performance reporting over Service Account credentials."
+  },
+  "freema__mcp-google-marketing": {
+    "repo_slug": "freema__mcp-google-marketing",
+    "repository": "freema/mcp-google-marketing",
+    "description": "Comprehensive TypeScript server with 35 tools covering Google Marketing Platform, GA4 property lifecycle, and Google Ads bidding."
+  },
+  "stufently__google-webtools-mcp": {
+    "repo_slug": "stufently__google-webtools-mcp",
+    "repository": "stufently/google-webtools-mcp",
+    "description": "Extensive TypeScript marketing suite exposing 39 tools across GA4 property configuration, Google Tag Manager, and Search Console."
+  },
+  "henkisdabro__wookstar-claude-plugins": {
+    "repo_slug": "henkisdabro__wookstar-claude-plugins",
+    "repository": "henkisdabro/wookstar-claude-plugins",
+    "description": "Modular Claude plugin architecture orchestrating GA4 Data API querying alongside remote Stape GTM server-side containers."
+  },
+  "DevDomeFamily__devdome-analytics": {
+    "repo_slug": "DevDomeFamily__devdome-analytics",
+    "repository": "DevDomeFamily/devdome-analytics",
+    "description": "Enterprise PHP server bridging server-side analytics, BigQuery exports, and cookieless conversion attribution across privacy-centric domains."
+  },
+  "dhawalshah__google-analytics-mcp": {
+    "repo_slug": "dhawalshah__google-analytics-mcp",
+    "repository": "dhawalshah/google-analytics-mcp",
+    "description": "Cloud-native Python server providing 10 tools with multi-tenant OAuth token rotation, organization isolation, and tenant-scoped GA4 querying."
+  },
+  "ESGEE-0562__google-analytics-mcp": {
+    "repo_slug": "ESGEE-0562__google-analytics-mcp",
+    "repository": "ESGEE-0562/google-analytics-mcp",
+    "description": "Production Python server implementing encrypted OAuth token persistence and automated refresh for unattended continuous GA4 report execution."
+  },
+  "codeChap__mcp-server-google-analytics": {
+    "repo_slug": "codeChap__mcp-server-google-analytics",
+    "repository": "codeChap/mcp-server-google-analytics",
+    "description": "High-performance Rust MCP server exposing 15 tools with zero-dependency loopback PKCE OAuth authentication and atomic token handling."
+  },
+  "minholi__google-analytics-mcp": {
+    "repo_slug": "minholi__google-analytics-mcp",
+    "repository": "minholi/google-analytics-mcp",
+    "description": "Python MCP server exposing 8 tools designed for shared team agency environments with centralized GA4 property switching."
+  },
+  "gomarble-ai__google-analytics-mcp-server": {
+    "repo_slug": "gomarble-ai__google-analytics-mcp-server",
+    "repository": "gomarble-ai/google-analytics-mcp-server",
+    "description": "Python server tailored for marketing teams with multi-account switching and specialized revenue metric extraction tools."
+  },
+  "ankhangonline__mcp-ga4-team-server": {
+    "repo_slug": "ankhangonline__mcp-ga4-team-server",
+    "repository": "ankhangonline/mcp-ga4-team-server",
+    "description": "Node.js server facilitating multi-user agency access to shared GA4 service accounts with request logging and permission guardrails."
+  },
+  "mnsmasum62786__was-ga4-mcp": {
+    "repo_slug": "mnsmasum62786__was-ga4-mcp",
+    "repository": "mnsmasum62786/was-ga4-mcp",
+    "description": "JavaScript remote server proxying team GA4 report requests through secure OAuth 2.0 session endpoints with error recovery."
+  },
+  "leonardosepulvedat__mcp-google-analytics": {
+    "repo_slug": "leonardosepulvedat__mcp-google-analytics",
+    "repository": "leonardosepulvedat/mcp-google-analytics",
+    "description": "TypeScript MCP server featuring 26 tools with bidirectional support for GA4 Data API reporting and server-side Measurement Protocol event validation."
+  },
+  "Insightful-Pipe__google-analytics-mcp-server": {
+    "repo_slug": "Insightful-Pipe__google-analytics-mcp-server",
+    "repository": "Insightful-Pipe/google-analytics-mcp-server",
+    "description": "Full-featured TypeScript server with 25 tools managing GA4 custom dimensions, metrics, data streams, and BigQuery linkages via Admin API."
+  },
+  "HappyMonkeyAI__ai-google-analytics-mcp": {
+    "repo_slug": "HappyMonkeyAI__ai-google-analytics-mcp",
+    "repository": "HappyMonkeyAI/ai-google-analytics-mcp",
+    "description": "Python server focusing on GA4 property configuration, account metadata inspection, and custom definition synchronization."
+  },
+  "mario-hernandez__google-analytics-mcp-claude-code": {
+    "repo_slug": "mario-hernandez__google-analytics-mcp-claude-code",
+    "repository": "mario-hernandez/google-analytics-mcp-claude-code",
+    "description": "Python toolkit featuring 16 tools with built-in statistical anomaly detection, schema discovery, and diagnostic traffic shift classification."
+  },
+  "onionst__ga4-toolkit": {
+    "repo_slug": "onionst__ga4-toolkit",
+    "repository": "onionst/ga4-toolkit",
+    "description": "Python MCP server providing 8 tools with historical baseline trend comparison and automated traffic anomaly identification."
+  },
+  "TheTechBasket__GA4-Dashboard-MCP": {
+    "repo_slug": "TheTechBasket__GA4-Dashboard-MCP",
+    "repository": "TheTechBasket/GA4-Dashboard-MCP",
+    "description": "JavaScript server featuring 11 tools that render interactive Three.js 3D data visualizations directly from live GA4 telemetry."
+  },
+  "inakigorostiza__ga4-mcp-dashboard": {
+    "repo_slug": "inakigorostiza__ga4-mcp-dashboard",
+    "repository": "inakigorostiza/ga4-mcp-dashboard",
+    "description": "Node.js MCP server providing real-time visitor event streaming and visual HTML dashboard generation for monitoring active traffic."
+  },
+  "arcbaslow__google-analytics-agent": {
+    "repo_slug": "arcbaslow__google-analytics-agent",
+    "repository": "arcbaslow/google-analytics-agent",
+    "description": "Autonomous Python agent framework with 32 tools orchestrating end-to-end GA4 data collection, executive report compilation, and multi-format exports."
+  },
+  "analyticsdatajg2025-cmd__ga4-mcp-powerbi": {
+    "repo_slug": "analyticsdatajg2025-cmd__ga4-mcp-powerbi",
+    "repository": "analyticsdatajg2025-cmd/ga4-mcp-powerbi",
+    "description": "JavaScript MCP server converting GA4 metric streams into PowerBI-compatible tabular data models and automated BI refresh feeds."
+  },
+  "drewbeechler__ga4-mcp-template": {
+    "repo_slug": "drewbeechler__ga4-mcp-template",
+    "repository": "drewbeechler/ga4-mcp-template",
+    "description": "TypeScript boilerplate template offering 7 starter tools, Docker configuration, and standard Service Account setup for custom MCP authoring."
+  },
+  "burhan29ee__ga4-mcp-server": {
+    "repo_slug": "burhan29ee__ga4-mcp-server",
+    "repository": "burhan29ee/ga4-mcp-server",
+    "description": "Modular Python starter template with 13 scaffolding tools and type-annotated handler patterns for rapid GA4 integration."
+  },
+  "communicationseo2021-creator__gsc-ga4-mcp-setup-guide": {
+    "repo_slug": "communicationseo2021-creator__gsc-ga4-mcp-setup-guide",
+    "repository": "communicationseo2021-creator/gsc-ga4-mcp-setup-guide",
+    "description": "Educational setup scaffold and MCP reference implementation detailing end-to-end Service Account configuration and report retrieval."
+  },
+  "seoteamschbang2021-hub__ga4-mcp-server": {
+    "repo_slug": "seoteamschbang2021-hub__ga4-mcp-server",
+    "repository": "seoteamschbang2021-hub/ga4-mcp-server",
+    "description": "Python template scaffold providing pre-configured MCP tools and configuration recipes for agency SEO deployment."
+  },
+  "TarjBaxi74__ga4-mcp-app": {
+    "repo_slug": "TarjBaxi74__ga4-mcp-app",
+    "repository": "TarjBaxi74/ga4-mcp-app",
+    "description": "Python conceptual prototype demonstrating direct LLM natural language queries to GA4 Data API v1beta reporting endpoints."
+  },
+  "Callince__ga4-mcp-server": {
+    "repo_slug": "Callince__ga4-mcp-server",
+    "repository": "Callince/ga4-mcp-server",
+    "description": "JavaScript experimental server testing session-extracted authentication tokens against GA4 real-time reporting APIs."
+  },
+  "frartenzo__ga4-mcp": {
+    "repo_slug": "frartenzo__ga4-mcp",
+    "repository": "frartenzo/ga4-mcp",
+    "description": "Minimal JavaScript proof-of-concept exploring multi-tool coordination between Google Analytics reporting and search metrics."
+  },
+  "spindle79__ga4-mcp-server": {
+    "repo_slug": "spindle79__ga4-mcp-server",
+    "repository": "spindle79/ga4-mcp-server",
+    "description": "TypeScript exploratory prototype evaluating raw Data API v1beta query latency and JSON serialization within MCP tool handlers."
+  },
+  "adamolson8-pixel__heartland-ga4-mcp": {
+    "repo_slug": "adamolson8-pixel__heartland-ga4-mcp",
+    "repository": "adamolson8-pixel/heartland-ga4-mcp",
+    "description": "Shell-wrapped Python prototype implementing command-line pipeline execution of GA4 reports inside containerized MCP hosts."
+  },
+  "shelpakovzhenya-art__seo-tool-google-analytics-mcp": {
+    "repo_slug": "shelpakovzhenya-art__seo-tool-google-analytics-mcp",
+    "repository": "shelpakovzhenya-art/seo-tool-google-analytics-mcp",
+    "description": "Single-tool TypeScript experimental bridge querying aggregate GA4 visitor metrics for automated SEO audit workflows."
+  },
+  "Raffaele86__ga4-mcp": {
+    "repo_slug": "Raffaele86__ga4-mcp",
+    "repository": "Raffaele86/ga4-mcp",
+    "description": "Python experimental implementation testing minimal stdio MCP transport over Google Analytics Data API v1beta."
+  }
+}

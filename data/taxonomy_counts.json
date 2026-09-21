@@ -1,0 +1,285 @@
+{
+  "total_index_projects": 63,
+  "categories": {
+    "1": {
+      "id": 1,
+      "name": "Query standard reports and slice dimensions",
+      "slug": "1-query-standard-reports-and-slice-dimensions",
+      "expected_count": 21,
+      "actual_count": 21,
+      "subcategories": {
+        "official-and-foundational-servers": {
+          "name": "Official and foundational servers",
+          "slug": "official-and-foundational-servers",
+          "count": 1,
+          "projects": [
+            "googleanalytics__google-analytics-mcp"
+          ]
+        },
+        "consolidated-modal-query-servers": {
+          "name": "Consolidated modal query servers",
+          "slug": "consolidated-modal-query-servers",
+          "count": 4,
+          "projects": [
+            "surendranb__google-analytics-mcp",
+            "eiiot__ga4-mcp",
+            "CUTolu2021__ga4-mcp-server",
+            "mharnett__mcp-ga4"
+          ]
+        },
+        "dynamic-schema-and-metadata-introspectors": {
+          "name": "Dynamic schema and metadata introspectors",
+          "slug": "dynamic-schema-and-metadata-introspectors",
+          "count": 3,
+          "projects": [
+            "fujii-yuji__GA4-MCP-Remote",
+            "Newsstate__ga4-mcp",
+            "gviollaz__iita-ga4-mcp"
+          ]
+        },
+        "lightweight-reporting-bridges": {
+          "name": "Lightweight reporting bridges",
+          "slug": "lightweight-reporting-bridges",
+          "count": 13,
+          "projects": [
+            "paulsign-lab__ga4-mcp",
+            "Leanpicazoo__ga4-mcp",
+            "mamaladze22__ga4-mcp",
+            "scalably-io__ga4-mcp",
+            "luminarylane__ga4-mcp",
+            "thesyedyahya__ga4-mcp",
+            "yusofansari__google-analytics-mcp",
+            "CamilaBarbareschi__cafedelirante-ga4-mcp",
+            "K41R0N__ga4-mcp",
+            "Hasim-cim__ga4-mcp",
+            "aline-delmain__delmain-ga4-mcp",
+            "devli13__mcp-ga4",
+            "administrator-prog__ga4-mcp"
+          ]
+        }
+      }
+    },
+    "2": {
+      "id": 2,
+      "name": "Ingest data locally and query with SQL",
+      "slug": "2-ingest-data-locally-and-query-with-sql",
+      "expected_count": 3,
+      "actual_count": 3,
+      "subcategories": {
+        "embedded-columnar-olap-scratchpads-duckdb": {
+          "name": "Embedded columnar OLAP scratchpads (DuckDB)",
+          "slug": "embedded-columnar-olap-scratchpads-duckdb",
+          "count": 1,
+          "projects": [
+            "sednalabs__ga4-mcp"
+          ]
+        },
+        "embedded-relational-databases-sqlite": {
+          "name": "Embedded relational databases (SQLite)",
+          "slug": "embedded-relational-databases-sqlite",
+          "count": 1,
+          "projects": [
+            "fenjo26__OpenGSC"
+          ]
+        },
+        "relational-schema-drivers": {
+          "name": "Relational schema drivers",
+          "slug": "relational-schema-drivers",
+          "count": 1,
+          "projects": [
+            "cdatasoftware__google-analytics-mcp-server-by-cdata"
+          ]
+        }
+      }
+    },
+    "3": {
+      "id": 3,
+      "name": "Bridge multi-platform marketing and search data",
+      "slug": "3-bridge-multi-platform-marketing-and-search-data",
+      "expected_count": 12,
+      "actual_count": 12,
+      "subcategories": {
+        "unified-search-console-and-ga4-platforms": {
+          "name": "Unified Search Console and GA4 platforms",
+          "slug": "unified-search-console-and-ga4-platforms",
+          "count": 4,
+          "projects": [
+            "rablab-mtl__mcp-ga4-gsc",
+            "peliter__google-gsc-ga4-mcp-setup",
+            "delaren47__gsc-ga4-mcp",
+            "shailrajsinh-rathod-seo__gsc-ga4-mcp"
+          ]
+        },
+        "google-tag-manager-audit-and-event-bridges": {
+          "name": "Google Tag Manager audit and event bridges",
+          "slug": "google-tag-manager-audit-and-event-bridges",
+          "count": 2,
+          "projects": [
+            "CreativeMetrics__gtm-ga4-mcp",
+            "kb223__gtm-ga4-mcp"
+          ]
+        },
+        "multi-ad-network-and-marketing-suites": {
+          "name": "Multi-ad network and marketing suites",
+          "slug": "multi-ad-network-and-marketing-suites",
+          "count": 5,
+          "projects": [
+            "irinabuht12-oss__google-meta-ads-ga4-mcp",
+            "ibnuhatim12__https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp",
+            "freema__mcp-google-marketing",
+            "stufently__google-webtools-mcp",
+            "henkisdabro__wookstar-claude-plugins"
+          ]
+        },
+        "cookieless-attribution-and-privacy-bridges": {
+          "name": "Cookieless attribution and privacy bridges",
+          "slug": "cookieless-attribution-and-privacy-bridges",
+          "count": 1,
+          "projects": [
+            "DevDomeFamily__devdome-analytics"
+          ]
+        }
+      }
+    },
+    "4": {
+      "id": 4,
+      "name": "Deploy enterprise and multi-tenant authentication",
+      "slug": "4-deploy-enterprise-and-multi-tenant-authentication",
+      "expected_count": 7,
+      "actual_count": 7,
+      "subcategories": {
+        "cloud-native-multi-tenant-oauth-gateways": {
+          "name": "Cloud-native multi-tenant OAuth gateways",
+          "slug": "cloud-native-multi-tenant-oauth-gateways",
+          "count": 1,
+          "projects": [
+            "dhawalshah__google-analytics-mcp"
+          ]
+        },
+        "cryptographically-encrypted-session-persistence": {
+          "name": "Cryptographically encrypted session persistence",
+          "slug": "cryptographically-encrypted-session-persistence",
+          "count": 1,
+          "projects": [
+            "ESGEE-0562__google-analytics-mcp"
+          ]
+        },
+        "ephemeral-loopback-pkce-authenticators": {
+          "name": "Ephemeral loopback PKCE authenticators",
+          "slug": "ephemeral-loopback-pkce-authenticators",
+          "count": 1,
+          "projects": [
+            "codeChap__mcp-server-google-analytics"
+          ]
+        },
+        "remote-team-and-multi-account-proxies": {
+          "name": "Remote team and multi-account proxies",
+          "slug": "remote-team-and-multi-account-proxies",
+          "count": 4,
+          "projects": [
+            "minholi__google-analytics-mcp",
+            "gomarble-ai__google-analytics-mcp-server",
+            "ankhangonline__mcp-ga4-team-server",
+            "mnsmasum62786__was-ga4-mcp"
+          ]
+        }
+      }
+    },
+    "5": {
+      "id": 5,
+      "name": "Send server-side events and manage properties",
+      "slug": "5-send-server-side-events-and-manage-properties",
+      "expected_count": 3,
+      "actual_count": 3,
+      "subcategories": {
+        "measurement-protocol-event-dispatchers": {
+          "name": "Measurement Protocol event dispatchers",
+          "slug": "measurement-protocol-event-dispatchers",
+          "count": 1,
+          "projects": [
+            "leonardosepulvedat__mcp-google-analytics"
+          ]
+        },
+        "admin-api-property-and-custom-definition-managers": {
+          "name": "Admin API property and custom definition managers",
+          "slug": "admin-api-property-and-custom-definition-managers",
+          "count": 2,
+          "projects": [
+            "Insightful-Pipe__google-analytics-mcp-server",
+            "HappyMonkeyAI__ai-google-analytics-mcp"
+          ]
+        }
+      }
+    },
+    "6": {
+      "id": 6,
+      "name": "Diagnose anomalies and generate deliverables",
+      "slug": "6-diagnose-anomalies-and-generate-deliverables",
+      "expected_count": 6,
+      "actual_count": 6,
+      "subcategories": {
+        "algorithmic-anomaly-detection-and-drop-classifiers": {
+          "name": "Algorithmic anomaly detection and drop classifiers",
+          "slug": "algorithmic-anomaly-detection-and-drop-classifiers",
+          "count": 2,
+          "projects": [
+            "mario-hernandez__google-analytics-mcp-claude-code",
+            "onionst__ga4-toolkit"
+          ]
+        },
+        "visual-3d-dashboards-and-real-time-streaming": {
+          "name": "Visual 3D dashboards and real-time streaming",
+          "slug": "visual-3d-dashboards-and-real-time-streaming",
+          "count": 2,
+          "projects": [
+            "TheTechBasket__GA4-Dashboard-MCP",
+            "inakigorostiza__ga4-mcp-dashboard"
+          ]
+        },
+        "automated-executive-report-and-document-generators": {
+          "name": "Automated executive report and document generators",
+          "slug": "automated-executive-report-and-document-generators",
+          "count": 2,
+          "projects": [
+            "arcbaslow__google-analytics-agent",
+            "analyticsdatajg2025-cmd__ga4-mcp-powerbi"
+          ]
+        }
+      }
+    },
+    "7": {
+      "id": 7,
+      "name": "Scaffolds, setup templates, and experimental concepts",
+      "slug": "7-scaffolds-setup-templates-and-experimental-concepts",
+      "expected_count": 11,
+      "actual_count": 11,
+      "subcategories": {
+        "starter-templates-and-boilerplate-scaffolds": {
+          "name": "Starter templates and boilerplate scaffolds",
+          "slug": "starter-templates-and-boilerplate-scaffolds",
+          "count": 4,
+          "projects": [
+            "drewbeechler__ga4-mcp-template",
+            "burhan29ee__ga4-mcp-server",
+            "communicationseo2021-creator__gsc-ga4-mcp-setup-guide",
+            "seoteamschbang2021-hub__ga4-mcp-server"
+          ]
+        },
+        "early-prototypes-and-conceptual-wrappers": {
+          "name": "Early prototypes and conceptual wrappers",
+          "slug": "early-prototypes-and-conceptual-wrappers",
+          "count": 7,
+          "projects": [
+            "TarjBaxi74__ga4-mcp-app",
+            "Callince__ga4-mcp-server",
+            "frartenzo__ga4-mcp",
+            "spindle79__ga4-mcp-server",
+            "adamolson8-pixel__heartland-ga4-mcp",
+            "shelpakovzhenya-art__seo-tool-google-analytics-mcp",
+            "Raffaele86__ga4-mcp"
+          ]
+        }
+      }
+    }
+  }
+}
