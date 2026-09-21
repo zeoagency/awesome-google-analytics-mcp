@@ -6,3 +6,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 CLAUDE.md
+
+# Inner development artifacts, specifications, datasets, and scripts
+specs/
+scripts/
+data/
+tests/
+*.json
