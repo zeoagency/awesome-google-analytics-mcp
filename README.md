@@ -19,10 +19,10 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
    - [Embedded columnar OLAP scratchpads (DuckDB) (1)](#embedded-columnar-olap-scratchpads-duckdb)
    - [Embedded relational databases (SQLite) (1)](#embedded-relational-databases-sqlite)
    - [Relational schema drivers (1)](#relational-schema-drivers)
-3. [Bridge multi-platform marketing and search data (12)](#3-bridge-multi-platform-marketing-and-search-data)
+3. [Bridge multi-platform marketing and search data (11)](#3-bridge-multi-platform-marketing-and-search-data)
    - [Unified Search Console and GA4 platforms (4)](#unified-search-console-and-ga4-platforms)
    - [Google Tag Manager audit and event bridges (2)](#google-tag-manager-audit-and-event-bridges)
-   - [Multi-ad network and marketing suites (5)](#multi-ad-network-and-marketing-suites)
+   - [Multi-ad network and marketing suites (4)](#multi-ad-network-and-marketing-suites)
    - [Cookieless attribution and privacy bridges (1)](#cookieless-attribution-and-privacy-bridges)
 4. [Deploy enterprise and multi-tenant authentication (7)](#4-deploy-enterprise-and-multi-tenant-authentication)
    - [Cloud-native multi-tenant OAuth gateways (1)](#cloud-native-multi-tenant-oauth-gateways)
@@ -36,9 +36,8 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
    - [Algorithmic anomaly detection and drop classifiers (2)](#algorithmic-anomaly-detection-and-drop-classifiers)
    - [Visual 3D dashboards and real-time streaming (2)](#visual-3d-dashboards-and-real-time-streaming)
    - [Automated executive report and document generators (2)](#automated-executive-report-and-document-generators)
-7. [Scaffolds, setup templates, and experimental concepts (11)](#7-scaffolds-setup-templates-and-experimental-concepts)
+7. [Starter templates and setup scaffolds (4)](#7-starter-templates-and-setup-scaffolds)
    - [Starter templates and boilerplate scaffolds (4)](#starter-templates-and-boilerplate-scaffolds)
-   - [Early prototypes and conceptual wrappers (7)](#early-prototypes-and-conceptual-wrappers)
 8. [Resources](#resources)
    - [Official Documentation & SDKs](#official-documentation--sdks)
    - [Community Guides & Architecture](#community-guides--architecture)
@@ -50,73 +49,65 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
 
 ## Developer Comparison Matrix
 
-*A comparative feature matrix of all 63 Model Context Protocol servers and agent interfaces for Google Analytics 4, detailing language runtime, tool surface, authentication paradigms, local storage engines, and API method support. Click on any project name to jump directly to its detailed entry below.*
+*A compact comparative matrix of all 55 Model Context Protocol servers and analytical bridges for Google Analytics 4, optimized for quick scanning on standard screens. Click any project name to jump directly to its detailed catalog entry below.*
 
-| Server / Tool | Runtime | Tools | Auth Paradigm | Storage Engine | Data API | Realtime | Funnels | Admin API | MP Events | BigQuery | Multi-Prop | Multi-Tenant | Anomaly Det. | Local SQL | Tier |
-| --- | --- | --- | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- |
-| [**googleanalytics/google-analytics-mcp**](#googleanalytics--google-analytics-mcp) | Python | 5 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Solid / Functional Community Baseline |
-| [**surendranb/google-analytics-mcp**](#surendranb--google-analytics-mcp) | Python | 11 | Service Account | Stateless Proxy | ✅ | — | — | ✅ | — | — | ✅ | — | — | — | Solid / Functional Community Baseline |
-| [**eiiot/ga4-mcp**](#eiiot--ga4-mcp) | Python | 5 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Solid / Functional Community Baseline |
-| [**CUTolu2021/ga4-mcp-server**](#cutolu2021--ga4-mcp-server) | JavaScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**mharnett/mcp-ga4**](#mharnett--mcp-ga4) | TypeScript | 8 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**fujii-yuji/GA4-MCP-Remote**](#fujii-yuji--ga4-mcp-remote) | Python | 3 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**Newsstate/ga4-mcp**](#newsstate--ga4-mcp) | TypeScript | 3 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Experimental / Deficient |
-| [**gviollaz/iita-ga4-mcp**](#gviollaz--iita-ga4-mcp) | Python | 2 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**paulsign-lab/ga4-mcp**](#paulsign-lab--ga4-mcp) | Python | 5 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**Leanpicazoo/ga4-mcp**](#leanpicazoo--ga4-mcp) | Python | 5 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**mamaladze22/ga4-mcp**](#mamaladze22--ga4-mcp) | TypeScript | 5 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**scalably-io/ga4-mcp**](#scalably-io--ga4-mcp) | Python | 17 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**luminarylane/ga4-mcp**](#luminarylane--ga4-mcp) | Python | 6 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**thesyedyahya/ga4-mcp**](#thesyedyahya--ga4-mcp) | Python | 5 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**yusofansari/google-analytics-mcp**](#yusofansari--google-analytics-mcp) | Python | 3 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**CamilaBarbareschi/cafedelirante-ga4-mcp**](#camilabarbareschi--cafedelirante-ga4-mcp) | Python | 3 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**K41R0N/ga4-mcp**](#k41r0n--ga4-mcp) | TypeScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**Hasim-cim/ga4-mcp**](#hasim-cim--ga4-mcp) | Python | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**aline-delmain/delmain-ga4-mcp**](#aline-delmain--delmain-ga4-mcp) | Python | 3 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**devli13/mcp-ga4**](#devli13--mcp-ga4) | JavaScript | 4 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**administrator-prog/ga4-mcp**](#administrator-prog--ga4-mcp) | TypeScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**sednalabs/ga4-mcp**](#sednalabs--ga4-mcp) | Rust | 35 | Dual (SA + OAuth PKCE) | Embedded DuckDB OLAP | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | ✅ | Solid / Functional Community Baseline |
-| [**fenjo26/OpenGSC**](#fenjo26--opengsc) | TypeScript | 68 | OAuth 2.0 PKCE | Embedded SQLite DB | ✅ | — | — | ✅ | — | — | ✅ | — | — | ✅ | Solid / Functional Community Baseline |
-| [**CDataSoftware/google-analytics-mcp-server-by-cdata**](#cdatasoftware--google-analytics-mcp-server-by-cdata) | Java | 3 | Dual (SA + OAuth PKCE) | Virtual Relational Driver | ✅ | — | — | — | — | — | — | — | — | ✅ | Viable Lightweight / Niche Alternative |
-| [**rablab-mtl/mcp-ga4-gsc**](#rablab-mtl--mcp-ga4-gsc) | TypeScript | 21 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**peliter/google-gsc-ga4-mcp-setup**](#peliter--google-gsc-ga4-mcp-setup) | Python | 3 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**delaren47/gsc-ga4-mcp**](#delaren47--gsc-ga4-mcp) | TypeScript | 7 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**shailrajsinh-rathod-seo/gsc-ga4-mcp**](#shailrajsinh-rathod-seo--gsc-ga4-mcp) | Python | 4 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | — | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**CreativeMetrics/gtm-ga4-mcp**](#creativemetrics--gtm-ga4-mcp) | JavaScript | 47 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | — | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**kb223/gtm-ga4-mcp**](#kb223--gtm-ga4-mcp) | Python | 7 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**irinabuht12-oss/google-meta-ads-ga4-mcp**](#irinabuht12-oss--google-meta-ads-ga4-mcp) | TypeScript | 25 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**ibnuhatim12/https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp**](#ibnuhatim12--https-github-com-irinabuht12-oss-google-meta-ads-ga4-mcp) | TypeScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**freema/mcp-google-marketing**](#freema--mcp-google-marketing) | TypeScript | 35 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**stufently/google-webtools-mcp**](#stufently--google-webtools-mcp) | TypeScript | 39 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**henkisdabro/wookstar-claude-plugins**](#henkisdabro--wookstar-claude-plugins) | Markdown / Shell | 2 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | ✅ | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**DevDomeFamily/devdome-analytics**](#devdomefamily--devdome-analytics) | PHP | 9 | Service Account | Stateless Proxy | — | — | — | ✅ | — | ✅ | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**dhawalshah/google-analytics-mcp**](#dhawalshah--google-analytics-mcp) | Python | 10 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | — | — | Solid / Functional Community Baseline |
-| [**ESGEE-0562/google-analytics-mcp**](#esgee-0562--google-analytics-mcp) | Python | 7 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**codeChap/mcp-server-google-analytics**](#codechap--mcp-server-google-analytics) | Rust | 15 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**minholi/google-analytics-mcp**](#minholi--google-analytics-mcp) | Python | 8 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | ✅ | — | — | Viable Lightweight / Niche Alternative |
-| [**gomarble-ai/google-analytics-mcp-server**](#gomarble-ai--google-analytics-mcp-server) | Python | 7 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | — | — | ✅ | — | — | ✅ | ✅ | — | — | Viable Lightweight / Niche Alternative |
-| [**ankhangonline/mcp-ga4-team-server**](#ankhangonline--mcp-ga4-team-server) | JavaScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**mnsmasum62786/was-ga4-mcp**](#mnsmasum62786--was-ga4-mcp) | JavaScript | 3 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Experimental / Deficient |
-| [**leonardosepulvedat/mcp-google-analytics**](#leonardosepulvedat--mcp-google-analytics) | TypeScript | 26 | Service Account | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**Insightful-Pipe/google-analytics-mcp-server**](#insightful-pipe--google-analytics-mcp-server) | TypeScript | 25 | OAuth 2.0 PKCE | Stateless Proxy | ✅ | — | — | ✅ | ✅ | ✅ | ✅ | — | — | — | Experimental / Deficient |
-| [**HappyMonkeyAI/ai-google-analytics-mcp**](#happymonkeyai--ai-google-analytics-mcp) | Python | 3 | Service Account | Stateless Proxy | ✅ | — | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**mario-hernandez/google-analytics-mcp-claude-code**](#mario-hernandez--google-analytics-mcp-claude-code) | Python | 16 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | — | ✅ | ✅ | — | — | ✅ | — | ✅ | — | Viable Lightweight / Niche Alternative |
-| [**onionst/ga4-toolkit**](#onionst--ga4-toolkit) | Python | 8 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | ✅ | — | Viable Lightweight / Niche Alternative |
-| [**TheTechBasket/GA4-Dashboard-MCP**](#thetechbasket--ga4-dashboard-mcp) | JavaScript | 11 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**inakigorostiza/ga4-mcp-dashboard**](#inakigorostiza--ga4-mcp-dashboard) | JavaScript | 3 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**arcbaslow/google-analytics-agent**](#arcbaslow--google-analytics-agent) | Python | 32 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | ✅ | — | Solid / Functional Community Baseline |
-| [**analyticsdatajg2025-cmd/ga4-mcp-powerbi**](#analyticsdatajg2025-cmd--ga4-mcp-powerbi) | JavaScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | ✅ | — | — | — | — | Viable Lightweight / Niche Alternative |
-| [**drewbeechler/ga4-mcp-template**](#drewbeechler--ga4-mcp-template) | TypeScript | 7 | Service Account | Stateless Proxy | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | Experimental / Deficient |
-| [**burhan29ee/ga4-mcp-server**](#burhan29ee--ga4-mcp-server) | Python | 13 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | ✅ | — | — | — | Viable Lightweight / Niche Alternative |
-| [**communicationseo2021-creator/gsc-ga4-mcp-setup-guide**](#communicationseo2021-creator--gsc-ga4-mcp-setup-guide) | HTML | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**seoteamschbang2021-hub/ga4-mcp-server**](#seoteamschbang2021-hub--ga4-mcp-server) | Python | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**TarjBaxi74/ga4-mcp-app**](#tarjbaxi74--ga4-mcp-app) | Python | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**Callince/ga4-mcp-server**](#callince--ga4-mcp-server) | JavaScript | 3 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Experimental / Deficient |
-| [**frartenzo/ga4-mcp**](#frartenzo--ga4-mcp) | JavaScript | 2 | Dual (SA + OAuth PKCE) | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**spindle79/ga4-mcp-server**](#spindle79--ga4-mcp-server) | TypeScript | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**adamolson8-pixel/heartland-ga4-mcp**](#adamolson8-pixel--heartland-ga4-mcp) | Shell | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
-| [**shelpakovzhenya-art/seo-tool-google-analytics-mcp**](#shelpakovzhenya-art--seo-tool-google-analytics-mcp) | TypeScript | 1 | Service Account | Stateless Proxy | ✅ | ✅ | — | ✅ | — | — | — | — | — | — | Experimental / Deficient |
-| [**Raffaele86/ga4-mcp**](#raffaele86--ga4-mcp) | Python | 3 | Service Account | Stateless Proxy | ✅ | ✅ | — | — | — | — | — | — | — | — | Experimental / Deficient |
+| Server / Tool | ⭐ Stars | Runtime | Auth Paradigm | Storage | Capabilities & APIs | Primary Specialization | Tier |
+| --- | :---: | :---: | :---: | :---: | --- | --- | :---: |
+| [**googleanalytics/google-analytics-mcp**](#googleanalytics--google-analytics-mcp) | 3,260 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Official Reference Implementation | Solid / Functional Community Baseline |
+| [**surendranb/google-analytics-mcp**](#surendranb--google-analytics-mcp) | 242 | Python | Service Account | Stateless | Reports · Admin | Runtime Schema Introspection & Caching | Solid / Functional Community Baseline |
+| [**eiiot/ga4-mcp**](#eiiot--ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Consolidated Reporting & Funnels | Solid / Functional Community Baseline |
+| [**CUTolu2021/ga4-mcp-server**](#cutolu2021--ga4-mcp-server) | 0 | JavaScript | Service Account | Stateless | Reports · Realtime · Admin | Session-Extracted Telemetry Proxy | Viable Lightweight / Niche Alternative |
+| [**mharnett/mcp-ga4**](#mharnett--mcp-ga4) | 0 | TypeScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Client Context & Custom Dimensions | Viable Lightweight / Niche Alternative |
+| [**fujii-yuji/GA4-MCP-Remote**](#fujii-yuji--ga4-mcp-remote) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Remote SSE Multi-Property Stream | Viable Lightweight / Niche Alternative |
+| [**Newsstate/ga4-mcp**](#newsstate--ga4-mcp) | 0 | TypeScript | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Dynamic Schema & Metric Introspection | Tier 4 |
+| [**gviollaz/iita-ga4-mcp**](#gviollaz--iita-ga4-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime | FastAPI Realtime Telemetry Bridge | Tier 4 |
+| [**paulsign-lab/ga4-mcp**](#paulsign-lab--ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Batch Report Execution & Streaming | Viable Lightweight / Niche Alternative |
+| [**Leanpicazoo/ga4-mcp**](#leanpicazoo--ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Minimalist Data API Bridge | Viable Lightweight / Niche Alternative |
+| [**mamaladze22/ga4-mcp**](#mamaladze22--ga4-mcp) | 0 | TypeScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Structured JSON Reporting Bridge | Viable Lightweight / Niche Alternative |
+| [**scalably-io/ga4-mcp**](#scalably-io--ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Multi-Tool Dimension Extraction | Viable Lightweight / Niche Alternative |
+| [**luminarylane/ga4-mcp**](#luminarylane--ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Opinionated Traffic Source Wrappers | Tier 4 |
+| [**thesyedyahya/ga4-mcp**](#thesyedyahya--ga4-mcp) | 2 | Python | Service Account | Stateless | Reports · Realtime · Admin | Annotation History & Custom Metrics | Tier 4 |
+| [**yusofansari/google-analytics-mcp**](#yusofansari--google-analytics-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime | Interactive OAuth Query Bridge | Tier 4 |
+| [**CamilaBarbareschi/cafedelirante-ga4-mcp**](#camilabarbareschi--cafedelirante-ga4-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime | E-Commerce Conversion Tracking | Tier 4 |
+| [**K41R0N/ga4-mcp**](#k41r0n--ga4-mcp) | 0 | TypeScript | Service Account | Stateless | Reports · Realtime | Lightweight Visitor Monitoring | Viable Lightweight / Niche Alternative |
+| [**Hasim-cim/ga4-mcp**](#hasim-cim--ga4-mcp) | 0 | Python | Service Account | Stateless | Reports · Realtime | Direct Agent Query Bridge | Tier 4 |
+| [**aline-delmain/delmain-ga4-mcp**](#aline-delmain--delmain-ga4-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Agency Client Preset Reporting | Tier 4 |
+| [**devli13/mcp-ga4**](#devli13--mcp-ga4) | 0 | JavaScript | Service Account | Stateless | Reports · Realtime · Admin | Fast Dimension Slicing | Tier 4 |
+| [**administrator-prog/ga4-mcp**](#administrator-prog--ga4-mcp) | 0 | TypeScript | Service Account | Stateless | Reports · Realtime | Headless Multi-Agent Pipeline | Viable Lightweight / Niche Alternative |
+| [**sednalabs/ga4-mcp**](#sednalabs--ga4-mcp) | 0 | Rust | Dual (SA + PKCE) | DuckDB OLAP | Reports · Realtime · Funnels · Admin · Local SQL | In-Memory Columnar DuckDB OLAP | Solid / Functional Community Baseline |
+| [**fenjo26/OpenGSC**](#fenjo26--opengsc) | 25 | TypeScript | OAuth 2.0 PKCE | SQLite DB | Reports · Admin · Local SQL | SQLite Caching & SQL Query Engine | Solid / Functional Community Baseline |
+| [**CDataSoftware/google-analytics-mcp-server-by-cdata**](#cdatasoftware--google-analytics-mcp-server-by-cdata) | 1 | Java | Dual (SA + PKCE) | Virtual JDBC | Reports · Local SQL | Virtual Relational JDBC Driver | Viable Lightweight / Niche Alternative |
+| [**rablab-mtl/mcp-ga4-gsc**](#rablab-mtl--mcp-ga4-gsc) | 0 | TypeScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Unified Search Console & GA4 Platform | Viable Lightweight / Niche Alternative |
+| [**peliter/google-gsc-ga4-mcp-setup**](#peliter--google-gsc-ga4-mcp-setup) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime | Synchronized GSC + GA4 Date Ranges | Viable Lightweight / Niche Alternative |
+| [**delaren47/gsc-ga4-mcp**](#delaren47--gsc-ga4-mcp) | 0 | TypeScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Organic Landing Page Attribution | Tier 4 |
+| [**shailrajsinh-rathod-seo/gsc-ga4-mcp**](#shailrajsinh-rathod-seo--gsc-ga4-mcp) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports | Keyword Ranking & Engagement Joins | Tier 4 |
+| [**CreativeMetrics/gtm-ga4-mcp**](#creativemetrics--gtm-ga4-mcp) | 0 | JavaScript | OAuth 2.0 PKCE | Stateless | Reports · Admin | GTM Container Tag & Schema Auditing | Viable Lightweight / Niche Alternative |
+| [**kb223/gtm-ga4-mcp**](#kb223--gtm-ga4-mcp) | 1 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Tag Trigger & Measurement Correlation | Tier 4 |
+| [**irinabuht12-oss/google-meta-ads-ga4-mcp**](#irinabuht12-oss--google-meta-ads-ga4-mcp) | 2,033 | TypeScript | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Google & Meta Ads Attribution Hub | Viable Lightweight / Niche Alternative |
+| [**freema/mcp-google-marketing**](#freema--mcp-google-marketing) | 3 | TypeScript | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Google Marketing Platform Lifecycle | Viable Lightweight / Niche Alternative |
+| [**stufently/google-webtools-mcp**](#stufently--google-webtools-mcp) | 7 | TypeScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Multi-Platform Marketing Suite | Viable Lightweight / Niche Alternative |
+| [**henkisdabro/wookstar-claude-plugins**](#henkisdabro--wookstar-claude-plugins) | 89 | Shell | Service Account | Stateless | Reports · Realtime · Admin | Modular Stape GTM & GA4 Plugins | Viable Lightweight / Niche Alternative |
+| [**DevDomeFamily/devdome-analytics**](#devdomefamily--devdome-analytics) | 0 | PHP | Service Account | Stateless | Admin | Cookieless Tracking & BigQuery Exports | Viable Lightweight / Niche Alternative |
+| [**dhawalshah/google-analytics-mcp**](#dhawalshah--google-analytics-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Funnels · Admin | Enterprise Multi-Tenant OAuth Gateway | Solid / Functional Community Baseline |
+| [**ESGEE-0562/google-analytics-mcp**](#esgee-0562--google-analytics-mcp) | 0 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Encrypted Token Persistence Engine | Viable Lightweight / Niche Alternative |
+| [**codeChap/mcp-server-google-analytics**](#codechap--mcp-server-google-analytics) | 0 | Rust | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Zero-Dependency Loopback PKCE | Viable Lightweight / Niche Alternative |
+| [**minholi/google-analytics-mcp**](#minholi--google-analytics-mcp) | 1 | Python | OAuth 2.0 PKCE | Stateless | Reports · Realtime | Agency Property Switching Proxy | Viable Lightweight / Niche Alternative |
+| [**gomarble-ai/google-analytics-mcp-server**](#gomarble-ai--google-analytics-mcp-server) | 18 | Python | OAuth 2.0 PKCE | Stateless | Reports · Admin | Marketing Team Multi-Account Proxy | Viable Lightweight / Niche Alternative |
+| [**ankhangonline/mcp-ga4-team-server**](#ankhangonline--mcp-ga4-team-server) | 0 | JavaScript | Service Account | Stateless | Reports · Realtime | Shared Service Account Guardrails | Viable Lightweight / Niche Alternative |
+| [**mnsmasum62786/was-ga4-mcp**](#mnsmasum62786--was-ga4-mcp) | 0 | JavaScript | OAuth 2.0 PKCE | Stateless | Reports · Realtime · Admin | Remote OAuth Session Proxy | Tier 4 |
+| [**leonardosepulvedat/mcp-google-analytics**](#leonardosepulvedat--mcp-google-analytics) | 2 | TypeScript | Service Account | Stateless | Reports · Realtime · Funnels · Admin · Events | Measurement Protocol Event Dispatch | Viable Lightweight / Niche Alternative |
+| [**Insightful-Pipe/google-analytics-mcp-server**](#insightful-pipe--google-analytics-mcp-server) | 0 | TypeScript | OAuth 2.0 PKCE | Stateless | Reports · Admin · Events | Admin API Custom Dimension Manager | Tier 4 |
+| [**HappyMonkeyAI/ai-google-analytics-mcp**](#happymonkeyai--ai-google-analytics-mcp) | 0 | Python | Service Account | Stateless | Reports · Admin | Property Metadata Synchronization | Viable Lightweight / Niche Alternative |
+| [**mario-hernandez/google-analytics-mcp-claude-code**](#mario-hernandez--google-analytics-mcp-claude-code) | 1 | Python | Dual (SA + PKCE) | Stateless | Reports · Funnels · Admin · Anomalies | Statistical Anomaly Drop Detection | Viable Lightweight / Niche Alternative |
+| [**onionst/ga4-toolkit**](#onionst--ga4-toolkit) | 0 | Python | Service Account | Stateless | Reports · Realtime · Admin · Anomalies | Baseline Trend Anomaly Detection | Viable Lightweight / Niche Alternative |
+| [**TheTechBasket/GA4-Dashboard-MCP**](#thetechbasket--ga4-dashboard-mcp) | 7 | JavaScript | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin | Three.js 3D Interactive Visualizer | Viable Lightweight / Niche Alternative |
+| [**inakigorostiza/ga4-mcp-dashboard**](#inakigorostiza--ga4-mcp-dashboard) | 0 | JavaScript | Dual (SA + PKCE) | Stateless | Reports · Realtime | Real-Time Event Stream Dashboard | Viable Lightweight / Niche Alternative |
+| [**arcbaslow/google-analytics-agent**](#arcbaslow--google-analytics-agent) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Funnels · Admin · Anomalies | Autonomous Executive Report Compiler | Solid / Functional Community Baseline |
+| [**analyticsdatajg2025-cmd/ga4-mcp-powerbi**](#analyticsdatajg2025-cmd--ga4-mcp-powerbi) | 0 | JavaScript | Service Account | Stateless | Reports · Realtime | PowerBI Tabular Data Feeds | Viable Lightweight / Niche Alternative |
+| [**drewbeechler/ga4-mcp-template**](#drewbeechler--ga4-mcp-template) | 0 | TypeScript | Service Account | Stateless | Reports · Realtime · Funnels · Admin | Dockerized TypeScript Starter Scaffold | Tier 4 |
+| [**burhan29ee/ga4-mcp-server**](#burhan29ee--ga4-mcp-server) | 0 | Python | Dual (SA + PKCE) | Stateless | Reports · Realtime · Admin | Modular Python Starter Template | Viable Lightweight / Niche Alternative |
+| [**communicationseo2021-creator/gsc-ga4-mcp-setup-guide**](#communicationseo2021-creator--gsc-ga4-mcp-setup-guide) | 0 | HTML | Service Account | Stateless | Reports · Realtime | Service Account Setup Reference | Tier 4 |
+| [**seoteamschbang2021-hub/ga4-mcp-server**](#seoteamschbang2021-hub--ga4-mcp-server) | 0 | Python | Service Account | Stateless | Reports · Realtime | Agency SEO Deployment Recipe | Tier 4 |
 
 ---
 
@@ -207,7 +198,7 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
 
 ## 3. Bridge multi-platform marketing and search data
 
-*12 projects. 12 projects across 4 subcategories uniting GA4 with Google Search Console, Google Tag Manager, ad platforms, and attribution pipelines.*
+*11 projects. 11 projects across 4 subcategories uniting GA4 with Google Search Console, Google Tag Manager, ad platforms, and attribution pipelines.*
 
 ### Unified Search Console and GA4 platforms
 
@@ -231,12 +222,11 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
 
 ### Multi-ad network and marketing suites
 
-*5 projects. Unified marketing hubs coordinating GA4 analytics alongside Google Ads and Meta Ads management.*
+*4 projects. Unified marketing hubs coordinating GA4 analytics alongside Google Ads and Meta Ads management.*
 
 | Project | What it does |
 |---|---|
 | <a id="irinabuht12-oss--google-meta-ads-ga4-mcp"></a>[**irinabuht12-oss/google-meta-ads-ga4-mcp**](https://github.com/irinabuht12-oss/google-meta-ads-ga4-mcp) | TypeScript suite featuring 25 tools spanning Google Ads campaign management, Meta Ads audiences, and GA4 attribution reporting. |
-| <a id="ibnuhatim12--https-github-com-irinabuht12-oss-google-meta-ads-ga4-mcp"></a>[**ibnuhatim12/https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp**](https://github.com/ibnuhatim12/https-github.com-irinabuht12-oss-google-meta-ads-ga4-mcp) | TypeScript fork providing multi-network campaign synchronization and GA4 cross-channel performance reporting over Service Account credentials. |
 | <a id="freema--mcp-google-marketing"></a>[**freema/mcp-google-marketing**](https://github.com/freema/mcp-google-marketing) | Comprehensive TypeScript server with 35 tools covering Google Marketing Platform, GA4 property lifecycle, and Google Ads bidding. |
 | <a id="stufently--google-webtools-mcp"></a>[**stufently/google-webtools-mcp**](https://github.com/stufently/google-webtools-mcp) | Extensive TypeScript marketing suite exposing 39 tools across GA4 property configuration, Google Tag Manager, and Search Console. |
 | <a id="henkisdabro--wookstar-claude-plugins"></a>[**henkisdabro/wookstar-claude-plugins**](https://github.com/henkisdabro/wookstar-claude-plugins) | Modular Claude plugin architecture orchestrating GA4 Data API querying alongside remote Stape GTM server-side containers. |
@@ -348,9 +338,9 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
 
 ---
 
-## 7. Scaffolds, setup templates, and experimental concepts
+## 7. Starter templates and setup scaffolds
 
-*11 projects. 11 projects across 2 subcategories providing starter boilerplates, setup guides, and experimental exploratory prototypes.*
+*4 projects. 4 projects. Production boilerplates and setup recipes for authoring custom GA4 MCP servers.*
 
 ### Starter templates and boilerplate scaffolds
 
@@ -362,20 +352,6 @@ Official links: [Google Analytics Data API](https://developers.google.com/analyt
 | <a id="burhan29ee--ga4-mcp-server"></a>[**burhan29ee/ga4-mcp-server**](https://github.com/burhan29ee/ga4-mcp-server) | Modular Python starter template with 13 scaffolding tools and type-annotated handler patterns for rapid GA4 integration. |
 | <a id="communicationseo2021-creator--gsc-ga4-mcp-setup-guide"></a>[**communicationseo2021-creator/gsc-ga4-mcp-setup-guide**](https://github.com/communicationseo2021-creator/gsc-ga4-mcp-setup-guide) | Educational setup scaffold and MCP reference implementation detailing end-to-end Service Account configuration and report retrieval. |
 | <a id="seoteamschbang2021-hub--ga4-mcp-server"></a>[**seoteamschbang2021-hub/ga4-mcp-server**](https://github.com/seoteamschbang2021-hub/ga4-mcp-server) | Python template scaffold providing pre-configured MCP tools and configuration recipes for agency SEO deployment. |
-
-### Early prototypes and conceptual wrappers
-
-*7 projects. Proof-of-concept implementations and experimental explorations of MCP GA4 integrations.*
-
-| Project | What it does |
-|---|---|
-| <a id="tarjbaxi74--ga4-mcp-app"></a>[**TarjBaxi74/ga4-mcp-app**](https://github.com/TarjBaxi74/ga4-mcp-app) | Python conceptual prototype demonstrating direct LLM natural language queries to GA4 Data API v1beta reporting endpoints. |
-| <a id="callince--ga4-mcp-server"></a>[**Callince/ga4-mcp-server**](https://github.com/Callince/ga4-mcp-server) | JavaScript experimental server testing session-extracted authentication tokens against GA4 real-time reporting APIs. |
-| <a id="frartenzo--ga4-mcp"></a>[**frartenzo/ga4-mcp**](https://github.com/frartenzo/ga4-mcp) | Minimal JavaScript proof-of-concept exploring multi-tool coordination between Google Analytics reporting and search metrics. |
-| <a id="spindle79--ga4-mcp-server"></a>[**spindle79/ga4-mcp-server**](https://github.com/spindle79/ga4-mcp-server) | TypeScript exploratory prototype evaluating raw Data API v1beta query latency and JSON serialization within MCP tool handlers. |
-| <a id="adamolson8-pixel--heartland-ga4-mcp"></a>[**adamolson8-pixel/heartland-ga4-mcp**](https://github.com/adamolson8-pixel/heartland-ga4-mcp) | Shell-wrapped Python prototype implementing command-line pipeline execution of GA4 reports inside containerized MCP hosts. |
-| <a id="shelpakovzhenya-art--seo-tool-google-analytics-mcp"></a>[**shelpakovzhenya-art/seo-tool-google-analytics-mcp**](https://github.com/shelpakovzhenya-art/seo-tool-google-analytics-mcp) | Single-tool TypeScript experimental bridge querying aggregate GA4 visitor metrics for automated SEO audit workflows. |
-| <a id="raffaele86--ga4-mcp"></a>[**Raffaele86/ga4-mcp**](https://github.com/Raffaele86/ga4-mcp) | Python experimental implementation testing minimal stdio MCP transport over Google Analytics Data API v1beta. |
 
 ---
 
@@ -406,7 +382,7 @@ Every repository indexed in this catalog has undergone code-level forensic evalu
 
 1. **6-Month Maintenance Invariant:** Active development verified on GitHub (last commit dated March 2026 or later). Abandoned, archival, or unmaintained stubs are quarantined.
 2. **Evidence-Grounded Technical Audit:** Every tool signature, authentication pattern, and storage engine is verified directly from repository source code (`package.json`, `pyproject.toml`, `Cargo.toml`, and handler definitions), never from unverified README claims.
-3. **Job-to-Be-Done Taxonomy Bounding:** Repositories are organized into 7 functional domains and 21 subcategories based on actual developer operational needs rather than arbitrary vendor classifications.
+3. **Job-to-Be-Done Taxonomy Bounding:** Repositories are organized into 7 functional domains and 20 subcategories based on actual developer operational needs rather than arbitrary vendor classifications.
 4. **Mathematical Parity Guarantee:** Category counts, Table of Contents anchors, subcategory summaries, and table row counts are reconciled via automated verification scripts with zero mathematical drift.
 
 ### Repository Inclusion & Quarantine Invariants

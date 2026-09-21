@@ -67,13 +67,13 @@ Organize projects across the 7 numbered macro-domains:
 4. **Deploy enterprise and multi-tenant authentication:** Multi-tenant OAuth gateways, encrypted token persistence, native loopback PKCE, and team account switching.
 5. **Send server-side events and manage properties:** Server-side Measurement Protocol dispatch, custom dimension/metric provisioning, and property configuration via Admin API.
 6. **Diagnose anomalies and generate deliverables:** Statistical anomaly detection, 3D data visualization, executive report compilation, and PowerBI feeds.
-7. **Scaffolds, setup templates, and experimental concepts:** Developer starter boilerplates, setup configuration recipes, and early exploratory prototypes.
+7. **Starter templates and setup scaffolds:** Developer starter boilerplates, Docker scaffolds, and agency setup recipes.
 
 ---
 
 ## 5. Developer Comparison Matrix Standards
 
-- **Column Budget:** The matrix must not exceed 20 discriminating columns (runtime, tools, auth paradigm, storage engine, specific API flags, multi-property discovery, multi-tenancy, and tier).
+- **Column Budget:** The matrix features 8 discriminating columns (Server / Tool, Stars, Runtime, Auth, Storage, Capabilities & APIs, Primary Specialization, Tier), optimized for rapid scanning without horizontal scroll on standard screens.
 - **Row Budget:** Capped at $\le 200$ rows.
 - **Two-Stage Linking:** Project names in the matrix link internally to anchor tags in the detailed catalog (`[**owner/repo**](#owner--repo)` $\to$ `<a id="owner--repo"></a>`), where developers can click directly to the upstream GitHub repository.
 
