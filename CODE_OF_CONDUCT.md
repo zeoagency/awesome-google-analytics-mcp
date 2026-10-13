@@ -2,7 +2,7 @@
 
 ## Our Standard
 
-Be direct, useful, and respectful. This project is a curated technical index, so discussion should focus on evidence, usefulness, maintenance state, and fit for the Google Analytics (GA4) MCP ecosystem.
+Be direct, useful, and respectful. This project is a curated technical index, so discussion should focus on evidence, usefulness, maintenance state, and fit for the Google Analytics 4 MCP, CLI, and SDK ecosystem.
 
 ## Unacceptable Behavior
 

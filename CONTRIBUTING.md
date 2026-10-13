@@ -1,13 +1,13 @@
 # Contributing
 
-Thanks for improving Awesome Google Analytics MCP. This is a curated list — a good entry helps developers and AI agents discover a high-quality Google Analytics 4 (GA4) Model Context Protocol server, client, or workflow.
-
-**Read [AGENTS.md](./AGENTS.md) first** — it defines the entry format, section taxonomy, description standards, and strict exclusion criteria. Everything you need to add a project is documented there.
+Help developers discover Google Analytics 4 MCP servers, CLI tools, and SDKs. Read [AGENTS.md](AGENTS.md) for the scope, evidence requirements, and entry format.
 
 ## Pull request checklist
 
-- [ ] I read [AGENTS.md](./AGENTS.md).
-- [ ] The project is Google Analytics (GA4) specific and publicly accessible.
-- [ ] The entry uses the canonical format (`| [**owner/repo**](url) | Description |`) and is placed in the correct subcategory.
-- [ ] The description is factual, verb-first, and concise (1–2 sentences) with zero marketing hype.
-- [ ] Links work and `npx markdownlint-cli2 "**/*.md"` passes without errors.
+- [ ] The project implements GA4 functionality and belongs to one of the three tool categories.
+- [ ] The implementation is publicly inspectable; the description is supported by upstream source or official SDK documentation.
+- [ ] The entry is not a duplicate, trivial clone, or wrapper around another listed implementation.
+- [ ] The description covers the Google Analytics functionality in one or two concise English sentences.
+- [ ] The inspected revision, source links, and decision are recorded in [the verification log](docs/verification.md).
+- [ ] Category counts and links are correct.
+- [ ] `python3 scripts/check_catalog.py` and `npx --yes markdownlint-cli2 "**/*.md"` pass.

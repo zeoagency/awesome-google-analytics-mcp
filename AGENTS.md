@@ -1,92 +1,27 @@
-# AGENTS.md
+# Catalog maintenance
 
-Working rules, architectural invariants, and language guidelines for anyone — human or agent — editing this repository. It is a curated, plain-English index and comparison of the Google Analytics 4 (GA4) Model Context Protocol (MCP) ecosystem. Keep it lean, minimalist, and immediately useful.
+This repository lists Google Analytics 4 (GA4) MCP servers, command-line tools, and SDKs. The README is an English catalog; keep entries concise and factual.
 
----
+## Scope
 
-## 1. Project Philosophy & Minimalist Structure
+Include tools with an implemented GA4 integration: Data API reporting, Admin API management, Measurement Protocol events, or GA4 event collection SDKs. Multi-service tools qualify when their GA4 integration is implemented; describe that integration.
 
-- **No Onboarding Tutorials:** Do not add introductory installation essays, "how to choose your layer" tables, or getting-started walkthroughs to the catalog root. Keep the README strictly minimalist: title, official links ribbon, Table of Contents with parenthesized counts, Developer Comparison Matrix, 7 numbered problem-domain sections, Resources, and Reference.
-- **Fast Jump Navigation:** Readers should jump straight to the relevant problem domain from the Table of Contents or Developer Comparison Matrix in 1 click.
-- **Mathematical Count Integrity:** The project count in `## Contents` must equal the section banner count, the sum of subcategory counts, and the exact count of table rows in that section. Never allow counts to drift.
+Exclude Universal Analytics-only tools, generic cloud/database/MCP utilities, standalone dashboards or agents without an MCP server, CLI, or SDK, empty scaffolds, documentation-only projects, and projects whose documented installation resolves incompatible dependencies without a usable locked installation path. List the original implementation instead of a trivial fork, mirror, or launcher. A fork qualifies when its GA4 implementation adds a substantive capability.
 
----
+## Review process
 
-## 2. Language & Voice Standards
+1. Inventory every existing entry and supporting file before editing.
+2. Inspect the upstream source and package metadata. For an MCP server, trace tool registration to a GA4 API handler; for a CLI, trace a command to its GA4 implementation; for an SDK, inspect its GA4 client or collection API.
+3. Record the inspected revision, source links, and inclusion/removal reason in `docs/verification.md`. Distinguish source inspection from runtime testing. If the implementation cannot be verified, leave the candidate out and record why.
+4. Correct retained descriptions and add verified missing tools. Use current canonical upstream links. Check copied implementations before listing them separately.
+5. Update category counts, run `python3 scripts/check_catalog.py` and `npx --yes markdownlint-cli2 "**/*.md"`, then review the full diff.
 
-The language of this catalog must be simple, direct, and developer-friendly:
+Use upstream code, official package repositories, and publisher documentation as evidence. Stars, marketing claims, and commit age alone do not establish functionality or quality. Archived projects may be useful; label their status when included. Never imply a live API test was performed unless it was.
 
-### 2.1. Plain-English, Verb-First Prose
+## README format
 
-- Lead with active verbs (*Ingests*, *Queries*, *Aggregates*, *Validates*, *Streams*, *Bridges*, *Orchestrates*, *Extracts*, *Provisions*).
-- Avoid passive voice, convoluted clauses, and marketing buzzwords (*"ultimate"*, *"blazing fast"*, *"game-changing"*).
-- State clearly what an analytics developer or AI agent can *do* with the tool, emphasizing verified capabilities (APIs supported, auth mechanisms, local SQL storage).
+Use three numbered sections: MCP servers, CLI tools, and SDKs. The contents and section headings carry matching entry counts. Each tool appears once, in its primary category; mention additional interfaces in its description. Count SDK packages separately when they expose different APIs or languages.
 
-### 2.2. The 1–2 Sentence Rule
+Use a two-column table (`Project | What it does`). Each description is one or two sentences, starts with a verb, and states the implemented GA4 capability and relevant language or interface. For SDKs, identify whether the publisher is Google or a community maintainer. Prefer substantive differences over exact tool counts, frozen star counts, or subjective tiers.
 
-Every project entry in the catalog tables must be strictly 1 or 2 concise sentences:
-
-- **Sentence 1:** Core capability, runtime, and primary API surface (Data API v1beta, Admin API, Realtime, Measurement Protocol).
-- **Sentence 2 (optional):** Key architectural discriminator (e.g., embedded DuckDB OLAP, SQLite caching, OAuth PKCE, multi-tenant isolation).
-
-### 2.3. Subcategory Header & Table Standards
-
-Every subcategory begins with an italicized count banner, followed by a clean 2-column markdown table:
-
-```markdown
-### Consolidated modal query servers
-
-*4 projects. Multi-purpose query servers bundling report execution, schema introspection, and custom dimension handling.*
-
-| Project | What it does |
-|---|---|
-| [**owner/repo**](https://github.com/owner/repo) | Plain-English explanation of what the tool does and its technical differentiators. |
-```
-
----
-
-## 3. Strict Exclusion Criteria (What NEVER Belongs Here)
-
-To maintain a high-signal catalog, the following must **never** be added:
-
-1. **NO Generic Cloud Stubs:** Generic BigQuery or GCP servers without dedicated, built-in GA4 event schemas or unnesting tooling.
-2. **NO Deprecated Universal Analytics Exclusives:** Repositories exclusively targeting legacy UA (`analytics:v3`, `analyticsreporting:v4`) without GA4 Data API support.
-3. **NO Empty Scaffolds or Non-Runnable Stubs:** Repositories without working MCP tool registrations (`CallToolRequest`, `@mcp.tool`, `server.tool`), broken dependencies, or empty directories.
-4. **NO Trivial Clones:** Direct forks or 1-commit mirrors of existing community repositories that add no substantive architectural capability.
-5. **NO Marketing Hype or AI Slop:** Descriptions must remain factual, concise, and grounded in verified repository source code.
-
----
-
-## 4. Canonical Section Structure
-
-Organize projects across the 7 numbered macro-domains:
-
-1. **Query standard reports and slice dimensions:** Standard reporting aggregations, dimension filtering, metric slicing, realtime streams, and schema metadata discovery.
-2. **Ingest data locally and query with SQL:** Local data ingestion, in-memory DuckDB OLAP, SQLite caching, and virtual JDBC relational tables.
-3. **Bridge multi-platform marketing and search data:** Cross-surface attribution, organic search joining (Search Console), container tag auditing (Google Tag Manager), and multi-ad network suites.
-4. **Deploy enterprise and multi-tenant authentication:** Multi-tenant OAuth gateways, encrypted token persistence, native loopback PKCE, and team account switching.
-5. **Send server-side events and manage properties:** Server-side Measurement Protocol dispatch, custom dimension/metric provisioning, and property configuration via Admin API.
-6. **Diagnose anomalies and generate deliverables:** Statistical anomaly detection, 3D data visualization, executive report compilation, and PowerBI feeds.
-7. **Starter templates and setup scaffolds:** Developer starter boilerplates, Docker scaffolds, and agency setup recipes.
-
----
-
-## 5. Developer Comparison Matrix Standards
-
-- **Column Budget:** The matrix features 8 discriminating columns (Server / Tool, Stars, Runtime, Auth, Storage, Capabilities & APIs, Primary Specialization, Tier), optimized for rapid scanning without horizontal scroll on standard screens.
-- **Row Budget:** Capped at $\le 200$ rows.
-- **Two-Stage Linking:** Project names in the matrix link internally to anchor tags in the detailed catalog (`[**owner/repo**](#owner--repo)` $\to$ `<a id="owner--repo"></a>`), where developers can click directly to the upstream GitHub repository.
-
----
-
-## 6. Markdown Quality & Continuous Integration
-
-All edits must pass markdown linting without warnings:
-
-```bash
-npx markdownlint-cli2 "**/*.md"
-```
-
-- Headings must have blank lines above and below.
-- Tables must adhere to consistent column pipe alignments.
-- Inline HTML anchors (`<a id="..."></a>`) are permitted for two-stage navigation.
+Keep the catalog focused on tools. Put verification evidence and maintenance instructions in supporting documents rather than adding general tutorials or unrelated resource lists to the README.
