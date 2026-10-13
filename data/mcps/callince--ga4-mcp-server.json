@@ -1,0 +1,311 @@
+{
+  "repo": "Callince/ga4-mcp-server",
+  "revision": "4b0eeba11a24aaf1b20fdee12209db5d4d795371",
+  "status": "included",
+  "reason": "The stdio entrypoint registers four callable read-only GA4 Data/Admin API tools with concrete Google client implementations.",
+  "registration_sources": [
+    {
+      "path": "server/index.js",
+      "start_line": 234,
+      "end_line": 334
+    },
+    {
+      "path": "server/index.js",
+      "start_line": 336,
+      "end_line": 378
+    }
+  ],
+  "tool_count": 4,
+  "tools": [
+    {
+      "name": "list_properties",
+      "description": "List the GA4 accounts and properties the signed-in Google account can access, with their numeric property IDs. Use this first to discover the property ID to pass to other tools.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server/index.js",
+          "start_line": 236,
+          "end_line": 241,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 138,
+          "end_line": 153,
+          "role": "handler"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 329,
+          "end_line": 334,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 343,
+          "end_line": 362,
+          "role": "registration/handler dispatch"
+        }
+      ],
+      "behavior": "Calls Admin listAccountSummaries with an empty request; returns account names/resources and property names/resources/numeric IDs, or a message when no accounts are visible.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listAccountSummaries"
+      ],
+      "notes": []
+    },
+    {
+      "name": "run_report",
+      "description": "Run a GA4 core report. Provide metric API names (e.g. activeUsers, sessions, screenPageViews) and optional dimension API names (e.g. date, country, pagePath). Date range defaults to the last 7 days.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property ID, numeric (e.g. 123456789) or 'properties/123456789'. Omit to use the configured default."
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date as YYYY-MM-DD or relative ('7daysAgo', 'yesterday', 'today'). Default '7daysAgo'."
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date. Default 'today'."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimension API names, e.g. ['date','country']."
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Metric API names, e.g. ['activeUsers','sessions']. At least one required."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max rows to return (default 100)."
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "description": "Optional GA4 FilterExpression applied to dimensions (passed through to the API)."
+          },
+          "orderBys": {
+            "type": "array",
+            "description": "Optional GA4 OrderBy array (passed through to the API)."
+          }
+        },
+        "required": [
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server/index.js",
+          "start_line": 242,
+          "end_line": 284,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 155,
+          "end_line": 169,
+          "role": "handler"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 329,
+          "end_line": 334,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 343,
+          "end_line": 362,
+          "role": "registration/handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 88,
+          "end_line": 104,
+          "role": "property resolution/name conversion"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 106,
+          "end_line": 125,
+          "role": "report formatting"
+        }
+      ],
+      "behavior": "Resolves the property from the argument or GA4_PROPERTY_ID, normalizes it to properties/{id}, converts dimension and metric names to name objects, and calls Data API runReport with one date range. Forwards dimensionFilter and orderBys unchanged when truthy; defaults dates to 7daysAgo/today and limit to 100. Returns property/date range and report headers, rowCount, and flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "dimensionFilter is an unrestricted object and orderBys is an array without an items schema; their full values are forwarded to the API.",
+        "The metrics description says at least one is required, but the schema has no minItems and the handler does not enforce nonempty metrics.",
+        "Date and limit defaults exist in the handler/descriptions, not JSON Schema default keywords."
+      ]
+    },
+    {
+      "name": "run_realtime_report",
+      "description": "Run a GA4 realtime report covering roughly the last 30 minutes. Provide metric API names (e.g. activeUsers) and optional realtime dimensions (e.g. country, unifiedScreenName).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property ID (numeric or 'properties/...'). Omit to use the configured default."
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Realtime dimension API names."
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Realtime metric API names. At least one required."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max rows (default 100)."
+          }
+        },
+        "required": [
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server/index.js",
+          "start_line": 285,
+          "end_line": 311,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 171,
+          "end_line": 180,
+          "role": "handler"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 329,
+          "end_line": 334,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 343,
+          "end_line": 362,
+          "role": "registration/handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 88,
+          "end_line": 104,
+          "role": "property resolution/name conversion"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 106,
+          "end_line": 125,
+          "role": "report formatting"
+        }
+      ],
+      "behavior": "Resolves and normalizes property, converts dimension and metric names to name objects, and calls Data API runRealtimeReport with limit defaulting to 100. Returns property, a fixed last 30 minutes window label, and report headers, rowCount, and flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "The metrics description says at least one is required, but the schema has no minItems and the handler does not enforce nonempty metrics.",
+        "The limit default exists in the handler/description, not a JSON Schema default keyword."
+      ]
+    },
+    {
+      "name": "get_metadata",
+      "description": "List the dimensions and metrics available for a GA4 property (API names, UI names, descriptions). Use this to discover valid names for run_report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property ID (numeric or 'properties/...'). Omit to use the configured default."
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server/index.js",
+          "start_line": 312,
+          "end_line": 326,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 182,
+          "end_line": 201,
+          "role": "handler"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 329,
+          "end_line": 334,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 343,
+          "end_line": 362,
+          "role": "registration/handler dispatch"
+        },
+        {
+          "path": "server/index.js",
+          "start_line": 88,
+          "end_line": 104,
+          "role": "property resolution/name conversion"
+        }
+      ],
+      "behavior": "Resolves and normalizes property and calls Data API getMetadata with properties/{id}/metadata. Returns property plus dimension API/UI names, categories/descriptions, and metric API/UI names, types, categories/descriptions.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": []
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list or live requests. HEAD matches the supplied revision.",
+    "All four tools are unconditionally registered in normal server mode; --login performs local OAuth browser consent/token persistence and exits, and is not an MCP tool.",
+    "Calls require a saved OAuth token with refresh_token, client_id, and client_secret at GA4_TOKEN_PATH or ~/.ga4-mcp/token.json. Clients initialize lazily, so absent authentication does not block tool listing. OAuth uses analytics.readonly.",
+    "Property-dependent calls require the property argument or GA4_PROPERTY_ID. No explicit input-schema validation occurs in the call dispatcher; handler/API errors are returned as MCP isError text.",
+    "Entrypoint/dependencies are declared in package.json and manifest.json. No authenticated runtime viability test was performed."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root compared all four explicit JSON tool schemas and full descriptions against the source literal, reviewed SDK dispatch and handler-only defaults; preserved loose order/filter schemas."
+  }
+}

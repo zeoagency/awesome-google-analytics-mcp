@@ -1,0 +1,128 @@
+[
+  {
+    "label": "Bin-Huang/google-analytics-cli",
+    "url": "https://github.com/Bin-Huang/google-analytics-cli",
+    "description": "Runs GA4 standard, pivot, batch and realtime reports from a TypeScript CLI using the Data API. Reads Admin configuration and exports audiences with JSON output and named credential profiles.",
+    "category": "CLI tools"
+  },
+  {
+    "label": "Hasim-cim/ga4-mcp",
+    "url": "https://github.com/Hasim-cim/ga4-mcp",
+    "description": "Runs GA4 reports, realtime queries, and property inspection from a Python command-line tool. Provides page, acquisition, demographic, and custom-report presets using Application Default Credentials.",
+    "category": "CLI tools"
+  },
+  {
+    "label": "kasdimg/analytics-cli",
+    "url": "https://github.com/kasdimg/analytics-cli",
+    "description": "Queries GA4 reports and Search Console analytics through a JavaScript CLI. Returns summary, page, device and custom-query results using shared service-account credentials.",
+    "category": "CLI tools"
+  },
+  {
+    "label": "nyosegawa/gacli",
+    "url": "https://github.com/nyosegawa/gacli",
+    "description": "Queries GA4 summaries, pages, realtime activity and custom reports through a Python CLI. Stores separate OAuth profiles and supports filtered queries with selectable output formats.",
+    "category": "CLI tools"
+  },
+  {
+    "label": "sulimanbenhalim/ga-cli",
+    "url": "https://github.com/sulimanbenhalim/ga-cli",
+    "description": "Creates, updates and deletes GA4 properties and data streams through a Python CLI using the Admin API. Lists accounts and supports local credential configuration.",
+    "category": "CLI tools"
+  },
+  {
+    "label": ".NET — Google.Analytics.Admin.V1Beta",
+    "url": "https://github.com/googleapis/google-cloud-dotnet/tree/main/apis/Google.Analytics.Admin.V1Beta",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official .NET Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": ".NET — Google.Analytics.Data.V1Beta",
+    "url": "https://github.com/googleapis/google-cloud-dotnet/tree/main/apis/Google.Analytics.Data.V1Beta",
+    "description": "Queries GA4 reports and realtime activity with Google's official .NET Data API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "adswerve/GA4-Measurement-Protocol-Python",
+    "url": "https://github.com/adswerve/GA4-Measurement-Protocol-Python",
+    "description": "Sends and validates GA4 Measurement Protocol events from Python for web and Firebase app streams. Provides a community SDK with queued events and persistent client state.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Go — analytics/admin/v1beta",
+    "url": "https://github.com/googleapis/go-genproto/tree/main/googleapis/analytics/admin/v1beta",
+    "description": "Calls the GA4 Admin API with Google's generated Go gRPC client and protobuf request types. Requires an authenticated gRPC connection supplied by the application.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Go — analytics/data/v1beta",
+    "url": "https://github.com/googleapis/go-genproto/tree/main/googleapis/analytics/data/v1beta",
+    "description": "Calls the GA4 Data API with Google's generated Go gRPC client and protobuf request types. Requires an authenticated gRPC connection supplied by the application.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Java — google-analytics-admin",
+    "url": "https://github.com/googleapis/google-cloud-java/tree/main/java-analytics-admin",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official Java Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Java — google-analytics-data",
+    "url": "https://github.com/googleapis/google-cloud-java/tree/main/java-analytics-data",
+    "description": "Queries GA4 reports and realtime activity with Google's official Java Data API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "MarkEdmondson1234/googleAnalyticsR",
+    "url": "https://github.com/MarkEdmondson1234/googleAnalyticsR",
+    "description": "Queries GA4 reports and realtime data from R with dimension filters and metric expressions. Provides a community SDK with data-frame results and Admin API helpers.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Node.js — @google-analytics/admin",
+    "url": "https://github.com/googleapis/google-cloud-node/tree/main/packages/google-analytics-admin",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official Node.js Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Node.js — @google-analytics/data",
+    "url": "https://github.com/googleapis/google-cloud-node/tree/main/packages/google-analytics-data",
+    "description": "Queries GA4 reports and realtime activity with Google's official Node.js Data API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "PHP — google/analytics-admin",
+    "url": "https://github.com/googleapis/google-cloud-php/tree/main/AnalyticsAdmin",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official PHP Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "PHP — google/analytics-data",
+    "url": "https://github.com/googleapis/google-cloud-php/tree/main/AnalyticsData",
+    "description": "Queries GA4 reports and realtime activity with Google's official PHP Data API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Python — google-analytics-admin",
+    "url": "https://github.com/googleapis/google-cloud-python/tree/main/packages/google-analytics-admin",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official Python Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Python — google-analytics-data",
+    "url": "https://github.com/googleapis/google-cloud-python/tree/main/packages/google-analytics-data",
+    "description": "Queries GA4 reports and realtime activity with Google's official Python Data API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Ruby — google-analytics-admin-v1alpha",
+    "url": "https://github.com/googleapis/google-cloud-ruby/tree/main/google-analytics-admin-v1alpha",
+    "description": "Manages GA4 accounts, properties, data streams and custom definitions with Google's official Ruby Admin API client.",
+    "category": "SDKs"
+  },
+  {
+    "label": "Ruby — google-analytics-data-v1beta",
+    "url": "https://github.com/googleapis/google-cloud-ruby/tree/main/google-analytics-data-v1beta",
+    "description": "Queries GA4 reports and realtime activity with Google's official Ruby Data API client.",
+    "category": "SDKs"
+  }
+]

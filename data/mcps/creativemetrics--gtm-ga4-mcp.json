@@ -1,0 +1,3318 @@
+{
+  "repo": "CreativeMetrics/gtm-ga4-mcp",
+  "revision": "2f274468eaf7dcf3fbb9d29e1d997a83bd88b302",
+  "status": "included",
+  "reason": "Runnable stdio entrypoint registers real GA4 Admin/Data handlers alongside GTM, Search Console, OAuth and browser diagnostics.",
+  "registration_sources": [
+    {
+      "path": "index.js",
+      "start_line": 21,
+      "end_line": 632
+    }
+  ],
+  "tool_count": 47,
+  "tools": [
+    {
+      "name": "get_auth_url",
+      "description": "Genera il link di autorizzazione OAuth2 per Google. Da usare al primo avvio.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 24,
+          "end_line": 28,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 646,
+          "end_line": 651,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/auth.js",
+          "start_line": 39,
+          "end_line": 46,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads configured OAuth client and optional saved tokens, then generates an offline Google OAuth authorization URL with the configured scopes.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "exchange_auth_code",
+      "description": "Completa il login scambiando il codice OAuth con un token di accesso.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Codice ricevuto da Google dopo il login"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 29,
+          "end_line": 37,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 652,
+          "end_line": 659,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/auth.js",
+          "start_line": 47,
+          "end_line": 57,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Exchanges the supplied OAuth code and saves tokens to ~/.gtm-ga4-mcp/token.json.",
+      "scope": "support",
+      "effect": "write",
+      "api_methods": [
+        "Google OAuth2 getToken"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gtm_list_accounts",
+      "description": "Elenca tutti gli account Google Tag Manager accessibili.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 40,
+          "end_line": 44,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 671,
+          "end_line": 673,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 7,
+          "end_line": 12,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_list_containers",
+      "description": "Elenca i container GTM di un account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "ID account GTM"
+          }
+        },
+        "required": [
+          "account_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 45,
+          "end_line": 53,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 674,
+          "end_line": 676,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 13,
+          "end_line": 20,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.containers.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_create_workspace",
+      "description": "Crea un nuovo workspace GTM. Utile dopo una pubblicazione per iniziare un nuovo set di modifiche.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome del workspace (es. \"Modifiche maggio 2025\")"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrizione opzionale"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "name"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 54,
+          "end_line": 67,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 677,
+          "end_line": 679,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 83,
+          "end_line": 93,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.create.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_copy_template",
+      "description": "Copia un singolo template da un container GTM a un altro per nome. Utile per installare un template specifico senza fare una duplicazione completa.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "src_account_id": {
+            "type": "string"
+          },
+          "src_container_id": {
+            "type": "string"
+          },
+          "src_workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "template_name": {
+            "type": "string",
+            "description": "Nome esatto del template da copiare"
+          },
+          "dst_account_id": {
+            "type": "string"
+          },
+          "dst_container_id": {
+            "type": "string"
+          },
+          "dst_workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "src_account_id",
+          "src_container_id",
+          "template_name",
+          "dst_account_id",
+          "dst_container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 68,
+          "end_line": 84,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 660,
+          "end_line": 667,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 42,
+          "end_line": 73,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Resolves source and destination workspaces, matches template name case-insensitively, returns existing destination template or creates one using source templateData and optional galleryReference.",
+      "scope": "adjacent",
+      "effect": "mixed",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.templates.list",
+        "Tag Manager API v2 accounts.containers.workspaces.templates.create",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_list_templates",
+      "description": "Elenca i template installati in un workspace GTM, incluso il loro tipo (cvt_...) e templateId.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 85,
+          "end_line": 97,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 668,
+          "end_line": 670,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 74,
+          "end_line": 82,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.containers.workspaces.templates.list, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.templates.list",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_list_tags",
+      "description": "Elenca i tag in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 99,
+          "end_line": 111,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 680,
+          "end_line": 682,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 94,
+          "end_line": 102,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.containers.workspaces.tags.list, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.tags.list",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_create_tag",
+      "description": "Crea un nuovo tag in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "tag": {
+            "type": "object",
+            "description": "Oggetto tag GTM (name, type, parameter, firingTriggerId, ecc.)"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "tag"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 112,
+          "end_line": 125,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 683,
+          "end_line": 685,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 103,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.tags.create, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.tags.create",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_update_tag",
+      "description": "Modifica un tag esistente in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "tag_id": {
+            "type": "string",
+            "description": "ID del tag da modificare"
+          },
+          "tag": {
+            "type": "object",
+            "description": "Oggetto tag aggiornato"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "tag_id",
+          "tag"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 126,
+          "end_line": 140,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 686,
+          "end_line": 688,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 113,
+          "end_line": 122,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.tags.update, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.tags.update",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_delete_tag",
+      "description": "Elimina un tag da un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "tag_id": {
+            "type": "string",
+            "description": "ID del tag da eliminare"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "tag_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 141,
+          "end_line": 154,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 689,
+          "end_line": 691,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 123,
+          "end_line": 133,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.tags.delete, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.tags.delete",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_list_triggers",
+      "description": "Elenca i trigger in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 157,
+          "end_line": 169,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 692,
+          "end_line": 694,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 134,
+          "end_line": 142,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.containers.workspaces.triggers.list, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.list",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_create_trigger",
+      "description": "Crea un nuovo trigger in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "trigger": {
+            "type": "object",
+            "description": "Oggetto trigger GTM (name, type, filter, ecc.)"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "trigger"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 170,
+          "end_line": 183,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 695,
+          "end_line": 697,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 143,
+          "end_line": 152,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.triggers.create, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.create",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_update_trigger",
+      "description": "Modifica un trigger esistente in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "trigger_id": {
+            "type": "string",
+            "description": "ID del trigger da modificare"
+          },
+          "trigger": {
+            "type": "object",
+            "description": "Oggetto trigger aggiornato"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "trigger_id",
+          "trigger"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 184,
+          "end_line": 198,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 698,
+          "end_line": 700,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 153,
+          "end_line": 162,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.triggers.update, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.update",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_delete_trigger",
+      "description": "Elimina un trigger da un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "trigger_id": {
+            "type": "string",
+            "description": "ID del trigger da eliminare"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "trigger_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 199,
+          "end_line": 212,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 701,
+          "end_line": 703,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 163,
+          "end_line": 173,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.triggers.delete, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.delete",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_list_variables",
+      "description": "Elenca le variabili in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 215,
+          "end_line": 227,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 704,
+          "end_line": 706,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 174,
+          "end_line": 182,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.containers.workspaces.variables.list, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.variables.list",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_create_variable",
+      "description": "Crea una nuova variabile in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "variable": {
+            "type": "object",
+            "description": "Oggetto variabile GTM (name, type, parameter, ecc.)"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "variable"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 228,
+          "end_line": 241,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 707,
+          "end_line": 709,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 183,
+          "end_line": 192,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.variables.create, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.variables.create",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_update_variable",
+      "description": "Modifica una variabile esistente in un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "variable_id": {
+            "type": "string",
+            "description": "ID della variabile da modificare"
+          },
+          "variable": {
+            "type": "object",
+            "description": "Oggetto variabile aggiornato"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "variable_id",
+          "variable"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 242,
+          "end_line": 256,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 710,
+          "end_line": 712,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 193,
+          "end_line": 202,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.variables.update, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.variables.update",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "GTM entity request body is an intentionally loose object schema and is forwarded unchanged; no nested entity fields are exposed.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_delete_variable",
+      "description": "Elimina una variabile da un workspace GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          },
+          "variable_id": {
+            "type": "string",
+            "description": "ID della variabile da eliminare"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id",
+          "variable_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 257,
+          "end_line": 270,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 713,
+          "end_line": 715,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 203,
+          "end_line": 213,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.containers.workspaces.variables.delete, Tag Manager API v2 accounts.containers.workspaces.list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.variables.delete",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "gtm_duplicate_container",
+      "description": "Duplica un intero container GTM (tag, trigger, variabili, cartelle, template) in un altro container. Gestisce rate limiting, backoff automatico sui 429, remapping ID e installazione template.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "src_account_id": {
+            "type": "string",
+            "description": "Account ID del container sorgente"
+          },
+          "src_container_id": {
+            "type": "string",
+            "description": "Container ID sorgente"
+          },
+          "dst_account_id": {
+            "type": "string",
+            "description": "Account ID del container destinazione"
+          },
+          "dst_container_id": {
+            "type": "string",
+            "description": "Container ID destinazione"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Prefisso opzionale da aggiungere ai nomi (es. \"[COPIA] \")"
+          },
+          "suffix": {
+            "type": "string",
+            "description": "Suffisso opzionale da aggiungere ai nomi"
+          }
+        },
+        "required": [
+          "src_account_id",
+          "src_container_id",
+          "dst_account_id",
+          "dst_container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 271,
+          "end_line": 286,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 716,
+          "end_line": 723,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 58,
+          "end_line": 376,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 8,
+          "end_line": 11,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 12,
+          "end_line": 20,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 21,
+          "end_line": 28,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 29,
+          "end_line": 32,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 33,
+          "end_line": 48,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-duplicate.js",
+          "start_line": 49,
+          "end_line": 57,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads source workspace entities, creates a destination workspace, copies templates, folders, built-in variables, variables, triggers and tags with ID remapping, prefix/suffix and rate-limit retries; returns partial successes/errors.",
+      "scope": "adjacent",
+      "effect": "mixed",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.built_in_variables.list",
+        "Tag Manager API v2 accounts.containers.workspaces.create",
+        "Tag Manager API v2 accounts.containers.workspaces.templates.create",
+        "Tag Manager API v2 accounts.containers.workspaces.folders.create",
+        "Tag Manager API v2 accounts.containers.workspaces.built_in_variables.create",
+        "Tag Manager API v2 accounts.containers.workspaces.variables.create",
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.create",
+        "Tag Manager API v2 accounts.containers.workspaces.tags.create",
+        "Tag Manager API v2 GET accounts/{account}/containers/{container}/workspaces",
+        "Tag Manager API v2 GET accounts/{account}/containers/{container}/workspaces/{workspace}/{folders|templates|variables|triggers|tags}"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Source workspace is Default Workspace or first available; raw REST list reads do not iterate pagination. Individual copy failures can leave a partially populated destination workspace."
+      ]
+    },
+    {
+      "name": "gtm_list_users",
+      "description": "Elenca tutti gli utenti con accesso a un account GTM e i loro permessi sui container.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 288,
+          "end_line": 298,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 727,
+          "end_line": 729,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 230,
+          "end_line": 237,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Tag Manager API v2 accounts.user_permissions.list.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.user_permissions.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_add_user",
+      "description": "Aggiunge un utente a un account GTM con permessi specifici sui container.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email Google dell'utente"
+          },
+          "account_permission": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "description": "Permesso account (default: user)"
+          },
+          "container_permissions": {
+            "type": "array",
+            "description": "Lista permessi per container",
+            "items": {
+              "type": "object",
+              "properties": {
+                "containerId": {
+                  "type": "string"
+                },
+                "permission": {
+                  "type": "string",
+                  "enum": [
+                    "no_access",
+                    "read",
+                    "edit",
+                    "approve",
+                    "publish"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "account_id",
+          "email"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 299,
+          "end_line": 322,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 730,
+          "end_line": 732,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 238,
+          "end_line": 256,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Creates GTM user permission with emailAddress, accountAccess.permission (default user), and containerAccess mapped from containerId/permission inputs.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.user_permissions.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_update_user",
+      "description": "Modifica i permessi di un utente esistente su un account GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "user_permission_id": {
+            "type": "string",
+            "description": "ID permesso utente (da gtm_list_users)"
+          },
+          "account_permission": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ]
+          },
+          "container_permissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "containerId": {
+                  "type": "string"
+                },
+                "permission": {
+                  "type": "string",
+                  "enum": [
+                    "no_access",
+                    "read",
+                    "edit",
+                    "approve",
+                    "publish"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "account_id",
+          "user_permission_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 323,
+          "end_line": 345,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 733,
+          "end_line": 735,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 257,
+          "end_line": 271,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Updates the identified GTM user permission using accountAccess.permission and mapped containerAccess inputs; omitted values become user and empty container list.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.user_permissions.update"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted account_permission defaults to user and omitted container_permissions becomes an empty list, rather than preserving current permissions."
+      ]
+    },
+    {
+      "name": "gtm_remove_user",
+      "description": "Rimuove completamente l'accesso di un utente a un account GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "user_permission_id": {
+            "type": "string",
+            "description": "ID permesso utente (da gtm_list_users)"
+          }
+        },
+        "required": [
+          "account_id",
+          "user_permission_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 346,
+          "end_line": 357,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 736,
+          "end_line": 740,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 272,
+          "end_line": 279,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Performs the requested API mutation and returns response data or a deletion acknowledgement. Calls Tag Manager API v2 accounts.user_permissions.delete.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.user_permissions.delete"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gtm_publish_container",
+      "description": "Pubblica il workspace GTM corrente creando una nuova versione.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale — se omesso usa il Default Workspace"
+          }
+        },
+        "required": [
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 358,
+          "end_line": 370,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 724,
+          "end_line": 726,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 214,
+          "end_line": 229,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Resolves workspace, creates a container version and publishes that version.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.create_version",
+        "Tag Manager API v2 accounts.containers.versions.publish",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Omitted workspace resolves cached Default Workspace by name or first workspace; no workspace causes an error."
+      ]
+    },
+    {
+      "name": "scan_url",
+      "description": "Scansiona un URL con un browser reale e rileva tutti i tag attivi (analytics, advertising, CMP, live chat, ecc.) tramite analisi di rete, HTML e variabili JavaScript. Accetta automaticamente i cookie banner.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL del sito da analizzare (es. https://www.esempio.it)"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 373,
+          "end_line": 383,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 824,
+          "end_line": 826,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 249,
+          "end_line": 301,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 87,
+          "end_line": 94,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 80,
+          "end_line": 86,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 95,
+          "end_line": 109,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 110,
+          "end_line": 122,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 123,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 136,
+          "end_line": 148,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 149,
+          "end_line": 182,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 183,
+          "end_line": 248,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Launches Puppeteer Chromium, opens the URL, automatically accepts recognized cookie banners, observes requests and rendered HTML/JavaScript, and returns detected tags, evidence and extracted tracking IDs.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "create_tags_from_url",
+      "description": "Scansiona un URL, rileva i tag attivi, estrae gli ID configurati e crea automaticamente i tag corrispondenti in un nuovo workspace GTM. Usa template nativi per GA4/Google Ads e template gallery ufficiali per Meta (Stape), LinkedIn, Clarity, TikTok, Pinterest.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL del sito da analizzare"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 384,
+          "end_line": 396,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 821,
+          "end_line": 823,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 217,
+          "end_line": 326,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 8,
+          "end_line": 22,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 151,
+          "end_line": 166,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 167,
+          "end_line": 183,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 184,
+          "end_line": 216,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-from-scan.js",
+          "start_line": 23,
+          "end_line": 150,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 242,
+          "end_line": 300,
+          "role": "handler/browser scan"
+        }
+      ],
+      "behavior": "Scans the URL, creates a new GTM workspace and All Pages trigger, installs downloaded gallery templates as needed, and creates supported tags using extracted IDs; returns warnings for failed or unsupported configurations.",
+      "scope": "adjacent",
+      "effect": "mixed",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.list",
+        "Tag Manager API v2 accounts.containers.workspaces.create",
+        "Tag Manager API v2 accounts.containers.workspaces.tags.create",
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.list",
+        "Tag Manager API v2 accounts.containers.workspaces.triggers.create",
+        "Tag Manager API v2 accounts.containers.workspaces.templates.list",
+        "Tag Manager API v2 accounts.containers.workspaces.templates.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Always writes to a newly created workspace; resolved existing workspace is not used for tag creation. Supports GA4, Ads, Meta, LinkedIn, Clarity, TikTok and Pinterest; templates are downloaded from GitHub main/master."
+      ]
+    },
+    {
+      "name": "compare_url_with_container",
+      "description": "Scansiona un URL e confronta i tag rilevati con quelli configurati in un container GTM. Identifica tag attivi sul sito, tag in GTM non rilevati sul sito, e tag sul sito non in GTM.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL del sito da analizzare"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string",
+            "description": "Opzionale"
+          }
+        },
+        "required": [
+          "url",
+          "account_id",
+          "container_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 397,
+          "end_line": 410,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 827,
+          "end_line": 865,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 249,
+          "end_line": 301,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 87,
+          "end_line": 94,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 80,
+          "end_line": 86,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 95,
+          "end_line": 109,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 110,
+          "end_line": 122,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 123,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 136,
+          "end_line": 148,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 149,
+          "end_line": 182,
+          "role": "handler"
+        },
+        {
+          "path": "src/tag-detector.js",
+          "start_line": 183,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 94,
+          "end_line": 102,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 31,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm.js",
+          "start_line": 21,
+          "end_line": 30,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Concurrently scans a browser page and lists GTM tags; returns both inventories and counts with an approximate-comparison note.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.tags.list",
+        "Tag Manager API v2 accounts.containers.workspaces.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Description promises mismatched-tag identification, but handler only returns inventories/counts; computed detection/type maps are unused."
+      ]
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "Elenca tutte le proprietà GA4 accessibili.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 413,
+          "end_line": 417,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 741,
+          "end_line": 743,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 11,
+          "end_line": 25,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta accountSummaries.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "Elenca le custom dimension di una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "ID proprietà GA4 (solo numero)"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 418,
+          "end_line": 426,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 744,
+          "end_line": 746,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 26,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.customDimensions.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.customDimensions.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_create_custom_dimension",
+      "description": "Crea una custom dimension in una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "parameter_name": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "EVENT",
+              "USER",
+              "ITEM"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id",
+          "display_name",
+          "parameter_name",
+          "scope"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 427,
+          "end_line": 441,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 747,
+          "end_line": 754,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 32,
+          "end_line": 40,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Creates a GA4 custom dimension with supplied displayName, parameterName, scope and description (default empty string) under properties/{property_id}.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.customDimensions.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "ga4_duplicate_custom_dimensions",
+      "description": "Duplica tutte le custom dimension da una proprietà GA4 a un'altra.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_property_id": {
+            "type": "string"
+          },
+          "target_property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_property_id",
+          "target_property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 442,
+          "end_line": 453,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 755,
+          "end_line": 757,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 67,
+          "end_line": 87,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 26,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 32,
+          "end_line": 40,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists source custom dimensions and creates each in the target property, returning per-dimension successes and failures.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.customDimensions.list",
+        "Analytics Admin API v1beta properties.customDimensions.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "Elenca le custom metric di una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 454,
+          "end_line": 462,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 758,
+          "end_line": 760,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 41,
+          "end_line": 46,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.customMetrics.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.customMetrics.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Esegue un report GA4 con metriche e dimensioni personalizzate.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Es. [\"sessions\", \"activeUsers\"]"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Es. [\"date\", \"deviceCategory\"]"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Es. \"7daysAgo\" o \"2024-01-01\""
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Es. \"today\""
+          },
+          "limit": {
+            "type": "number",
+            "description": "Numero di righe (default 10)"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 463,
+          "end_line": 478,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 761,
+          "end_line": 768,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 47,
+          "end_line": 60,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 7,
+          "end_line": 10,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Wraps metric and dimension strings as name objects, supplies one date range and limit (falsy limit becomes 10), and returns properties.runReport response data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Data API v1beta properties.runReport"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Schema has no numeric limit bounds or date format validation; dispatcher replaces a zero limit with 10."
+      ]
+    },
+    {
+      "name": "ga4_list_conversion_events",
+      "description": "Elenca gli eventi di conversione configurati in una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 479,
+          "end_line": 487,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 769,
+          "end_line": 771,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 61,
+          "end_line": 66,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.conversionEvents.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.conversionEvents.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "Elenca i data stream (web/app) di una proprietà GA4 con measurement ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 488,
+          "end_line": 496,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 772,
+          "end_line": 774,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 88,
+          "end_line": 95,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.dataStreams.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.dataStreams.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_list_audiences",
+      "description": "Elenca le audience configurate in una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 497,
+          "end_line": 505,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 775,
+          "end_line": 777,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 96,
+          "end_line": 103,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.audiences.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.audiences.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_list_key_events",
+      "description": "Elenca i key event (ex conversioni) di una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 506,
+          "end_line": 514,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 778,
+          "end_line": 780,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 104,
+          "end_line": 109,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns API response entity list/data. Calls Analytics Admin API v1beta properties.keyEvents.list.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.keyEvents.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "List calls do not iterate nextPageToken; returned results can be incomplete."
+      ]
+    },
+    {
+      "name": "ga4_create_key_event",
+      "description": "Crea un key event in una proprietà GA4.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Nome esatto dell'evento GA4 da marcare come key event"
+          }
+        },
+        "required": [
+          "property_id",
+          "event_name"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 515,
+          "end_line": 526,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 781,
+          "end_line": 783,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 110,
+          "end_line": 120,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Creates a GA4 key event with requestBody.eventName under properties/{property_id}.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.keyEvents.create"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "ga4_compare_properties",
+      "description": "Confronta custom dimension, custom metric, key event e data stream tra due proprietà GA4. Mostra cosa è presente solo in una, solo nell'altra, o in entrambe.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id_a": {
+            "type": "string"
+          },
+          "property_id_b": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id_a",
+          "property_id_b"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 527,
+          "end_line": 538,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 784,
+          "end_line": 786,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 121,
+          "end_line": 166,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 26,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 41,
+          "end_line": 46,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 88,
+          "end_line": 95,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 104,
+          "end_line": 109,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads custom dimensions, custom metrics, key events and streams for both properties concurrently; compares parameter/event names and reports stream counts and summaries.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.customDimensions.list",
+        "Analytics Admin API v1beta properties.customMetrics.list",
+        "Analytics Admin API v1beta properties.dataStreams.list",
+        "Analytics Admin API v1beta properties.keyEvents.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "ga4_looker_report_url",
+      "description": "Genera un URL per creare un report Looker Studio pre-connesso a una proprietà GA4. L'utente apre il link e il report è pronto.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "template": {
+            "type": "string",
+            "enum": [
+              "ga4_overview",
+              "ga4_acquisition",
+              "ga4_ecommerce",
+              "ga4_engagement"
+            ],
+            "description": "Template report (default: ga4_overview)"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 539,
+          "end_line": 554,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 787,
+          "end_line": 791,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/ga4.js",
+          "start_line": 167,
+          "end_line": 172,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Locally builds a Looker Studio create-report URL using a hard-coded template ID and GA4 property ID; no report is created by the server.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Template IDs are fixed source constants and their external validity was not verified."
+      ]
+    },
+    {
+      "name": "gtm_check_tag_health",
+      "description": "Verifica la salute dei tag GTM confrontando gli eventi GA4 degli ultimi 7 giorni con i 7 giorni precedenti. Segnala eventi fermi o calati oltre una soglia, e tag GTM in pausa.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "gtm_account_id": {
+            "type": "string"
+          },
+          "gtm_container_id": {
+            "type": "string"
+          },
+          "ga4_property_id": {
+            "type": "string",
+            "description": "ID numerico proprietà GA4 (senza \"properties/\")"
+          },
+          "drop_threshold": {
+            "type": "number",
+            "description": "Soglia calo per alert (0.0-1.0, default 0.8 = 80%)"
+          }
+        },
+        "required": [
+          "gtm_account_id",
+          "gtm_container_id",
+          "ga4_property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 557,
+          "end_line": 570,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 792,
+          "end_line": 798,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/gtm-health.js",
+          "start_line": 50,
+          "end_line": 129,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-health.js",
+          "start_line": 25,
+          "end_line": 28,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-health.js",
+          "start_line": 29,
+          "end_line": 32,
+          "role": "handler"
+        },
+        {
+          "path": "src/gtm-health.js",
+          "start_line": 33,
+          "end_line": 49,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Runs eventCount/eventName reports for 7daysAgo..today and 14daysAgo..8daysAgo, flags stopped/dropped predefined events, lists the default/first workspace and flags paused GTM tags.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Tag Manager API v2 accounts.containers.workspaces.list",
+        "Tag Manager API v2 accounts.containers.workspaces.tags.list",
+        "Analytics Data API v1beta properties.runReport"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "drop_threshold is not schema-bounded; zero is replaced with 0.8 by the handler.",
+        "Scope is adjacent because this cross-service diagnostic reads both GA4 and GTM; it does not validate each GTM tag against an event."
+      ]
+    },
+    {
+      "name": "gsc_list_sites",
+      "description": "Elenca tutti i siti verificati in Google Search Console.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 573,
+          "end_line": 577,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 799,
+          "end_line": 801,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 7,
+          "end_line": 12,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists accessible Search Console site entries.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 sites.list"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gsc_top_queries",
+      "description": "Mostra le query di ricerca con più click per un sito.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "URL sito (es. https://www.esempio.it/)"
+          },
+          "days": {
+            "type": "number",
+            "description": "Periodo in giorni (default 28)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Numero di query (default 25)"
+          }
+        },
+        "required": [
+          "site_url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 578,
+          "end_line": 590,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 802,
+          "end_line": 804,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 32,
+          "end_line": 44,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 13,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Queries Search Console for query-dimension rows from today minus days to today, with the requested row limit; formats CTR and positions.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 searchanalytics.query"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gsc_top_pages",
+      "description": "Mostra le pagine con più click organici per un sito.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number",
+            "description": "Periodo in giorni (default 28)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Numero di pagine (default 25)"
+          }
+        },
+        "required": [
+          "site_url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 591,
+          "end_line": 603,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 805,
+          "end_line": 807,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 45,
+          "end_line": 57,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 13,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Queries Search Console for page-dimension rows from today minus days to today, with the requested row limit; formats CTR and positions.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 searchanalytics.query"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gsc_compare_periods",
+      "description": "Confronta click e posizioni di ricerca tra due periodi per identificare query in crescita o calo.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number",
+            "description": "Durata di ogni periodo in giorni (default 28)"
+          }
+        },
+        "required": [
+          "site_url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 604,
+          "end_line": 615,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 808,
+          "end_line": 810,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 58,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 13,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Queries up to 50 query rows in each of two date periods, joins previous results to current queries and returns click deltas and positions sorted by current clicks.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 searchanalytics.query"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required."
+      ]
+    },
+    {
+      "name": "gsc_search_analytics",
+      "description": "Esegui una query personalizzata su Search Console con dimensioni e filtri a scelta.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Es. 2025-01-01"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Es. 2025-01-31"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Es. [\"query\",\"page\",\"device\",\"country\"]"
+          },
+          "row_limit": {
+            "type": "number",
+            "description": "Numero di righe (default 25)"
+          }
+        },
+        "required": [
+          "site_url",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "index.js",
+          "start_line": 616,
+          "end_line": 630,
+          "role": "registration/schema"
+        },
+        {
+          "path": "index.js",
+          "start_line": 811,
+          "end_line": 820,
+          "role": "dispatcher"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 13,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/search-console.js",
+          "start_line": 3,
+          "end_line": 6,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Forwards supplied date strings, dimensions (default query) and row limit (default 25) to searchanalytics.query; transforms CTR to percent and rounds positions.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 searchanalytics.query"
+      ],
+      "notes": [
+        "Dispatcher constructs OAuth client before handling this tool, including browser-only scan and local Looker URL generation; configured credentials file is required.",
+        "Description mentions filters, but no filter property is exposed or passed by dispatcher; module-level dimensionFilterGroups support is unreachable through this tool."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list or live requests and no upstream code execution.",
+    "All registration is unconditional in index.js; imported modules provide implementation helpers rather than additional tool lists. Standalone health-check.js script and formatting helper are not MCP tools.",
+    "OAuth client reads ~/.gtm-ga4-mcp/credentials.json and optional token.json. Authorization uses the legacy urn:ietf:wg:oauth:2.0:oob redirect; this is a setup compatibility risk, not an authenticated runtime test.",
+    "Puppeteer/browser installation is required by browser tools; package entrypoint is index.js.",
+    "Error responses are caught and returned as MCP isError text. No runtime input validation is implemented in the dispatcher."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root AST parser exactly compared all 47 literal schemas and complete descriptions; root read dispatcher/module methods and GA4 health comparison, corrected GA4 scope for cross-service health and property-specific Looker URL generation."
+  }
+}

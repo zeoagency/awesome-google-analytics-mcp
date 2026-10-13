@@ -1,0 +1,1096 @@
+{
+  "repo": "Newsstate/ga4-mcp",
+  "revision": "54ba34d170438ad186f78cf412b0aaefd6ebe6c0",
+  "status": "included",
+  "reason": "Next.js HTTP MCP endpoint advertises and dispatches 11 real tools, including seven GA4 Admin/Data tools and four Search Console tools.",
+  "registration_sources": [
+    {
+      "path": "app/api/mcp/route.ts",
+      "start_line": 21,
+      "end_line": 33
+    },
+    {
+      "path": "lib/mcp.ts",
+      "start_line": 37,
+      "end_line": 419
+    }
+  ],
+  "tool_count": 11,
+  "tools": [
+    {
+      "name": "list_properties",
+      "description": "List all GA4 properties accessible by the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 22,
+          "end_line": 22,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 203,
+          "end_line": 206,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 38,
+          "end_line": 66,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls GA4 Admin v1beta accountSummaries.list({}) once, flattens account property summaries to name/displayName; timezone and currency undefined. Returns JSON text array.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only.",
+        "No pagination loop for accountSummaries.list; may omit properties on subsequent pages."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "List all Google Analytics 4 properties accessible by the authenticated user.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 44,
+              "end_line": 66,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "run_report",
+      "description": "Run a GA4 analytics report for a date range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 23,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 207,
+          "end_line": 217,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 70,
+          "end_line": 98,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls GA4 Data v1beta runReport with property prefix normalized, one date range (defaults 7daysAgo/today), metric names (default sessions/activeUsers), optional dimension names and limit (default 100). No orderByMetric forwarded. Returns JSON text with headers, rows and rowCount.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Run a GA4 analytics report for a date range. Returns dimensions and metrics.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID, e.g. \"123456789\" or \"properties/123456789\""
+              },
+              "startDate": {
+                "type": "string",
+                "default": "7daysAgo",
+                "description": "Start date: \"7daysAgo\", \"30daysAgo\", or \"YYYY-MM-DD\""
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today",
+                "description": "End date: \"today\" or \"YYYY-MM-DD\""
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [
+                  "sessions",
+                  "activeUsers",
+                  "screenPageViews"
+                ],
+                "description": "Metrics to retrieve, e.g. [\"sessions\",\"activeUsers\",\"bounceRate\"]"
+              },
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Dimensions to group by, e.g. [\"date\",\"country\",\"deviceCategory\"]"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000,
+                "default": 100,
+                "description": "Maximum number of rows to return (1-10000)"
+              },
+              "orderByMetric": {
+                "type": "string",
+                "description": "Sort results descending by this metric name"
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 67,
+              "end_line": 130,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "run_realtime_report",
+      "description": "Get realtime active users in the last 30 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 24,
+          "end_line": 24,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 218,
+          "end_line": 224,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 102,
+          "end_line": 126,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls GA4 Data v1beta runRealtimeReport with normalized property and metric names (default activeUsers). Endpoint forwards neither dimensions nor limit; helper uses empty dimensions and limit 50. Returns headers, rows and rowCount as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get real-time analytics data showing active users in the last 30 minutes.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID, e.g. \"123456789\""
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [
+                  "activeUsers"
+                ],
+                "description": "Realtime metrics, e.g. [\"activeUsers\",\"eventCount\"]"
+              },
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Dimensions, e.g. [\"country\",\"deviceCategory\",\"unifiedScreenName\"]"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50,
+                "description": "Maximum number of rows (1-200)"
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 131,
+              "end_line": 175,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_top_pages",
+      "description": "Get top pages by page views.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 25,
+          "end_line": 25,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 225,
+          "end_line": 236,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 70,
+          "end_line": 98,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Runs GA4 runReport for 7daysAgo/today by default with screenPageViews,sessions,bounceRate,averageSessionDuration and pagePath,pageTitle; descending screenPageViews; limit defaults 10. Returns headers, rows and rowCount.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get the top pages by page views for a date range.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "7daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 10
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 176,
+              "end_line": 207,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_traffic_sources",
+      "description": "Breakdown of sessions by traffic source and medium.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 26,
+          "end_line": 26,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 237,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 70,
+          "end_line": 98,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Runs GA4 runReport for 30daysAgo/today by default with sessions,activeUsers,bounceRate and sessionDefaultChannelGroup,sessionSource,sessionMedium; descending sessions; limit defaults 20.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only.",
+        "Unused builder includes conversions metric; HTTP handler does not."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Breakdown of sessions by traffic source / medium.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "30daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 208,
+              "end_line": 239,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_audience_overview",
+      "description": "Get audience demographics: country, device, browser.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "groupBy": {
+            "type": "string",
+            "enum": [
+              "country",
+              "deviceCategory",
+              "browser",
+              "operatingSystem"
+            ]
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 27,
+          "end_line": 27,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 249,
+          "end_line": 260,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 70,
+          "end_line": 98,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Runs GA4 runReport for 30daysAgo/today by default with activeUsers,sessions,newUsers; dimension groupBy defaults country; fixed limit 20; descending activeUsers.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get audience demographics: country, device, browser breakdown.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "30daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              },
+              "groupBy": {
+                "type": "string",
+                "enum": [
+                  "country",
+                  "deviceCategory",
+                  "browser",
+                  "operatingSystem"
+                ],
+                "default": "country",
+                "description": "Dimension to group by"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 240,
+              "end_line": 275,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_events",
+      "description": "Get event counts for a date range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 28,
+          "end_line": 28,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 261,
+          "end_line": 272,
+          "role": "handler"
+        },
+        {
+          "path": "lib/ga4.ts",
+          "start_line": 70,
+          "end_line": 98,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Runs GA4 runReport for 7daysAgo/today by default with eventCount,eventCountPerUser,totalUsers and eventName; descending eventCount; limit defaults 25.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get event counts for a date range.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "type": "string",
+                "description": "GA4 property ID"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "7daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 25
+              }
+            },
+            "required": [
+              "propertyId"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 276,
+              "end_line": 307,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "list_search_console_sites",
+      "description": "List all websites verified in Google Search Console.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 29,
+          "end_line": 29,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 273,
+          "end_line": 277,
+          "role": "handler"
+        },
+        {
+          "path": "lib/searchconsole.ts",
+          "start_line": 23,
+          "end_line": 30,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls Search Console webmasters v3 sites.list; maps siteEntry to siteUrl and permissionLevel, returns JSON text array.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 sites.list"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "List all websites verified in Google Search Console for the authenticated user.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 308,
+              "end_line": 325,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_search_queries",
+      "description": "Get top search queries from Google Search Console with clicks, impressions, CTR and position.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 30,
+          "end_line": 30,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 278,
+          "end_line": 295,
+          "role": "handler"
+        },
+        {
+          "path": "lib/searchconsole.ts",
+          "start_line": 34,
+          "end_line": 60,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls Search Console webmasters v3 searchanalytics.query with siteUrl, startDate (default 28daysAgo), endDate (default today), dimensions [query], rowLimit (default 25) and startRow 0. Returns rows with keys,clicks,impressions,CTR rounded as percentage,position rounded to one decimal and rowCount equal to returned rows.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only.",
+        "Relative date defaults are passed unchanged to Search Console; no conversion to YYYY-MM-DD exists, so default requests can fail."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get top search queries from Google Search Console with clicks, impressions, CTR and average position.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "siteUrl": {
+                "type": "string",
+                "description": "Site URL exactly as in Search Console, e.g. \"https://example.com/\" or \"sc-domain:example.com\""
+              },
+              "startDate": {
+                "type": "string",
+                "default": "28daysAgo",
+                "description": "Start date: \"7daysAgo\", \"28daysAgo\", or \"YYYY-MM-DD\""
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today",
+                "description": "End date: \"today\" or \"YYYY-MM-DD\""
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 25
+              }
+            },
+            "required": [
+              "siteUrl"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 326,
+              "end_line": 362,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_search_pages",
+      "description": "Get top pages from Google Search Console by clicks and impressions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 31,
+          "end_line": 31,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 278,
+          "end_line": 295,
+          "role": "handler"
+        },
+        {
+          "path": "lib/searchconsole.ts",
+          "start_line": 34,
+          "end_line": 60,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls Search Console webmasters v3 searchanalytics.query with siteUrl, startDate (default 28daysAgo), endDate (default today), dimensions [page], rowLimit (default 25) and startRow 0. Returns rows with keys,clicks,impressions,CTR rounded as percentage,position rounded to one decimal and rowCount equal to returned rows.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only.",
+        "Relative date defaults are passed unchanged to Search Console; no conversion to YYYY-MM-DD exists, so default requests can fail."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get top pages from Google Search Console showing which URLs get the most clicks and impressions from Google Search.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "siteUrl": {
+                "type": "string",
+                "description": "Site URL as registered in Search Console"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "28daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 25
+              }
+            },
+            "required": [
+              "siteUrl"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 363,
+              "end_line": 391,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_search_performance",
+      "description": "Get daily search performance trend from Google Search Console.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 32,
+          "end_line": 32,
+          "role": "registration/schema"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 278,
+          "end_line": 295,
+          "role": "handler"
+        },
+        {
+          "path": "lib/searchconsole.ts",
+          "start_line": 34,
+          "end_line": 60,
+          "role": "handler/API"
+        }
+      ],
+      "behavior": "Calls Search Console webmasters v3 searchanalytics.query with siteUrl, startDate (default 28daysAgo), endDate (default today), dimensions [date], rowLimit (default 25) and startRow 0. Returns rows with keys,clicks,impressions,CTR rounded as percentage,position rounded to one decimal and rowCount equal to returned rows.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "HTTP dispatcher does not validate advertised schemas; defaults exist in implementation only.",
+        "Relative date defaults are passed unchanged to Search Console; no conversion to YYYY-MM-DD exists, so default requests can fail.",
+        "Unused builder uses fixed rowLimit 90; HTTP handler defaults to 25 and accepts unadvertised limit."
+      ],
+      "alternate_registrations": [
+        {
+          "description": "Get daily search performance trend from Google Search Console showing clicks, impressions, CTR and position over time.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "siteUrl": {
+                "type": "string",
+                "description": "Site URL as registered in Search Console"
+              },
+              "startDate": {
+                "type": "string",
+                "default": "28daysAgo"
+              },
+              "endDate": {
+                "type": "string",
+                "default": "today"
+              }
+            },
+            "required": [
+              "siteUrl"
+            ],
+            "additionalProperties": false
+          },
+          "schema_origin": "explicit registration",
+          "sources": [
+            {
+              "path": "lib/mcp.ts",
+              "start_line": 392,
+              "end_line": 417,
+              "role": "registration/schema/handler"
+            }
+          ],
+          "notes": [
+            "Unused exported builder; no caller in repository. This registration is not used by the HTTP MCP endpoint. Zod object strips unrecognized keys."
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only, no tools/list or live requests. HEAD verified against supplied revision.",
+    "HTTP MCP route uses its own TOOLS_LIST and dispatcher, not buildMCPServer. Alternate unused SDK registrations are preserved per tool with complete Zod-derived schemas/descriptions. No optional modules or permission tiers found.",
+    "HTTP calls require bearer access token validated via oauth2 tokeninfo or stored token cookie. Cookie OAuth client can refresh expired credentials. GA4 and Search Console read-only scopes configured in lib/google.ts:58-63.",
+    "No install/build/runtime check performed. Dependencies and Next.js entrypoint exist; no definite unusable entrypoint found. OAuth configuration and valid credentials required."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 11 active HTTP TOOLS_LIST schemas and full descriptions exactly; traced tools/list and tools/call dispatcher into GA4 report and Search Console handlers. Kept the unused SDK registrations distinct rather than substituting their different parameter contracts."
+  }
+}

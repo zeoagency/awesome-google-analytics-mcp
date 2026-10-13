@@ -1,0 +1,953 @@
+{
+  "repo": "HappyMonkeyAI/ai-google-analytics-mcp",
+  "revision": "170ca6d97a076393f5ef530c8cc39f3ffb50951f",
+  "status": "included",
+  "reason": "Working source entrypoint registers genuine GA4 Admin API discovery and property/web-stream provisioning alongside local tracking/configuration and optional registry tools; Data API reporting belongs only to a documented companion.",
+  "registration_sources": [
+    {
+      "path": "src/ga4_provision_mcp/server.py",
+      "start_line": 19,
+      "end_line": 28
+    },
+    {
+      "path": "src/ga4_provision_mcp/server.py",
+      "start_line": 31,
+      "end_line": 496
+    }
+  ],
+  "tool_count": 18,
+  "tools": [
+    {
+      "name": "get_ga4_auth_setup_instructions",
+      "description": "Return GCP/GA auth steps. Prefer service account if gcloud ADC shows 'This app is blocked'.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "title": "get_ga4_auth_setup_instructionsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 31,
+          "end_line": 55,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Return static service-account, ADC, API-enablement and companion-server setup instructions.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "list_ga_account_summaries",
+      "description": "List GA account summaries and child properties (read-only Admin API).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          }
+        },
+        "required": [],
+        "title": "list_ga_account_summariesArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 58,
+          "end_line": 65,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/admin.py",
+          "start_line": 110,
+          "end_line": 133,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Call Admin API list_account_summaries and return account and child property summaries.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta list_account_summaries"
+      ],
+      "notes": [
+        "Handler caps limit at 50; no exposed numeric bounds."
+      ]
+    },
+    {
+      "name": "provision_ga4_property",
+      "description": "Create a new GA4 property for a project under a GA account.\naccount_id: numeric id only (e.g. 12345678) or accounts/12345678.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id"
+          },
+          "project_name": {
+            "type": "string",
+            "title": "Project Name"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "Europe/London"
+          },
+          "currency_code": {
+            "type": "string",
+            "title": "Currency Code",
+            "default": "GBP"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "default": "Production"
+          }
+        },
+        "required": [
+          "account_id",
+          "project_name"
+        ],
+        "title": "provision_ga4_propertyArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 68,
+          "end_line": 98,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/admin.py",
+          "start_line": 49,
+          "end_line": 76,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Normalize account ID and create a Property with display name project_name - environment, account parent, timezone and currency. Blank account_id uses GA4_DEFAULT_ACCOUNT_ID.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta create_property"
+      ],
+      "notes": [
+        "Blank timezone/currency fall back to GA4_DEFAULT_TIMEZONE/GA4_DEFAULT_CURRENCY or hardcoded defaults; account normalization strips all nondigits."
+      ]
+    },
+    {
+      "name": "create_web_data_stream",
+      "description": "Create a web data stream for a GA4 property. Returns measurement_id (G-XXXXXXXX).\nproperty_id: numeric or properties/<id>.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "stream_name": {
+            "type": "string",
+            "title": "Stream Name"
+          },
+          "website_url": {
+            "type": "string",
+            "title": "Website Url"
+          }
+        },
+        "required": [
+          "property_id",
+          "stream_name",
+          "website_url"
+        ],
+        "title": "create_web_data_streamArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 101,
+          "end_line": 115,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/admin.py",
+          "start_line": 79,
+          "end_line": 107,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Create a WEB_DATA_STREAM under the normalized property with stream name and website default URI; return measurement ID.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta create_data_stream"
+      ],
+      "notes": [
+        "Handler accepts numeric property ID or properties/<numeric ID>; website URL has no local format validation."
+      ]
+    },
+    {
+      "name": "render_ga4_gtag_snippet",
+      "description": "Return HTML gtag snippet for a measurement ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          }
+        },
+        "required": [
+          "measurement_id"
+        ],
+        "title": "render_ga4_gtag_snippetArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 118,
+          "end_line": 125,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/snippets.py",
+          "start_line": 10,
+          "end_line": 24,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Generate the standard HTML gtag.js loader and configuration block.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Measurement ID is stripped then validated against G-[A-Z0-9]+ in implementation, not input schema."
+      ]
+    },
+    {
+      "name": "inject_ga4_gtag_into_file",
+      "description": "Inject or update GA4 gtag in a local HTML/layout file (absolute path recommended).\nSet dry_run=true to preview without writing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "title": "File Path"
+          },
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          }
+        },
+        "required": [
+          "file_path",
+          "measurement_id"
+        ],
+        "title": "inject_ga4_gtag_into_fileArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 128,
+          "end_line": 156,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/snippets.py",
+          "start_line": 27,
+          "end_line": 80,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Read a local file; replace GA4 placeholder, update an existing gtag ID, insert before closing head, or append; write changes unless dry_run.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Measurement ID must match G-[A-Z0-9]+ after trimming; dry_run returns actions and size rather than full updated source."
+      ]
+    },
+    {
+      "name": "render_ga4_nextjs_component",
+      "description": "Return a Next.js client component (next/script) for GA4.\nmode: env (read NEXT_PUBLIC_GA_MEASUREMENT_ID) or inline (embed id).\nconsent_gated: only load gtag after localStorage cookie consent is accepted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "env"
+          },
+          "consent_gated": {
+            "type": "boolean",
+            "title": "Consent Gated",
+            "default": false
+          }
+        },
+        "required": [
+          "measurement_id"
+        ],
+        "title": "render_ga4_nextjs_componentArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 159,
+          "end_line": 188,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/nextjs.py",
+          "start_line": 25,
+          "end_line": 120,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Generate a Next.js next/script client component, suggested path and env line; optionally gate loading on cookie_consent accepted in localStorage and consent events.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "mode is a plain string schema but handler restricts it to env or inline; measurement ID must match G-[A-Z0-9]+."
+      ]
+    },
+    {
+      "name": "scaffold_ga4_nextjs_tracking",
+      "description": "Scaffold GA4 for a Next.js app: write GoogleAnalytics.tsx, wire layout.tsx,\nand set NEXT_PUBLIC_GA_MEASUREMENT_ID in .env.local (when mode=env).\nweb_root must be the Next.js package root (directory containing package.json).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "web_root": {
+            "type": "string",
+            "title": "Web Root"
+          },
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          },
+          "layout_relative": {
+            "type": "string",
+            "title": "Layout Relative",
+            "default": "src/app/layout.tsx"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "env"
+          },
+          "consent_gated": {
+            "type": "boolean",
+            "title": "Consent Gated",
+            "default": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          }
+        },
+        "required": [
+          "web_root",
+          "measurement_id"
+        ],
+        "title": "scaffold_ga4_nextjs_trackingArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 191,
+          "end_line": 218,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/nextjs.py",
+          "start_line": 224,
+          "end_line": 302,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/nextjs.py",
+          "start_line": 156,
+          "end_line": 205,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Require package.json and existing layout; generate GoogleAnalytics.tsx, patch import/body usage, and upsert .env.local when mode=env, unless dry_run.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "mode is a plain string schema but handler restricts it to env or inline; measurement ID must match G-[A-Z0-9]+.",
+        "If layout has no body tag or usage placeholder, layout is unchanged but component/env can still be written."
+      ]
+    },
+    {
+      "name": "save_project_ga4_config",
+      "description": "Write .ga4.config.json in a project root for agents and humans to reference later.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_dir": {
+            "type": "string",
+            "title": "Project Dir"
+          },
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "website_url": {
+            "type": "string",
+            "title": "Website Url"
+          },
+          "stream_name": {
+            "type": "string",
+            "title": "Stream Name",
+            "default": ""
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra",
+            "default": null
+          }
+        },
+        "required": [
+          "project_dir",
+          "measurement_id",
+          "property_id",
+          "website_url"
+        ],
+        "title": "save_project_ga4_configArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 221,
+          "end_line": 244,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Write .ga4.config.json under an existing directory with trimmed metadata and normalized numeric property ID; include arbitrary extra dictionary if truthy.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "extra intentionally accepts arbitrary nested JSON values; no extra model exists. Property normalization errors and filesystem errors are not caught."
+      ]
+    },
+    {
+      "name": "provision_project_ga4_setup",
+      "description": "End-to-end: create property + web stream, optionally save .ga4.config.json and wire tracking.\ntracking_mode: none | html | nextjs | auto (auto uses detect_tracking_stack when project_dir set).\ninject_html_path used for html mode (or explicit path). scaffold_nextjs_web_root for nextjs mode.\nIf registry_slug is set and GA4_LAUNCHER_REGISTRY_* env is configured, syncs analytics.ga4 metadata.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id"
+          },
+          "project_name": {
+            "type": "string",
+            "title": "Project Name"
+          },
+          "website_url": {
+            "type": "string",
+            "title": "Website Url"
+          },
+          "project_dir": {
+            "type": "string",
+            "title": "Project Dir",
+            "default": ""
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "Europe/London"
+          },
+          "inject_html_path": {
+            "type": "string",
+            "title": "Inject Html Path",
+            "default": ""
+          },
+          "registry_slug": {
+            "type": "string",
+            "title": "Registry Slug",
+            "default": ""
+          },
+          "scaffold_nextjs_web_root": {
+            "type": "string",
+            "title": "Scaffold Nextjs Web Root",
+            "default": ""
+          },
+          "nextjs_layout_relative": {
+            "type": "string",
+            "title": "Nextjs Layout Relative",
+            "default": ""
+          },
+          "nextjs_dry_run": {
+            "type": "boolean",
+            "title": "Nextjs Dry Run",
+            "default": false
+          },
+          "tracking_mode": {
+            "type": "string",
+            "title": "Tracking Mode",
+            "default": "none"
+          }
+        },
+        "required": [
+          "account_id",
+          "project_name",
+          "website_url"
+        ],
+        "title": "provision_project_ga4_setupArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 331,
+          "end_line": 408,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/admin.py",
+          "start_line": 49,
+          "end_line": 76,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/admin.py",
+          "start_line": 79,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 216,
+          "end_line": 260,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Create property then web stream; optionally write config, detect/apply HTML or Next.js tracking, and sync launcher registry metadata.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta create_property",
+        "Admin API v1beta create_data_stream"
+      ],
+      "notes": [
+        "nextjs_dry_run affects only Next.js scaffolding; property/stream provisioning, config writing, HTML injection and registry sync still occur.",
+        "No rollback if stream creation fails after property creation; returned ok may remain true when optional wiring/sync results fail.",
+        "tracking_mode has no schema enum or handler rejection of unknown modes; auto uses filesystem heuristics. Explicit inject_html_path triggers injection even outside html mode."
+      ]
+    },
+    {
+      "name": "scan_local_ga4_configs",
+      "description": "Scan filesystem roots (default ~/projects) for `.ga4.config.json` inventory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scan_roots": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scan Roots",
+            "default": null
+          },
+          "max_depth": {
+            "type": "integer",
+            "title": "Max Depth",
+            "default": 4
+          }
+        },
+        "required": [],
+        "title": "scan_local_ga4_configsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 411,
+          "end_line": 417,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/inventory.py",
+          "start_line": 55,
+          "end_line": 68,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/inventory.py",
+          "start_line": 25,
+          "end_line": 52,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Walk specified roots or ~/projects for .ga4.config.json, skipping common dependency/VCS directories and applying max_depth; return sorted metadata inventory.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "Empty list and null both use default roots; directories at depth >= max_depth are not processed."
+      ]
+    },
+    {
+      "name": "list_projects_needing_ga4",
+      "description": "Launcher registry projects missing local config and/or registry analytics.ga4 metadata.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter_query": {
+            "type": "string",
+            "title": "Filter Query",
+            "default": ""
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          },
+          "include_partial": {
+            "type": "boolean",
+            "title": "Include Partial",
+            "default": true
+          }
+        },
+        "required": [],
+        "title": "list_projects_needing_ga4Arguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 420,
+          "end_line": 431,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/inventory.py",
+          "start_line": 155,
+          "end_line": 193,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Read launcher registry, filter candidates, inspect local configs and registry measurement IDs, return missing-both or partial gaps and tracking stack hints.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "Requires configured existing launcher registry; limit clamped to 1..100 before gap filtering."
+      ]
+    },
+    {
+      "name": "detect_project_tracking_stack",
+      "description": "Recommend html vs nextjs wiring for a project directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_dir": {
+            "type": "string",
+            "title": "Project Dir"
+          }
+        },
+        "required": [
+          "project_dir"
+        ],
+        "title": "detect_project_tracking_stackArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 434,
+          "end_line": 437,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/inventory.py",
+          "start_line": 92,
+          "end_line": 118,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Inspect existing project directory and candidate web roots for App Router layouts or HTML entrypoints; recommend nextjs, html or unknown.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "get_analytics_monitoring_companion_guide",
+      "description": "How to pair this provision server with official read-only analytics-mcp for reports.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "title": "get_analytics_monitoring_companion_guideArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 440,
+          "end_line": 460,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Return a static dual-server workflow and example configuration for separate official analytics-mcp reporting.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Documentation only: no run_report, realtime or other Data API reporting implemented by this server."
+      ]
+    },
+    {
+      "name": "get_ga4_integration_status",
+      "description": "Report optional launcher registry and keymaster hook availability (graceful when unset).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "title": "get_ga4_integration_statusArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 463,
+          "end_line": 466,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 335,
+          "end_line": 346,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 42,
+          "end_line": 59,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 263,
+          "end_line": 288,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Inspect optional launcher registry and Keymaster environment paths and return availability plus environment documentation.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "Keymaster hooks inspect paths and provide composition hints; no Keymaster credential ingestion API is called."
+      ]
+    },
+    {
+      "name": "list_registry_projects_for_ga4",
+      "description": "List launcher registry projects with .ga4.config.json and .keymaster hints when registry env is set.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "filter_query": {
+            "type": "string",
+            "title": "Filter Query",
+            "default": ""
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 50
+          }
+        },
+        "required": [],
+        "title": "list_registry_projects_for_ga4Arguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 469,
+          "end_line": 472,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 135,
+          "end_line": 159,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Read optional launcher registry, apply case-insensitive filter and enrich projects with config, Keymaster bootstrap and web-root hints.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "Requires GA4_LAUNCHER_REGISTRY_JSON or LAUNCHER_REGISTRY_JSON existing file; limit clamped to 1..100."
+      ]
+    },
+    {
+      "name": "resolve_project_for_ga4",
+      "description": "Resolve registry slug and/or filesystem path for GA4 provisioning (paths, website_url, agent hints).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "default": ""
+          },
+          "project_dir": {
+            "type": "string",
+            "title": "Project Dir",
+            "default": ""
+          }
+        },
+        "required": [],
+        "title": "resolve_project_for_ga4Arguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 475,
+          "end_line": 478,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 174,
+          "end_line": 213,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Resolve registry slug and/or local directory; read GA4 config and Keymaster bootstrap metadata, suggest web roots and URL, emit agent integration hints.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "At least one nonblank slug/project_dir required in implementation, not schema."
+      ]
+    },
+    {
+      "name": "sync_ga4_to_launcher_registry",
+      "description": "Write GA4 metadata to launcher registry project.analytics.ga4 (requires writable env).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "measurement_id": {
+            "type": "string",
+            "title": "Measurement Id"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "website_url": {
+            "type": "string",
+            "title": "Website Url",
+            "default": ""
+          },
+          "stream_name": {
+            "type": "string",
+            "title": "Stream Name",
+            "default": ""
+          }
+        },
+        "required": [
+          "slug",
+          "measurement_id",
+          "property_id"
+        ],
+        "title": "sync_ga4_to_launcher_registryArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_provision_mcp/server.py",
+          "start_line": 481,
+          "end_line": 496,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 216,
+          "end_line": 260,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_provision_mcp/integrations.py",
+          "start_line": 70,
+          "end_line": 79,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Find launcher registry project by slug; overwrite analytics.ga4 metadata with timestamp and save registry JSON updating updated_at.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Tool always registered; action requires existing registry env and GA4_LAUNCHER_REGISTRY_WRITABLE set to 1,true,yes. Measurement ID must match G-[A-Z0-9]+. Property ID only trimmed, not validated."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live requests. Source supplied without .git; supplied revision is authoritative.",
+    "All 18 @mcp.tool registrations are unconditional. ga4://workflow is a resource, excluded from tool count. Separate analytics-mcp and Keymaster tools mentioned in docs/hints are not registered here.",
+    "Published console entrypoint ga4-provision-mcp resolves to ga4_provision_mcp.server:main and uses MCP SDK 1 FastMCP, stdio transport. README documents uv sync; uv.lock pins mcp 1.28.1 and provides the compatible MCP 1 install path. Install/runtime not executed in this extraction.",
+    "Schema reconstructed from annotations/defaults: no Pydantic/TypedDict request models or injected Context parameters; Optional dict/list nullability retained, arbitrary Any dict values preserved. Docstrings are complete tool descriptions; colon parameter prose is not a Field description or schema constraint.",
+    "Credentials use AnalyticsAdminServiceClient application-default credentials. Optional integrations only read/write local registry and inspect Keymaster files; no Data API calls."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 18 decorated server signatures/defaults/docstrings. Read Admin API provisioning, stream creation and local snippet/Next.js/config/inventory handlers; distinguished static guidance and registry helpers from implemented collection setup. Checked the documented uv lock installation path."
+  }
+}

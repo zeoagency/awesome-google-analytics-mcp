@@ -1,0 +1,140 @@
+{
+  "repo": "K41R0N/ga4-mcp",
+  "revision": "aa90b1568a0800eb4dfdc96700e6c10ef1d36ecd",
+  "status": "included",
+  "reason": "Next.js MCP route registers two implemented GA4 read tools using Google Analytics Admin and Data clients with per-user OAuth refresh tokens.",
+  "registration_sources": [
+    {
+      "path": "app/api/mcp/route.ts",
+      "start_line": 54,
+      "end_line": 117
+    }
+  ],
+  "tool_count": 2,
+  "tools": [
+    {
+      "name": "list_properties",
+      "description": "Lists GA4 properties YOU have access to. Pass user=<your-email>.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string",
+            "description": "Your teammate identifier (usually email)."
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 56,
+          "end_line": 80,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 9,
+          "end_line": 31,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Loads google_refresh:<user> from Redis, constructs an AnalyticsAdminServiceClient with authorized-user OAuth credentials and REST fallback, calls listAccountSummaries({}), flattens all returned propertySummaries to account display name, property display name, and propertyId with properties/ removed, and returns pretty-printed JSON in text content. Catches errors and returns diagnostic text with isError true.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listAccountSummaries"
+      ],
+      "notes": [
+        "The user string has no email-format constraint; it is a Redis refresh-token lookup identifier."
+      ]
+    },
+    {
+      "name": "run_report",
+      "description": "Runs a GA4 report as the specified user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "propertyId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 100
+          }
+        },
+        "required": [
+          "user",
+          "propertyId",
+          "startDate",
+          "endDate",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 82,
+          "end_line": 113,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "app/api/mcp/route.ts",
+          "start_line": 9,
+          "end_line": 31,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Loads the selected user OAuth refresh token from Redis and calls BetaAnalyticsDataClient.runReport with property properties/<propertyId>, one date range, metrics mapped to name objects, dimensions mapped to name objects (empty when omitted), and the limit (default 100). Returns the entire API response as pretty-printed JSON text. Catches errors and returns diagnostic text with isError true.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Schema accepts unrestricted strings for dates and propertyId and allows empty metric/dimension arrays; GA API validity is not checked locally.",
+        "The registration exposes only these report fields, not an arbitrary full runReport request."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no upstream execution, tools/list request, or live API requests.",
+    "Both tools register unconditionally in the sole createMcpHandler callback. The HTTP endpoint requires a bearer token equal to MCP_BEARER_TOKEN via withMcpAuth(required: true).",
+    "Deployment requires Upstash Redis environment configuration, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, and MCP_BEARER_TOKEN; each selected user must have an OAuth refresh token in Redis. Google OAuth start/callback routes request analytics.readonly and store the token; these HTTP routes are not MCP tools.",
+    "Input schemas reconstructed from explicit Zod registration shapes. additionalProperties false represents the default Zod object conversion; unknown keys are stripped by default validation, rather than a custom strict() constraint.",
+    "No definite entrypoint blocker found by source inspection."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently reconstructed both inline Zod schemas and descriptions exactly with a TypeScript AST; read both handlers, user-specific Google clients and bearer wrapper. No extra tool modules exist."
+  }
+}

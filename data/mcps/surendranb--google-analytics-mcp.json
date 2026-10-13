@@ -1,0 +1,466 @@
+{
+  "repo": "surendranb/google-analytics-mcp",
+  "revision": "d6a321257ae7f5c2a721554602792bf69d796891",
+  "status": "included",
+  "reason": "Published Python entrypoint registers a real GA4 Data API run_report tool plus cached live-metadata discovery and setup/support tools.",
+  "registration_sources": [
+    {
+      "path": "ga4_mcp/server.py",
+      "start_line": 3,
+      "end_line": 28
+    },
+    {
+      "path": "ga4_mcp/coordinator.py",
+      "start_line": 1,
+      "end_line": 607
+    },
+    {
+      "path": "ga4_mcp/tools/metadata.py",
+      "start_line": 1,
+      "end_line": 250
+    },
+    {
+      "path": "ga4_mcp/tools/reporting.py",
+      "start_line": 1,
+      "end_line": 460
+    },
+    {
+      "path": "ga4_mcp/tools/troubleshooting.py",
+      "start_line": 1,
+      "end_line": 77
+    },
+    {
+      "path": "ga4_mcp/tools/skills.py",
+      "start_line": 1,
+      "end_line": 73
+    },
+    {
+      "path": "ga4_mcp/setup_flow.py",
+      "start_line": 1,
+      "end_line": 218
+    }
+  ],
+  "tool_count": 12,
+  "tools": [
+    {
+      "name": "check_for_updates",
+      "description": "Check PyPI for newer versions of this MCP server and get upgrade instructions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/coordinator.py",
+          "start_line": 397,
+          "end_line": 404,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_mcp/updates.py",
+          "start_line": 28,
+          "end_line": 96,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Forces PyPI package-version request with 2.5-second timeout via check_server_update; reads and writes ~/.cache/mcp_fleet_updates.json and returns version comparison and upgrade instructions. Network failures silently fall back to cached/current version.",
+      "scope": "support",
+      "effect": "mixed",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "list_properties",
+      "description": "List all GA4 properties associated with an account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 66,
+          "end_line": 74,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns only GA4_PROPERTY_ID from the process environment as a one-item properties list, or an error; ignores account_id. No account/property discovery API call.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "account_id is unused; this is configured-property reporting, not Admin API listProperties."
+      ]
+    },
+    {
+      "name": "search_schema",
+      "description": "Search for a keyword across all dimensions and metrics for this property.\nReturns a ranked list of up to 10 matching fields scored by relevance.\n\nReturns: {\"top_results\": {\"DIMENSION: api_name\": score, \"METRIC: api_name\": score, ...}}\n\nUse this when you have a concept (\"engagement\", \"revenue\", \"channel\") and need\nexact API field names before calling get_ga4_data.\nUse list_dimension_categories or list_metric_categories instead if you want to\nbrowse all available fields without a specific keyword.\n\nArgs:\n    keyword: One or more keywords to search for (e.g., \"user\", \"campaign revenue\").",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "description": "One or more keywords to search for (e.g., \"user\", \"campaign revenue\")."
+          }
+        },
+        "required": [
+          "keyword"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 76,
+          "end_line": 132,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Searches startup-cached dimensions and metrics with weighted name/UI-name/description/category substring matches and returns top 10 scores; emits skill tips.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "get_property_schema",
+      "description": "Returns the complete schema for the configured GA4 property, including all\navailable dimensions and metrics (standard and custom). Warning: This can be\na very large object (10k+ tokens). Use search_schema for most discovery tasks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 135,
+          "end_line": 144,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns the complete startup-cached schema or a schema-not-loaded error.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "list_dimension_categories",
+      "description": "List all dimension categories for this GA4 property, with a count of\ndimensions in each category.\n\nReturns: {\"dimension_categories\": {\"Category Name\": count, ...}}\n\nUse this as the first step in dimension exploration — browse categories,\nthen call get_dimensions_by_category with the name that fits your analysis.\nUse search_schema instead if you already have a keyword to search for.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 146,
+          "end_line": 170,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Counts cached dimensions by category and emits a skill tip.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "list_metric_categories",
+      "description": "List all metric categories for this GA4 property, with a count of\nmetrics in each category.\n\nReturns: {\"metric_categories\": {\"Category Name\": count, ...}}\n\nUse this as the first step in metric exploration — browse categories,\nthen call get_metrics_by_category with the name that fits your analysis.\nUse search_schema instead if you already have a keyword to search for.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 172,
+          "end_line": 196,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Counts cached metrics by category and emits a skill tip.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "get_dimensions_by_category",
+      "description": "Return all dimensions in a specific category with their API names and descriptions.\n\nReturns: {\"dimension_api_name\": \"description\", ...}\n\nThe category name must exactly match a value returned by list_dimension_categories.\nUse search_schema instead if you already have a keyword — it is faster and more\ntargeted than browsing by category.\n\nArgs:\n    category: Exact category name from list_dimension_categories (case-insensitive).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Exact category name from list_dimension_categories (case-insensitive)."
+          }
+        },
+        "required": [
+          "category"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 198,
+          "end_line": 223,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns API-name to description mapping for cached dimensions in a case-insensitively matched category, or an error.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "get_metrics_by_category",
+      "description": "Return all metrics in a specific category with their API names and descriptions.\n\nReturns: {\"metric_api_name\": \"description\", ...}\n\nThe category name must exactly match a value returned by list_metric_categories.\nUse search_schema instead if you already have a keyword — it is faster and more\ntargeted than browsing by category.\n\nArgs:\n    category: Exact category name from list_metric_categories (case-insensitive).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Exact category name from list_metric_categories (case-insensitive)."
+          }
+        },
+        "required": [
+          "category"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/metadata.py",
+          "start_line": 225,
+          "end_line": 250,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns API-name to description mapping for cached metrics in a case-insensitively matched category, or an error.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "get_ga4_data",
+      "description": "Retrieve GA4 data with built-in intelligence for better and safer results.\n\nReturns on success: {\"data\": [...], \"metadata\": {...}, \"_skills_tip\": \"...\"}.\n  For multi-row pulls (a time series like ['date'], or any breakdown) the\n  result also carries \"totals\": {metric: value} — GA4 server-side aggregates\n  across all rows. Read the period figure from \"totals\"; do NOT sum the rows\n  yourself. (Additive metrics sum; rate metrics are period-computed by GA4.)\nReturns on volume warning: {\"warning\": \"...\", \"estimated_rows\": N, \"suggestions\": [...]}\nReturns on error: {\"error\": \"...\"}\n\nCRITICAL WORKFLOW — follow this sequence every time:\n\n1. DISCOVER FIELDS: NEVER guess dimension or metric names. Call `search_schema`,\n   `list_dimension_categories`, or `list_metric_categories` FIRST to verify exact\n   API names for this property. Guessing costs you a failed round-trip.\n\n2. DISCOVER PATTERN: For any domain-specific analysis, call `search_skills('<topic>')`\n   BEFORE querying to get the proven methodology — correct dimensions, metrics,\n   filters, and how to interpret the result. One extra call prevents multiple failures.\n   Use for: traffic diagnosis, attribution, ecommerce, channel acquisition, content\n   performance, geo/device segmentation, AI referrals, bot detection.\n\n3. RETRIEVE: Call get_ga4_data with the verified fields and the skill's pattern.\n\n4. TROUBLESHOOT: On schema error, invalid field, or filter parse error — do NOT\n   retry by guessing. Your training may predate current GA4 (UA was sunset\n   2023-07-01). Call `search_schema('<keyword>')` to find the current name in\n   THIS property, or `search_skills('ua-to-ga4' | 'common-metric-names' |\n   'filter-structures')` for the mapping.\n\nFIELD NAMES — GA4 API names vs common wrong guesses:\n- 'screenPageViews'       not 'uniquePageviews' or 'pageViews'\n- 'totalUsers'            not 'users'\n- 'keyEvents'             not 'conversions' or 'goalCompletionsAll'\n- 'sessionKeyEventRate'   not 'sessionConversionRate' or 'conversionRate' (GA4 renamed conversions→key events, 2024)\n- 'userEngagementDuration' not 'timeOnPage' or 'avgTimeOnPage'\n- 'averageSessionDuration' not 'avgSessionDuration'\n- 'itemsViewed'           not 'itemViews'\n- 'ecommercePurchases'    not 'purchases'\n- 'sessionDefaultChannelGroup'  not 'sessionDefaultChannelGrouping'\n- 'sessionSource'/'sessionMedium'  not 'source'/'medium'\n- All names are camelCase — never snake_case (page_path → pagePath, event_name → eventName)\n- 'bounceRate' and 'newUsers' are correct as-is\n\nDATE RANGES:\n- Format: 'YYYY-MM-DD' or relative strings: '7daysAgo', '30daysAgo', 'yesterday', 'today'\n- 'NdaysAgo' counts back from today, excluding today. 'yesterday' = last complete day.\n- Period comparison (YoY, WoW): run two separate queries with different date ranges,\n  then compare the results. The API does not support multi-period in one call.\n\nSCOPE RULES — incompatible combinations return a 400 error:\n- Session dims (sessionSource, sessionMedium, sessionCampaignName) → use with\n  sessions, bounceRate, sessionKeyEventRate. NOT with eventCount.\n- Event dims (eventName) → use with eventCount. NOT with sessions.\n- User dims (firstUserSource, firstUserMedium) → use with totalUsers, newUsers. NOT sessions.\n- Safe with any metric: date, deviceCategory, country, city, pagePath, pageTitle.\n\nFILTER STRUCTURE:\n- Simple: {\"filter\": {\"fieldName\": \"sessionSource\", \"stringFilter\": {\"value\": \"google\", \"matchType\": \"CONTAINS\"}}}\n- AND:    {\"andGroup\": {\"expressions\": [{\"filter\": {...}}, {\"filter\": {...}}]}}\n- OR:     {\"orGroup\":  {\"expressions\": [{\"filter\": {...}}, {\"filter\": {...}}]}}\n- NOT:    {\"notExpression\": {\"filter\": {...}}}\n- Wrong keys that break filters: and_filter→andGroup, or_filter→orGroup,\n  not_filter→notExpression, filters→expressions, field→fieldName\n\nArgs:\n    dimensions: GA4 dimension names (verified via schema tools, e.g. [\"date\", \"city\"]).\n    metrics: GA4 metric names (verified via schema tools, e.g. [\"totalUsers\", \"sessions\"]).\n    date_range_start: Start date — 'YYYY-MM-DD' or '7daysAgo', '30daysAgo', 'yesterday'.\n    date_range_end: End date — 'YYYY-MM-DD' or 'yesterday', 'today'.\n    dimension_filter: Optional FilterExpression dict. camelCase and snake_case both accepted.\n    limit: Max rows to return. Defaults to 1000.\n    estimate_only: If True, returns only estimated row count without fetching data.\n    proceed_with_large_dataset: Set True to bypass the 2500-row volume warning.\n    enable_aggregation: If True, asks GA4 for server-side metric totals whenever a\n        dimension splits the data across rows (e.g. a 7-day ['date'] pull), returned\n        in a \"totals\" block so the model needn't sum rows. Default True.\n    intent: Short plain-English description of what the user is trying to learn.\n            E.g. \"which channels drive most signups\", \"bot traffic audit for last month\".",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "date"
+            ],
+            "description": "GA4 dimension names (verified via schema tools, e.g. [\"date\", \"city\"])."
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "totalUsers",
+              "newUsers",
+              "sessions"
+            ],
+            "description": "GA4 metric names (verified via schema tools, e.g. [\"totalUsers\", \"sessions\"])."
+          },
+          "date_range_start": {
+            "type": "string",
+            "default": "7daysAgo",
+            "description": "Start date — 'YYYY-MM-DD' or '7daysAgo', '30daysAgo', 'yesterday'."
+          },
+          "date_range_end": {
+            "type": "string",
+            "default": "yesterday",
+            "description": "End date — 'YYYY-MM-DD' or 'yesterday', 'today'."
+          },
+          "dimension_filter": {
+            "type": "object",
+            "additionalProperties": true,
+            "default": null,
+            "description": "Optional FilterExpression dict. camelCase and snake_case both accepted."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 1000,
+            "description": "Max rows to return. Defaults to 1000."
+          },
+          "estimate_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "If True, returns only estimated row count without fetching data."
+          },
+          "proceed_with_large_dataset": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set True to bypass the 2500-row volume warning."
+          },
+          "enable_aggregation": {
+            "type": "boolean",
+            "default": true,
+            "description": "If True, asks GA4 for server-side metric totals whenever a dimension splits the data across rows (e.g. a 7-day ['date'] pull), returned in a \"totals\" block so the model needn't sum rows. Default True."
+          },
+          "intent": {
+            "type": "string",
+            "default": null,
+            "description": "Short plain-English description of what the user is trying to learn. E.g. \"which channels drive most signups\", \"bot traffic audit for last month\"."
+          }
+        },
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/reporting.py",
+          "start_line": 216,
+          "end_line": 460,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Validates dimensions and metrics against the cached property schema, translates aliases, converts and repairs dimension_filter into FilterExpression, and queries configured GA4_PROPERTY_ID. Usually first calls run_report with limit=1 for row-count estimation; estimate_only returns the count. Warns above 2500 estimated rows when requested limit exceeds 2500 unless bypassed. Main run_report uses one date range, descending date/first-metric sorting, optional TOTAL metric aggregation; returns flattened rows, counts, totals and skill hints. Can elicit and reinitialize broken setup in place.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "dimension_filter is an arbitrary dict in the exposed schema; handler additionally accepts stringified JSON/list shapes that the annotated schema does not advertise.",
+        "dimension_filter and intent have None defaults but non-Optional annotations; schema retains object/string types with null defaults, not nullable unions.",
+        "Metrics must be nonempty and all resolved field names must exist in cached schema; these restrictions are handler-only. No schema bounds on limit or date strings."
+      ]
+    },
+    {
+      "name": "get_troubleshooting_guide",
+      "description": "Returns the troubleshooting/setup guide for a topic, served from inside the\nserver (no network needed). Use whenever you hit a schema error,\ndimension_filter parse error, IAM / 403 authorization error, or a\nboot-time setup error.\n\nArgs:\n    topic: One of \"setup\", \"iam\", or \"schema\".",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "One of \"setup\", \"iam\", or \"schema\"."
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/troubleshooting.py",
+          "start_line": 63,
+          "end_line": 77,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns bundled setup, IAM or schema guide selected by trimmed case-insensitive topic, or an invalid-topic message; no external call.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Allowed topics are implemented by lookup, not a schema enum."
+      ]
+    },
+    {
+      "name": "search_skills",
+      "description": "Fetch analytical recipes and how-to guides from the GA4 skills library.\n\nSkills are domain-specific playbooks for common GA4 analysis patterns —\nexact dimensions, metrics, filters, and interpretation logic for each use case.\nCall this BEFORE querying get_ga4_data for any domain-specific analysis.\n\nAvailable skills: traffic-diagnosis, attribution-scope, channel-acquisition,\ncontent-performance, geo-device-segmentation, ecommerce-analysis,\nai-referral-analysis, bot-traffic-detection, common-metric-names,\nfilter-structures, custom-dimensions, compatible-combinations, ua-to-ga4,\ndate-ranges, ga4-limitations.\n\nUsage:\n- search_skills(\"\")              → returns full index of all skills\n- search_skills(\"ecommerce\")     → returns the ecommerce-analysis skill\n- search_skills(\"ua-to-ga4\")     → returns the UA→GA4 field name mapping\n\nArgs:\n    query: A skill name (exact slug) or empty string to browse the full index.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "A skill name (exact slug) or empty string to browse the full index."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/tools/skills.py",
+          "start_line": 27,
+          "end_line": 73,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Fetches index.md from public GitHub main skills directory with 8-second timeout. For a normalized alphanumeric/hyphen slug attempts its .md file; on 404 or nonexact query returns index. Returns network-error text on failure and emits skill tips.",
+      "scope": "support",
+      "effect": "read",
+      "api_methods": [],
+      "notes": [
+        "query is required; browsing the index requires an explicit empty string. Remote content tracks main rather than this pinned revision."
+      ]
+    },
+    {
+      "name": "setup_ga4_access",
+      "description": "Interactively fix a broken GA4 MCP setup (missing property ID, missing or\nexpired credentials, or missing GA4 access) by asking the user for the\nneeded input through the client, then re-initializing without a restart.\nCall this whenever a configuration or authentication error is reported.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_mcp/setup_flow.py",
+          "start_line": 81,
+          "end_line": 90,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_mcp/setup_flow.py",
+          "start_line": 93,
+          "end_line": 218,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Runs interactive setup recovery using Context elicitation: collects missing property ID or credentials path, or confirms reauthentication/IAM repair; optionally offers browser URLs. Modifies current process environment, validates credentials file, then reinitializes cached property schema with live GA4 get_metadata. Returns guided fallback when elicitation unsupported; does not persist config.",
+      "scope": "support",
+      "effect": "mixed",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": [
+        "Context is injected and excluded from input schema; the three Pydantic models are elicitation forms, not tool input parameters.",
+        "Answering adc does not clear or set GOOGLE_APPLICATION_CREDENTIALS; reinitialize still requires an existing configured credentials path, so this advertised recovery option may fail."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only, no tools/list or live requests. HEAD matches supplied revision.",
+    "All 12 tools register unconditionally on published server main entrypoint imports. No Admin API discovery, real-time-report or list_accounts registration exists despite documentation claims.",
+    "Coordinator telemetry decorator preserves signatures with functools.wraps; on initialization failure intercepts metadata/report calls except get_ga4_data with elicitation-capable client. Troubleshooting, skills, setup and updates remain exempt. Successful calls may append upgrade notices and trigger background PyPI requests/cache writes; telemetry wrapper surrounds every tool.",
+    "Startup requires GA4_PROPERTY_ID and an existing GOOGLE_APPLICATION_CREDENTIALS path and fetches Data API v1beta getMetadata into shared module caches. Initialization errors keep stdio server running with guided error responses.",
+    "Schemas are source-derived from Python annotations/defaults/docstrings, not captured runtime SDK output. Runtime-generated cosmetic titles are not asserted."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 12 Python signatures/defaults and docstrings, with the explicit check_for_updates decorator description overriding its docstring. Read cached-schema scoring/category handlers, configured-only property listing, report validation/volume controls and coordinator initialization wrappers; confirmed no realtime/funnel tools."
+  }
+}

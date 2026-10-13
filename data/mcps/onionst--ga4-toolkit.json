@@ -1,0 +1,643 @@
+{
+  "repo": "onionst/ga4-toolkit",
+  "revision": "1fbfe9e929dbdb055e556318b152be675e60071c",
+  "status": "included",
+  "reason": "Eight unconditional FastMCP tools implement read-only GA4 Data API reports/metadata and Admin API property discovery; stdio entrypoint resolves to the server main.",
+  "registration_sources": [
+    {
+      "path": "src/ga4_toolkit/mcp_server.py",
+      "start_line": 11,
+      "end_line": 173
+    }
+  ],
+  "tool_count": 8,
+  "tools": [
+    {
+      "name": "ga4_list_properties",
+      "description": "List every GA4 property accessible with the current read-only credentials.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "title": "ga4_list_propertiesArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 28,
+          "end_line": 31,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 179,
+          "end_line": 207,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Paginate Admin API accountSummaries with pageSize 200 and nextPageToken; flatten account and property summaries into account_id, account_name, property_id, property_name and property_type.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_overview",
+      "description": "Return daily users, sessions, engagement, key events, and revenue.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": "28daysAgo"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": "yesterday"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_overviewArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 34,
+          "end_line": 48,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 209,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/presets.py",
+          "start_line": 8,
+          "end_line": 30,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Run historical report with date dimension and activeUsers, newUsers, sessions, engagedSessions, engagementRate, keyEvents and totalRevenue metrics, fixed limit 366; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination."
+      ]
+    },
+    {
+      "name": "ga4_top_pages",
+      "description": "Return top page paths and titles ordered by page views.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": "28daysAgo"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": "yesterday"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_top_pagesArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 51,
+          "end_line": 67,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 209,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/presets.py",
+          "start_line": 33,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Run historical report with pagePath/pageTitle dimensions and screenPageViews, activeUsers, sessions, engagementRate metrics, ordered by screenPageViews descending; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination.",
+        "Handler enforces limit between 1 and 10000; no bounds are declared in the exposed schema."
+      ]
+    },
+    {
+      "name": "ga4_acquisition",
+      "description": "Return session channels and source/medium acquisition performance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": "28daysAgo"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": "yesterday"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_acquisitionArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 70,
+          "end_line": 86,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 209,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/presets.py",
+          "start_line": 52,
+          "end_line": 68,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Run historical report with sessionDefaultChannelGroup/sessionSourceMedium dimensions and sessions, activeUsers, engagedSessions, keyEvents metrics, ordered by sessions descending; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination.",
+        "Handler enforces limit between 1 and 10000; no bounds are declared in the exposed schema."
+      ]
+    },
+    {
+      "name": "ga4_events",
+      "description": "Return top GA4 events, users, key events, and event values.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": "28daysAgo"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": "yesterday"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 25
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_eventsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 89,
+          "end_line": 105,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 209,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/presets.py",
+          "start_line": 71,
+          "end_line": 87,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Run historical report with eventName dimension and eventCount, totalUsers, keyEvents, eventValue metrics, ordered by eventCount descending; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination.",
+        "Handler enforces limit between 1 and 10000; no bounds are declared in the exposed schema."
+      ]
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a custom historical GA4 report with requested dimensions and metrics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "default": "28daysAgo"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date",
+            "default": "yesterday"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Filter",
+            "default": null
+          },
+          "order_by_metric": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order By Metric",
+            "default": null
+          },
+          "descending": {
+            "type": "boolean",
+            "title": "Descending",
+            "default": true
+          }
+        },
+        "required": [
+          "dimensions",
+          "metrics",
+          "property_id"
+        ],
+        "title": "ga4_run_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 108,
+          "end_line": 135,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 209,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "POST historical runReport with supplied dimensions, metrics and date range, stringified limit and returnPropertyQuota=true. Truthy arbitrary dimension_filter/metric_filter objects are forwarded directly as dimensionFilter/metricFilter. Optional metric ordering is applied; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination.",
+        "Handler strips/drops empty names, requires 1–9 dimensions and 1–10 metrics and validates names against `[A-Za-z][A-Za-z0-9_]*`. It enforces limit 1–10000 and order_by_metric membership in requested metrics; these restrictions are absent from exposed schema."
+      ]
+    },
+    {
+      "name": "ga4_realtime",
+      "description": "Run a GA4 realtime report for activity from the last 30 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions",
+            "default": [
+              "country"
+            ]
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics",
+            "default": [
+              "activeUsers",
+              "eventCount"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 100
+          },
+          "order_by_metric": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order By Metric",
+            "default": null
+          },
+          "descending": {
+            "type": "boolean",
+            "title": "Descending",
+            "default": true
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_realtimeArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 138,
+          "end_line": 157,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 250,
+          "end_line": 279,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 307,
+          "end_line": 336,
+          "role": "handler"
+        }
+      ],
+      "behavior": "POST runRealtimeReport with supplied dimensions and metrics, stringified limit, returnPropertyQuota=true and optional metric ordering; return flattened rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Reports fetch one page only; flattened output includes row counts, truncation warnings, metadata and quota. No automatic report pagination.",
+        "Handler strips/drops empty names, requires 1–4 dimensions and 1–4 metrics and validates names against `[A-Za-z][A-Za-z0-9_]*`. It enforces limit 1–10000 and order_by_metric membership in requested metrics; these restrictions are absent from exposed schema."
+      ]
+    },
+    {
+      "name": "ga4_metadata",
+      "description": "List compatible GA4 dimensions and metrics, optionally filtered by text.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_metadataArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/ga4_toolkit/mcp_server.py",
+          "start_line": 160,
+          "end_line": 165,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 281,
+          "end_line": 304,
+          "role": "handler"
+        },
+        {
+          "path": "src/ga4_toolkit/client.py",
+          "start_line": 71,
+          "end_line": 112,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GET property metadata. If search is truthy, case-insensitively filter dimensions and metrics by combined apiName, uiName, description and category text. Append propertyId and return metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": [
+        "Property IDs are stripped, accept a properties/ prefix, and must then be numeric; this restriction is enforced by the handler, not the exposed schema.",
+        "Despite description saying compatible dimensions and metrics, this calls getMetadata only; no checkCompatibility request is made."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only, no tools/list or live requests.",
+    "No .git directory exists; supplied revision is authoritative.",
+    "All eight registrations are unconditional. CLI auth/config commands are not MCP tools.",
+    "Credentials load lazily from GOOGLE_APPLICATION_CREDENTIALS, local ga4-cli/google-credentials.json or Google ADC with analytics.readonly scope. Python >=3.11 and declared google-auth, mcp and requests dependencies are required; no definite entrypoint blocker found."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all eight Python signatures, defaults and full docstrings; read every decorated handler, preset request, paginated property discovery and native REST report/realtime client validation. Distinguished handler-only limits from the emitted schema."
+  }
+}

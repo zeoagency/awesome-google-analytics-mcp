@@ -1,0 +1,958 @@
+{
+  "repo": "codeChap/mcp-server-google-analytics",
+  "revision": "b003d8ade81adc672fd338bc50a0d5287e10d890",
+  "status": "included",
+  "reason": "Rust rmcp server implements GA4 Admin and Data API read/write operations and interactive OAuth support.",
+  "registration_sources": [
+    {
+      "path": "src/server.rs",
+      "start_line": 206,
+      "end_line": 519
+    },
+    {
+      "path": "src/main.rs",
+      "start_line": 29,
+      "end_line": 55
+    }
+  ],
+  "tool_count": 15,
+  "tools": [
+    {
+      "name": "get_account_summaries",
+      "description": "Retrieves all Google Analytics account summaries the authenticated user(s) have access to, including account names and their GA4 properties. When multiple accounts are configured, results include an _account field identifying which account owns each summary. Use this first to discover available property IDs. No parameters required.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 220,
+          "end_line": 230,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 178,
+          "end_line": 182,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Auto-paginates accountSummaries for each configured client with pageSize=200; caches property-to-client mappings. Multiple clients tag each summary with _account and embed individual errors while continuing.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_property_details",
+      "description": "Get detailed information about a specific GA4 property including display name, industry category, time zone, currency code, service level, create time, and parent account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 231,
+          "end_line": 243,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 184,
+          "end_line": 189,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GET property resource, accepting bare string ID or properties/ prefix. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.get"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "list_google_ads_links",
+      "description": "List all Google Ads links for a GA4 property. Returns linked Google Ads customer IDs and their configuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 244,
+          "end_line": 253,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 191,
+          "end_line": 196,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Auto-paginates Google Ads links with pageSize=200 and returns the collected array. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.googleAdsLinks.list"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "list_property_annotations",
+      "description": "List reporting data annotations for a GA4 property (Admin API alpha). Annotations are notes on specific dates or periods used to mark releases, campaigns, traffic changes, etc.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 254,
+          "end_line": 266,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 200,
+          "end_line": 205,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Auto-paginates reporting data annotations with pageSize=200 and returns the collected array. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha properties.reportingDataAnnotations.list"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "get_custom_dimensions_and_metrics",
+      "description": "Get custom dimensions and custom metrics defined for a GA4 property. Returns only user-defined custom dimensions and metrics, not the standard built-in ones.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 267,
+          "end_line": 279,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 209,
+          "end_line": 223,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GET metadata and retain dimensions/metrics whose customDefinition is true; return custom_dimensions and custom_metrics arrays. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.getMetadata"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "run_report",
+      "description": "Run a report on a GA4 property. Retrieves event-based analytics data for the specified dimensions and metrics over the given date range(s).\n\n## References\n- Dimensions: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#dimensions\n- Metrics: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#metrics\n\n## Date ranges\nFormat: YYYY-MM-DD or relative strings: \"today\", \"yesterday\", \"NdaysAgo\".\nExample: [{\"start_date\": \"30daysAgo\", \"end_date\": \"today\"}]\n\n## Dimension filter\nA FilterExpression with one of:\n- filter: {field_name, string_filter: {match_type: EXACT|BEGINS_WITH|ENDS_WITH|CONTAINS|FULL_REGEXP|PARTIAL_REGEXP, value, case_sensitive}}\n- filter: {field_name, numeric_filter: {operation: EQUAL|LESS_THAN|GREATER_THAN|..., value: {int64_value or double_value}}}\n- filter: {field_name, in_list_filter: {values: [...], case_sensitive}}\n- filter: {field_name, between_filter: {from_value: {...}, to_value: {...}}}\n- and_group: {expressions: [...]}\n- or_group: {expressions: [...]}\n- not_expression: {<filter_expression>}\n\n## Order by\n- By dimension: {dimension: {dimension_name, order_type: ALPHANUMERIC|CASE_INSENSITIVE_ALPHANUMERIC|NUMERIC}, desc: bool}\n- By metric: {metric: {metric_name}, desc: bool}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          },
+          "date_ranges": {
+            "type": "array",
+            "items": {},
+            "description": "Date ranges for the report. Each object has: start_date (required, YYYY-MM-DD or relative: \"today\", \"yesterday\", \"NdaysAgo\"), end_date (required, same format), name (optional). Example: [{\"start_date\": \"30daysAgo\", \"end_date\": \"today\"}]"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of dimension names. See: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#dimensions Example: [\"country\", \"city\"]"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of metric names. See: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#metrics Example: [\"activeUsers\", \"sessions\"]"
+          },
+          "dimension_filter": {
+            "description": "Optional dimension filter expression. Supports: simple filter (string_filter, numeric_filter, in_list_filter, between_filter), not_expression, and_group, or_group. Example: {\"filter\": {\"field_name\": \"country\", \"string_filter\": {\"match_type\": \"EXACT\", \"value\": \"US\"}}}"
+          },
+          "metric_filter": {
+            "description": "Optional metric filter expression. Same structure as dimension_filter. Example: {\"filter\": {\"field_name\": \"activeUsers\", \"numeric_filter\": {\"operation\": \"GREATER_THAN\", \"value\": {\"int64_value\": 100}}}}"
+          },
+          "order_bys": {
+            "description": "Optional ordering. List of order_by objects. Each can have: dimension (with dimension_name and optional order_type: ALPHANUMERIC, CASE_INSENSITIVE_ALPHANUMERIC, NUMERIC), metric (with metric_name), or pivot; plus desc (bool). Example: [{\"metric\": {\"metric_name\": \"activeUsers\"}, \"desc\": true}]"
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Maximum rows to return (max 250000). Used for pagination."
+          },
+          "offset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Row offset for pagination."
+          },
+          "currency_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 4217 currency code (e.g. \"USD\", \"EUR\")."
+          },
+          "return_property_quota": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to include property quota information in the response."
+          }
+        },
+        "required": [
+          "property_id",
+          "date_ranges",
+          "dimensions",
+          "metrics"
+        ],
+        "title": "RunReportParams",
+        "description": "Parameters for the `run_report` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 280,
+          "end_line": 322,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 27,
+          "end_line": 88,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 225,
+          "end_line": 234,
+          "role": "handler"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 356,
+          "end_line": 459,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds dateRanges, dimensions and metrics; names are wrapped as {name}. Recursively converts snake_case keys of date ranges, filters and ordering to camelCase. Optional limit/offset are sent as decimal strings, with currencyCode and returnPropertyQuota when supplied. POST runReport and return JSON. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation.",
+        "Filter, order and range structures use arbitrary serde_json::Value; documented nested shapes and numeric limits are not schema constraints. No local validation of GA field names or row limits."
+      ]
+    },
+    {
+      "name": "login",
+      "description": "Re-authenticate a configured Google account via interactive OAuth. Starts a local loopback listener, opens Google's consent screen in the default browser, captures the callback, and writes a new refresh_token to the account's credentials file. Use when an existing refresh_token has been revoked or expired. The MCP server must be restarted after success for the new token to take effect. Requires an OAuth Desktop-app client_id/client_secret, either in the [[accounts]] entry in config.toml or already present in the existing credentials file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The account name from config.toml ([[accounts]] `name` field) to re-authenticate. Starts a loopback OAuth flow, opens the consent URL in the default browser, captures the callback, and writes a new refresh_token to that account's credentials file."
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LoginParams",
+        "description": "Parameters for the `login` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 323,
+          "end_line": 345,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 5,
+          "end_line": 15,
+          "role": "schema"
+        },
+        {
+          "path": "src/login.rs",
+          "start_line": 31,
+          "end_line": 76,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Loads the named account from config.toml, resolves Desktop OAuth client credentials, binds 127.0.0.1 on an ephemeral port, opens Google consent for analytics.edit and analytics.readonly, waits up to 300 seconds for a callback, checks state, exchanges the code and overwrites that account credentials JSON. Existing in-memory clients require restart.",
+      "scope": "support",
+      "effect": "mixed",
+      "api_methods": [
+        "OAuth 2.0 authorization code token exchange"
+      ],
+      "notes": [
+        "Always registered, but requires a config.toml account; ADC-only startup provides no configured account for this tool. Startup loads credential files first, so this tool cannot bootstrap a server with missing credentials."
+      ]
+    },
+    {
+      "name": "run_realtime_report",
+      "description": "Run a realtime report on a GA4 property. Returns data for the last 30 minutes by default (configurable via minute_ranges).\n\n## References\n- Realtime dimensions: https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#dimensions\n- Realtime metrics: https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#metrics\n\nNo date_ranges parameter — use minute_ranges to control the time window.\nOnly user-scoped custom dimensions (customUser:*) are supported; custom metrics are not.\n\nFilters and ordering use the same format as run_report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of realtime dimension names. See: https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#dimensions Example: [\"country\", \"unifiedScreenName\"]"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of realtime metric names. See: https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#metrics Example: [\"activeUsers\"]"
+          },
+          "dimension_filter": {
+            "description": "Optional dimension filter expression. Same structure as run_report's dimension_filter."
+          },
+          "metric_filter": {
+            "description": "Optional metric filter expression. Same structure as run_report's metric_filter."
+          },
+          "order_bys": {
+            "description": "Optional ordering. Same structure as run_report's order_bys."
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Maximum rows to return."
+          },
+          "offset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Row offset for pagination."
+          },
+          "minute_ranges": {
+            "description": "Optional minute ranges for the realtime report. By default covers the last 30 minutes. Each object has: start_minutes_ago (int, max 29), end_minutes_ago (int, min 0), name (optional). Example: [{\"start_minutes_ago\": 10, \"end_minutes_ago\": 0}]"
+          },
+          "return_property_quota": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether to include property quota information in the response."
+          }
+        },
+        "required": [
+          "property_id",
+          "dimensions",
+          "metrics"
+        ],
+        "title": "RunRealtimeReportParams",
+        "description": "Parameters for the `run_realtime_report` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 346,
+          "end_line": 375,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 211,
+          "end_line": 258,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 236,
+          "end_line": 245,
+          "role": "handler"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 356,
+          "end_line": 494,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds named dimensions/metrics and shared filter/order/quota/limit/offset fields as for run_report; recursively converts minute_ranges to camelCase and POSTs runRealtimeReport. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.runRealtimeReport"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation.",
+        "Filter, order and range structures use arbitrary serde_json::Value; documented nested shapes and numeric limits are not schema constraints. No local validation of GA field names or row limits.",
+        "offset is forwarded to the realtime API despite not being a RunRealtimeReportRequest field; supplying it may cause API rejection."
+      ]
+    },
+    {
+      "name": "create_custom_dimension",
+      "description": "Create a custom dimension on a GA4 property (registers an event parameter or user property so it can be used in reports). Requires the account to have edit rights and the `analytics.edit` OAuth scope. scope defaults to \"EVENT\"; parameter_name cannot be changed later.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          },
+          "parameter_name": {
+            "type": "string",
+            "description": "The event parameter (or user property) name this dimension is registered against, e.g. \"website_id\", \"suburb\", \"city\". Max 24 chars for EVENT scope, 24 for USER scope. Cannot be changed after creation."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable display name shown in the GA UI, e.g. \"Website ID\"."
+          },
+          "scope": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Scope of the dimension: \"EVENT\" (event parameter), \"USER\" (user property), or \"ITEM\" (ecommerce item parameter). Defaults to \"EVENT\"."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional description of the custom dimension (max 150 chars)."
+          },
+          "disallow_ads_personalization": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "EVENT-scope only: if true, this dimension is NOT sent to Google signals / used for ads personalization. Optional."
+          }
+        },
+        "required": [
+          "property_id",
+          "parameter_name",
+          "display_name"
+        ],
+        "title": "CreateCustomDimensionParams",
+        "description": "Parameters for the `create_custom_dimension` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 376,
+          "end_line": 401,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 90,
+          "end_line": 125,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 249,
+          "end_line": 259,
+          "role": "handler"
+        }
+      ],
+      "behavior": "POST parameterName, displayName, scope (fallback EVENT), optional description and disallowAdsPersonalization. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.customDimensions.create"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation.",
+        "Documented enum choices, length limits and handler fallback defaults are prose/implementation only; no schemars enum, length, format or serde default constraints."
+      ]
+    },
+    {
+      "name": "list_custom_dimensions",
+      "description": "List all custom dimensions on a GA4 property, including archived ones, with their full resource names. The trailing segment of the name is the ID needed by archive_custom_dimension.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 402,
+          "end_line": 414,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 261,
+          "end_line": 267,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Auto-paginates customDimensions with pageSize=200 and returns their JSON array; no local archived-status filter. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.customDimensions.list"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "archive_custom_dimension",
+      "description": "Archive (soft-delete) a custom dimension by its trailing ID. Requires `analytics.edit`. Use list_custom_dimensions to find the ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (bare number, string, or \"properties/12345\")."
+          },
+          "custom_dimension_id": {
+            "type": "string",
+            "description": "The trailing ID of the custom dimension to archive — the last segment of its resource name (e.g. \"3\" from \"properties/123/customDimensions/3\"). Use list_custom_dimensions to find it."
+          }
+        },
+        "required": [
+          "property_id",
+          "custom_dimension_id"
+        ],
+        "title": "ArchiveCustomDimensionParams",
+        "description": "Parameters for the `archive_custom_dimension` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 415,
+          "end_line": 429,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 127,
+          "end_line": 139,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 269,
+          "end_line": 279,
+          "role": "handler"
+        }
+      ],
+      "behavior": "POST properties/{id}/customDimensions/{custom_dimension_id}:archive without a body. An empty successful response becomes {success:true}. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.customDimensions.archive"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "create_key_event",
+      "description": "Mark an event as a key event (conversion) on a GA4 property. Requires `analytics.edit`. counting_method defaults to \"ONCE_PER_EVENT\". Optionally set a default conversion value.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (bare number, string, or \"properties/12345\")."
+          },
+          "event_name": {
+            "type": "string",
+            "description": "The event name to mark as a key event (conversion), e.g. \"enquiry\", \"book\". Must match the event name as collected."
+          },
+          "counting_method": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "How conversions are counted: \"ONCE_PER_EVENT\" (every occurrence) or \"ONCE_PER_SESSION\" (at most once per session). Defaults to \"ONCE_PER_EVENT\"."
+          },
+          "default_value": {
+            "description": "Optional default conversion value, as an object: {\"numericValue\": 100.0, \"currencyCode\": \"ZAR\"}. Both fields required together if supplied."
+          }
+        },
+        "required": [
+          "property_id",
+          "event_name"
+        ],
+        "title": "CreateKeyEventParams",
+        "description": "Parameters for the `create_key_event` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 430,
+          "end_line": 451,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 141,
+          "end_line": 164,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 281,
+          "end_line": 291,
+          "role": "handler"
+        }
+      ],
+      "behavior": "POST eventName, countingMethod (fallback ONCE_PER_EVENT), and optional defaultValue forwarded unchanged. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.keyEvents.create"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation.",
+        "Documented enum choices, length limits and handler fallback defaults are prose/implementation only; no schemars enum, length, format or serde default constraints."
+      ]
+    },
+    {
+      "name": "list_key_events",
+      "description": "List all key events (conversions) on a GA4 property, with their resource names. The trailing segment of the name is the ID needed by delete_key_event.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID. Accepts: bare number (12345), string (\"12345\"), or resource name (\"properties/12345\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "PropertyIdParams",
+        "description": "Parameters for tools that only need a property ID."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 452,
+          "end_line": 464,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 17,
+          "end_line": 25,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 293,
+          "end_line": 298,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Auto-paginates keyEvents with pageSize=200 and returns their JSON array. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.keyEvents.list"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "delete_key_event",
+      "description": "Delete a key event (conversion) by its trailing ID. Requires `analytics.edit`. Use list_key_events to find the ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (bare number, string, or \"properties/12345\")."
+          },
+          "key_event_id": {
+            "type": "string",
+            "description": "The trailing ID of the key event to delete — the last segment of its resource name (e.g. \"5\" from \"properties/123/keyEvents/5\"). Use list_key_events to find it."
+          }
+        },
+        "required": [
+          "property_id",
+          "key_event_id"
+        ],
+        "title": "DeleteKeyEventParams",
+        "description": "Parameters for the `delete_key_event` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 465,
+          "end_line": 476,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 166,
+          "end_line": 178,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 300,
+          "end_line": 310,
+          "role": "handler"
+        }
+      ],
+      "behavior": "DELETE properties/{id}/keyEvents/{key_event_id}; empty successful responses become {success:true}. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.keyEvents.delete"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation."
+      ]
+    },
+    {
+      "name": "create_property_annotation",
+      "description": "Create a reporting-data annotation on a GA4 property's timeline (e.g. to mark a deploy or campaign). Requires `analytics.edit`. Supply date as \"YYYY-MM-DD\"; add end_date for a date-range annotation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (bare number, string, or \"properties/12345\")."
+          },
+          "title": {
+            "type": "string",
+            "description": "Annotation title, e.g. \"Deployed bounding-box proximity search\"."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional longer description of what changed."
+          },
+          "date": {
+            "type": "string",
+            "description": "The date the annotation marks, as \"YYYY-MM-DD\". If end_date is also given, this is the start of a date-range annotation."
+          },
+          "end_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional end date \"YYYY-MM-DD\" to make this a date-range annotation instead of a single day."
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Annotation color. One of: PURPLE, BROWN, BLUE, GREEN, RED, CYAN, ORANGE. Defaults to PURPLE. (The API rejects an unset color.)"
+          }
+        },
+        "required": [
+          "property_id",
+          "title",
+          "date"
+        ],
+        "title": "CreatePropertyAnnotationParams",
+        "description": "Parameters for the `create_property_annotation` tool."
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/server.rs",
+          "start_line": 477,
+          "end_line": 497,
+          "role": "registration/handler"
+        },
+        {
+          "path": "src/params.rs",
+          "start_line": 180,
+          "end_line": 209,
+          "role": "schema"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 314,
+          "end_line": 324,
+          "role": "handler"
+        },
+        {
+          "path": "src/api.rs",
+          "start_line": 496,
+          "end_line": 543,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Parses date/end_date into integer year/month/day objects. POSTs title, color (fallback PURPLE), optional description and either annotationDate or annotationDateRange; local parsing errors return tool errors. Property operations route through the cached Google account, or probe configured clients on cache miss; cached HTTP 403 clears the entry. API errors become MCP tool-error content.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1alpha properties.reportingDataAnnotations.create"
+      ],
+      "notes": [
+        "property_id is a JSON string despite description claiming acceptance of a bare number; there is no coercion annotation.",
+        "Documented enum choices, length limits and handler fallback defaults are prose/implementation only; no schemars enum, length, format or serde default constraints.",
+        "Date parsing checks three integer components only; does not validate calendar ranges or date ordering."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live requests. Git HEAD matches supplied revision.",
+    "All 15 tools register unconditionally through tool_router/tool_handler; write scope is required by Google APIs, not a local registration permission tier.",
+    "Schemars schemas reconstructed from JsonSchema/Deserialize models. No serde default/rename/flatten, enums or nested typed models occur. Option fields can be omitted or null; arbitrary Value schemas remain unconstrained. Additional properties are allowed by default.",
+    "Startup requires valid config credentials or ADC-discovered credentials before stdio serving. Runtime OAuth permissions and API enablement were not tested."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root reviewed every rmcp tool registration and all nine Schemars/Serde request structs, including 43 declared fields, Option/null semantics and unrestricted JSON Values; traced read/write dispatch and OAuth login."
+  }
+}

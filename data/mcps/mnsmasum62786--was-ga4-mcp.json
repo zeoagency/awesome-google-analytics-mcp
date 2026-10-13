@@ -1,0 +1,1511 @@
+{
+  "repo": "mnsmasum62786/was-ga4-mcp",
+  "revision": "74d3244754dde0d3cd3142de4d2e513796d38dca",
+  "status": "included",
+  "reason": "Implements 31 unconditional MCP tools with real OAuth-backed GA4 Data/Admin HTTP handlers; one metadata tool has a routing defect, but remaining server implementation is viable.",
+  "registration_sources": [
+    {
+      "path": "server.js",
+      "start_line": 17,
+      "end_line": 26
+    },
+    {
+      "path": "tools/registry.js",
+      "start_line": 1,
+      "end_line": 9
+    },
+    {
+      "path": "tools/data.js",
+      "start_line": 1,
+      "end_line": 143
+    },
+    {
+      "path": "tools/admin.js",
+      "start_line": 1,
+      "end_line": 227
+    },
+    {
+      "path": "tools/helpers.js",
+      "start_line": 1,
+      "end_line": 110
+    }
+  ],
+  "tool_count": 31,
+  "tools": [
+    {
+      "name": "ga4_run_report",
+      "description": "UNIVERSAL REPORT — run any GA4 report. propertyId is the numeric property ID.\n\ndateRanges: array of { startDate, endDate }. Date format YYYY-MM-DD or relative like \"today\", \"yesterday\", \"7daysAgo\", \"30daysAgo\".\n\ndimensions: array of { name } — examples: date, country, sessionDefaultChannelGroup, sessionSource, sessionMedium, deviceCategory, browser, pagePath, pageTitle, eventName, customEvent:my_param, audienceName, firstUserDefaultChannelGroup, etc.\n\nmetrics: array of { name } — examples: activeUsers, sessions, screenPageViews, eventCount, conversions, totalRevenue, engagedSessions, engagementRate, averageSessionDuration, bounceRate, transactions, purchaseRevenue, addToCarts, beginCheckouts.\n\ndimensionFilter / metricFilter: filter expressions. Example: { \"filter\": { \"fieldName\": \"sessionDefaultChannelGroup\", \"stringFilter\": { \"value\": \"Organic Search\" } } }.\n\norderBys: [{ \"dimension\": { \"dimensionName\": \"date\" } }] or [{ \"metric\": { \"metricName\": \"sessions\" }, \"desc\": true }].\n\nlimit: max rows (default 1000, max 250000).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "default": [
+              {
+                "startDate": "7daysAgo",
+                "endDate": "yesterday"
+              }
+            ]
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "dimensionFilter": {
+            "type": "object"
+          },
+          "metricFilter": {
+            "type": "object"
+          },
+          "orderBys": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "default": 1000
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0
+          },
+          "keepEmptyRows": {
+            "type": "boolean",
+            "default": false
+          },
+          "currencyCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId",
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 8,
+          "end_line": 55,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Posts selected report fields to /v1beta/properties/{propertyId}:runReport. Defaults dates to 7daysAgo–yesterday, dimensions to [], limit to 1000, offset to 0, keepEmptyRows to false; forwards supplied filters, ordering and currency.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Exposed report objects/items are intentionally unrestricted object schemas; nested GA API fields are not specified. Handler forwards only the fields described in behavior.",
+        "Description claims max limit 250000, but schema has no maximum and handler does not enforce it. Falsy limit (including 0) becomes 1000."
+      ]
+    },
+    {
+      "name": "ga4_run_realtime_report",
+      "description": "Real-time report (last 30 min of activity). Common metrics: activeUsers, screenPageViews, eventCount. Common dimensions: country, city, deviceCategory, browser, unifiedScreenName, eventName.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "dimensionFilter": {
+            "type": "object"
+          },
+          "metricFilter": {
+            "type": "object"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 100
+          },
+          "minuteRanges": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "[{name, startMinutesAgo, endMinutesAgo}] — defaults to last 30 min"
+          }
+        },
+        "required": [
+          "propertyId",
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 56,
+          "end_line": 83,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Posts metrics, dimensions (default []), limit (default 100) and optional filters/minuteRanges to /v1beta/properties/{propertyId}:runRealtimeReport.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Exposed report objects/items are intentionally unrestricted object schemas; nested GA API fields are not specified. Handler forwards only the fields described in behavior."
+      ]
+    },
+    {
+      "name": "ga4_run_pivot_report",
+      "description": "Pivoted report (cross-tabulation). Useful for heatmap-style breakdowns. pivots: [{ fieldNames: [\"country\"], limit: 10, orderBys: [...], offset: 0 }].",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "default": [
+              {
+                "startDate": "30daysAgo",
+                "endDate": "yesterday"
+              }
+            ]
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "pivots": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "dimensionFilter": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "propertyId",
+          "metrics",
+          "pivots"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 84,
+          "end_line": 106,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Posts metrics, pivots, dimensions (default []), dates (default 30daysAgo–yesterday) and optional dimensionFilter to /v1beta/properties/{propertyId}:runPivotReport.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runPivotReport"
+      ],
+      "notes": [
+        "Exposed report objects/items are intentionally unrestricted object schemas; nested GA API fields are not specified. Handler forwards only the fields described in behavior."
+      ]
+    },
+    {
+      "name": "ga4_batch_run_reports",
+      "description": "Run up to 5 reports in a single API call. Reduces round trips for dashboards. requests: array of report bodies (same shape as ga4_run_report).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "maxItems": 5
+          }
+        },
+        "required": [
+          "propertyId",
+          "requests"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 107,
+          "end_line": 119,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Posts {requests} unchanged to /v1beta/properties/{propertyId}:batchRunReports.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta batchRunReports"
+      ],
+      "notes": [
+        "Exposed report objects/items are intentionally unrestricted object schemas; nested GA API fields are not specified. Handler forwards only the fields described in behavior."
+      ]
+    },
+    {
+      "name": "ga4_get_metadata",
+      "description": "List all dimensions + metrics available for a property (including custom ones). Use to discover what you can query.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 120,
+          "end_line": 125,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Calls ga4Get with /v1beta/properties/{propertyId}/metadata. Shared routing sends this GET to analyticsadmin.googleapis.com rather than the Data API metadata endpoint.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "HTTP GET analyticsadmin.googleapis.com/v1beta/properties/{propertyId}/metadata"
+      ],
+      "notes": [
+        "Defect: /metadata does not match ga4Get routing predicates (:getMetadata is checked instead), so request uses Admin API host and cannot fetch Data API metadata as intended."
+      ]
+    },
+    {
+      "name": "ga4_check_compatibility",
+      "description": "Check whether requested dimensions + metrics are compatible (can be combined in one report).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/data.js",
+          "start_line": 126,
+          "end_line": 142,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Posts dimensions and metrics, each defaulting to [], to /v1beta/properties/{propertyId}:checkCompatibility.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta checkCompatibility"
+      ],
+      "notes": [
+        "Exposed report objects/items are intentionally unrestricted object schemas; nested GA API fields are not specified. Handler forwards only the fields described in behavior."
+      ]
+    },
+    {
+      "name": "ga4_list_account_summaries",
+      "description": "List all GA4 account summaries the authenticated user can access. Each includes property summaries — fastest way to discover all properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "default": 200
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 9,
+          "end_line": 14,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/accountSummaries with pageSize default 200; returns the API response.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_list_accounts",
+      "description": "List GA4 accounts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "default": 50
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 15,
+          "end_line": 20,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/accounts with pageSize default 50; returns the API response.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accounts.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_get_account",
+      "description": "Get a single GA4 account by name. name format: accounts/{accountId}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 21,
+          "end_line": 26,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/accounts/{accountId}; directly appends supplied accountId.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accounts.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List GA4 properties under an account. accountId must be the numeric ID (without \"accounts/\" prefix).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "Numeric account ID (e.g. 111368097)"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 100
+          },
+          "showDeleted": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 27,
+          "end_line": 44,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties with filter parent:accounts/{accountId}, pageSize default 100, and showDeleted default false.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_get_property",
+      "description": "Get a single property's settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 45,
+          "end_line": 50,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}; returns property settings.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_update_property",
+      "description": "Update GA4 property fields. updateMask is comma-separated list of fields to update (e.g. \"displayName,timeZone,currencyCode,industryCategory\").",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "updateMask": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object",
+            "description": "Fields to update — displayName, timeZone, currencyCode, industryCategory"
+          }
+        },
+        "required": [
+          "propertyId",
+          "updateMask",
+          "payload"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 51,
+          "end_line": 64,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "PATCH /v1beta/properties/{propertyId}?updateMask={encoded updateMask} using payload unchanged.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.patch"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List data streams in a GA4 property (web, app, etc.).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 65,
+          "end_line": 70,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/dataStreams.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.dataStreams.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_get_data_stream",
+      "description": "Get a data stream by ID, including the measurement ID and stream-specific settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "streamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId",
+          "streamId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 71,
+          "end_line": 80,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/dataStreams/{streamId}.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.dataStreams.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_conversion_events",
+      "description": "List configured conversion events on a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 81,
+          "end_line": 86,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/keyEvents; uses key events despite the conversion-events tool name.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.keyEvents.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_create_conversion_event",
+      "description": "Mark an event as a key event (conversion). eventName is the event name to mark (e.g. \"purchase\", \"generate_lead\", \"form_submit\"). countingMethod: ONCE_PER_EVENT or ONCE_PER_SESSION.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "countingMethod": {
+            "type": "string",
+            "enum": [
+              "ONCE_PER_EVENT",
+              "ONCE_PER_SESSION"
+            ],
+            "default": "ONCE_PER_EVENT"
+          },
+          "defaultValue": {
+            "type": "object",
+            "description": "{ numericValue: 0, currencyCode: \"USD\" }"
+          }
+        },
+        "required": [
+          "propertyId",
+          "eventName"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 87,
+          "end_line": 105,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "POST /v1beta/properties/{propertyId}/keyEvents with eventName, countingMethod default ONCE_PER_EVENT, and optional defaultValue unchanged.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.keyEvents.create"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "List custom dimensions on a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 106,
+          "end_line": 111,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/customDimensions.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.customDimensions.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_create_custom_dimension",
+      "description": "Create a custom dimension. scope: EVENT | USER | ITEM. parameterName is the event/user parameter to bind.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "EVENT",
+              "USER",
+              "ITEM"
+            ],
+            "default": "EVENT"
+          },
+          "description": {
+            "type": "string"
+          },
+          "disallowAdsPersonalization": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "propertyId",
+          "displayName",
+          "parameterName"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 112,
+          "end_line": 134,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "POST /v1beta/properties/{propertyId}/customDimensions with displayName, parameterName, scope default EVENT, and supplied description/disallowAdsPersonalization.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.customDimensions.create"
+      ],
+      "notes": [
+        "Schema default disallowAdsPersonalization=false is not applied in handler; omitted field is undefined and omitted during JSON serialization."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "List custom metrics on a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 135,
+          "end_line": 140,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/customMetrics.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.customMetrics.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_create_custom_metric",
+      "description": "Create a custom metric. measurementUnit: STANDARD | CURRENCY | FEET | METERS | KILOMETERS | MILES | MILLISECONDS | SECONDS | MINUTES | HOURS.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "EVENT"
+            ],
+            "default": "EVENT"
+          },
+          "measurementUnit": {
+            "type": "string",
+            "default": "STANDARD"
+          },
+          "description": {
+            "type": "string"
+          },
+          "restrictedMetricType": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "propertyId",
+          "displayName",
+          "parameterName",
+          "measurementUnit"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 141,
+          "end_line": 165,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "POST /v1beta/properties/{propertyId}/customMetrics with displayName, parameterName, scope default EVENT, measurementUnit, description and restrictedMetricType.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.customMetrics.create"
+      ],
+      "notes": [
+        "measurementUnit is required despite its schema default STANDARD; handler does not apply that default. No enum constrains measurementUnit beyond its description."
+      ]
+    },
+    {
+      "name": "ga4_list_audiences",
+      "description": "List audiences on a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 50
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 166,
+          "end_line": 171,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/audiences with pageSize default 50.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.audiences.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_list_google_ads_links",
+      "description": "List Google Ads accounts linked to this property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 172,
+          "end_line": 177,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/googleAdsLinks.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.googleAdsLinks.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_list_bigquery_links",
+      "description": "List BigQuery export links on a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 178,
+          "end_line": 183,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/bigQueryLinks.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.bigQueryLinks.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_create_bigquery_link",
+      "description": "Create a BigQuery export link. project must be a GCP project ID. dataLocation: US | EU | asia-south1 | etc. dailyExportEnabled = true for daily exports, streamingExportEnabled = true for streaming.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string",
+            "description": "GCP project ID (NOT number)"
+          },
+          "dataLocation": {
+            "type": "string",
+            "default": "US"
+          },
+          "dailyExportEnabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "streamingExportEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "includeAdvertisingId": {
+            "type": "boolean",
+            "default": true
+          },
+          "excludedEvents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "propertyId",
+          "project"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 184,
+          "end_line": 208,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "POST /v1beta/properties/{propertyId}/bigQueryLinks with project prefixed projects/, dataLocation default US, dailyExportEnabled/includeAdvertisingId true unless explicitly false, streamingExportEnabled true only when explicitly true, and excludedEvents default [].",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API v1beta properties.bigQueryLinks.create"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_users",
+      "description": "List access bindings (users) on an account or property. parent format: accounts/{id} or properties/{id}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 209,
+          "end_line": 214,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/{parent}/accessBindings; parent directly supplies accounts/{id} or properties/{id} path.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accessBindings.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_get_attribution_settings",
+      "description": "Get the attribution model settings for a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 215,
+          "end_line": 220,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/attributionSettings.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.getAttributionSettings"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_data_retention_settings",
+      "description": "Get the data retention period for a property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/admin.js",
+          "start_line": 221,
+          "end_line": 226,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/properties/{propertyId}/dataRetentionSettings.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.getDataRetentionSettings"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_universal_call",
+      "description": "UNIVERSAL — call any GA4 Data or Admin API endpoint. Use when no specialized tool exists. fullUrl must be the complete https URL (e.g. https://analyticsadmin.googleapis.com/v1beta/...).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PATCH",
+              "DELETE"
+            ],
+            "default": "GET"
+          },
+          "fullUrl": {
+            "type": "string"
+          },
+          "body": {
+            "description": "JSON body for POST/PATCH"
+          }
+        },
+        "required": [
+          "fullUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/helpers.js",
+          "start_line": 8,
+          "end_line": 21,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Passes method (default GET), arbitrary fullUrl and optional body to googleFetch. Uses the same OAuth bearer token and JSON serialization; returns parsed response or raw text.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "HTTP arbitrary method/fullUrl via OAuth-authenticated googleFetch"
+      ],
+      "notes": [
+        "fullUrl has no format/host/protocol restriction and handler does not restrict it to Google/GA4; body has no type restriction."
+      ]
+    },
+    {
+      "name": "ga4_quick_overview",
+      "description": "Cross-property snapshot: count of accessible accounts + properties + recent activity. Great as a starting point.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/helpers.js",
+          "start_line": 22,
+          "end_line": 45,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/accountSummaries with pageSize 200, counts accounts and property summaries, returns first 10 account summaries and up to 3 sample properties per account.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used.",
+        "Description mentions recent activity, but implementation only reads account summaries and does not query activity."
+      ]
+    },
+    {
+      "name": "ga4_find_property",
+      "description": "Search across all your account summaries for properties matching a name substring (case-insensitive).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "exact": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/helpers.js",
+          "start_line": 46,
+          "end_line": 79,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "GET /v1beta/accountSummaries with pageSize 500; scans property display names case-insensitively, using equality if exact is truthy and substring matching otherwise; returns match count and account/property metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used."
+      ]
+    },
+    {
+      "name": "ga4_property_health_check",
+      "description": "Quick health report for a property: yesterday vs 7-day-ago totals, conversion event count, data stream count, last data received hint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "tools/helpers.js",
+          "start_line": 80,
+          "end_line": 109,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "google-client.js",
+          "start_line": 51,
+          "end_line": 114,
+          "role": "shared HTTP client/routing"
+        }
+      ],
+      "behavior": "Concurrently runs a report comparing yesterday and 7daysAgo for activeUsers, sessions, eventCount and conversions, lists key events and data streams. Returns raw report, event count/names, stream count and stream metadata. Each request catches errors independently.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport",
+        "Admin API v1beta properties.keyEvents.list",
+        "Admin API v1beta properties.dataStreams.list"
+      ],
+      "notes": [
+        "No pagination loop or pageToken input: only first API response page is used.",
+        "Description mentions last data received hint, but no such field is computed. Key-event/stream request errors are hidden as zero counts/empty arrays; report errors appear in yesterdayVs7dAgo."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only, no tools/list or live requests; upstream code was not executed.",
+    "All 31 tools are registered unconditionally; google-client.js exits during import if OAuth client ID, client secret or refresh token are missing. Credentials come from environment variables or ~/.was-ga4-mcp/config.json.",
+    "cli.js auth/logout/status/help are CLI commands, not registered MCP tools. No optional modules or permission tiers were found.",
+    "Shared client refreshes OAuth tokens and performs authenticated fetch, parsing JSON or raw text; server returns text JSON, truncates output above 60000 characters, and converts exceptions to isError responses.",
+    "Server dispatcher passes arguments directly to handlers without explicit inputSchema validation or automatic default application."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 31 literal schemas/descriptions exactly; traced registry/dispatcher and native Google fetch routing, Admin writes/universal call and helper reports. Confirmed the metadata endpoint host defect directly in shared client."
+  }
+}

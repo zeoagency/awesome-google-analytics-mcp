@@ -10,6 +10,18 @@ Trace MCP tool registration, CLI command dispatch or SDK client code to an imple
 
 Remove unrelated database/host setup links, subjective tiers, frozen star counts and unsupported performance claims. Keep one catalog entry per implementation; count language/API SDK packages separately. [AGENTS.md](../AGENTS.md) documents the repeatable process and [CONTRIBUTING.md](../CONTRIBUTING.md) provides the checklist.
 
+## Tool reference audit
+
+All 35 retained MCPs were reviewed again, one source inventory per server, using separate GPT 6.1 Sol subagents on low reasoning in batches of at most three. The coordinating reviewer independently checked registrations, descriptions, parameters and handlers before accepting each record. The reviewed revisions match the entry decisions below. All 35 still implement GA4 operations; no additional removal was justified by this pass.
+
+The [tool index](tool-index.md) contains 480 distinct names across 649 registrations: 423 GA4 operations and 226 other-service or server-support operations. Multi-service totals include every registered tool; only their implemented GA4 capabilities determine the main-page placement. Counts include optional tools, not just default exposure. A name shared by several servers is indexed once with links to every provider.
+
+The [per-server references](../README.md) preserve full registered descriptions and complete exposed input schemas. Explicit JSON schemas were compared against source literals; annotation and Zod schemas were reconstructed and checked against signatures, shared models, enums, constraints and defaults. Sednalabs provides a committed schema snapshot, independently matched to all 35 registrations and request structs. Generated schema cosmetics may vary with unbounded dependencies. Loose native objects remain loose; descriptions and handler-only checks do not become invented schema restrictions.
+
+Each [machine-readable record](../data/mcps/) contains its pinned registration/handler sources, independent review method, observed behavior, scope, effects and limitations. Records distinguish native funnels from independent event counts, historical reporting from realtime calls, and advertised tools from permission-gated availability. No live `tools/list`, upstream server execution or authenticated GA4 calls were performed.
+
+The main page now groups servers by six implemented tasks rather than popularity, language, authentication style or marketing. The CLI and SDK entries retain their previous review. Generated-page checks enforce full tool/provider coverage; catalog checks enforce reviewed inclusion decisions, schema references, task placement and navigation.
+
 ## Dependency compatibility evidence
 
 MCP Python SDK 2 removes the legacy FastMCP module and lowlevel decorator APIs used by six excluded entries. See the [removed FastMCP module](https://github.com/modelcontextprotocol/python-sdk/blob/754254c08fe1c3eda18b69da3d336106fe8d72d6/src/mcp/server/fastmcp.py), [lowlevel server](https://github.com/modelcontextprotocol/python-sdk/blob/754254c08fe1c3eda18b69da3d336106fe8d72d6/src/mcp/server/lowlevel/server.py), and [published package metadata](https://pypi.org/pypi/mcp/json). At review, PyPI stable was 2.3.0. Those entries provide neither an MCP <2 constraint nor a usable documented lockfile. This concerns fresh documented installations; existing environments using MCP 1 may still work. Reconsider after an upstream dependency fix.

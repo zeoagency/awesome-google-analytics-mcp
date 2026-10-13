@@ -1,0 +1,2549 @@
+{
+  "repo": "arcbaslow/google-analytics-agent",
+  "revision": "305af22aa78797e3348e045d46e61814fb6b45a3",
+  "status": "included",
+  "reason": "Published ga4-mcp entrypoint registers real GA4 Data/Admin read and analysis tools, preview-gated Admin writers, BigQuery dry-run and local support tools.",
+  "registration_sources": [
+    {
+      "path": "scripts/ga4_mcp.py",
+      "start_line": 49,
+      "end_line": 637
+    },
+    {
+      "path": "pyproject.toml",
+      "start_line": 34,
+      "end_line": 69
+    }
+  ],
+  "tool_count": 47,
+  "tools": [
+    {
+      "name": "bigquery_dry_run",
+      "description": "Estimate a fixed GA4 export aggregate query. Execution is CLI-only and may incur costs.",
+      "inputSchema": {
+        "type": "object",
+        "title": "bigquery_dry_runArguments",
+        "properties": {
+          "billing_project": {
+            "type": "string",
+            "title": "Billing Project"
+          },
+          "source_project": {
+            "type": "string",
+            "title": "Source Project"
+          },
+          "dataset": {
+            "type": "string",
+            "title": "Dataset"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "template": {
+            "type": "string",
+            "title": "Template"
+          },
+          "event_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Event Name"
+          },
+          "parameters": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parameters"
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Steps"
+          },
+          "window_seconds": {
+            "type": "integer",
+            "default": 3600,
+            "title": "Window Seconds"
+          },
+          "max_bytes": {
+            "type": "integer",
+            "default": 1073741824,
+            "title": "Max Bytes"
+          }
+        },
+        "required": [
+          "billing_project",
+          "source_project",
+          "dataset",
+          "location",
+          "start_date",
+          "end_date",
+          "template"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 108,
+          "end_line": 139,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_bigquery.py",
+          "start_line": 118,
+          "end_line": 224,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds a fixed SELECT aggregate query against GA4 BigQuery daily export tables and submits a dry-run job to estimate bytes and cost controls; never executes the query.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "BigQuery API query (dry run)"
+      ],
+      "notes": [
+        "Optional google-cloud-bigquery dependency is loaded on invocation. Handler accepts fixed parameters/consent/freshness/funnel templates, dates spanning 1–31 days and validated project/dataset/event identifiers; these restrictions are not exposed as schema enums/patterns.",
+        "max_bytes must be 1–107374182400. Missing BigQuery dependency returns unsupported. Parameter template requires 1–50 parameter names and an event; funnel template requires 2–7 steps and window_seconds 1–2678400."
+      ]
+    },
+    {
+      "name": "realtime_report",
+      "description": "Read uncached realtime rows; inspect completeness. Minute 30–59 needs GA360.",
+      "inputSchema": {
+        "type": "object",
+        "title": "realtime_reportArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "start_minutes_ago": {
+            "type": "integer",
+            "default": 29,
+            "title": "Start Minutes Ago"
+          },
+          "end_minutes_ago": {
+            "type": "integer",
+            "default": 0,
+            "title": "End Minutes Ago"
+          },
+          "filter_dict": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filter Dict"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10000,
+            "title": "Limit"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 142,
+          "end_line": 156,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_explore.py",
+          "start_line": 16,
+          "end_line": 63,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Constructs a RunRealtimeReportRequest for the supplied fields, minute range, dimension filter and limit; returns uncached rows, quota and completeness without pagination.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Handler enforces 0 <= end_minutes_ago <= start_minutes_ago <= 59; minutes over 29 require GA360. Limit must be 1–250000; these bounds are not in the exposed schema. filter_dict is deliberately an arbitrary JSON object interpreted as a dimension filter."
+      ]
+    },
+    {
+      "name": "comparison_report",
+      "description": "Compare named groups and dates within one property, preserving API rows and metadata.",
+      "inputSchema": {
+        "type": "object",
+        "title": "comparison_reportArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "comparisons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Comparisons"
+          },
+          "date_ranges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "title": "Date Ranges"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10000,
+            "title": "Limit"
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10000,
+            "title": "Page Size"
+          },
+          "max_pages": {
+            "type": "integer",
+            "default": 10,
+            "title": "Max Pages"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions",
+          "comparisons",
+          "date_ranges"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 159,
+          "end_line": 174,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_explore.py",
+          "start_line": 81,
+          "end_line": 145,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Validates named comparisons and date ranges, converts inline filters or saved comparison identifiers, and pages a Core runReport while preserving rows, quota and metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "comparisons and date_ranges each require 1–4 uniquely named objects; names are nonblank, <=100 characters, and cannot start RESERVED_ or date_range_. Each comparison accepts name and exactly one dimension_filter or comparison; saved comparison must match comparisons/ID. Each date range requires exactly name,start_date,end_date. These are handler restrictions, not schema structure. limit/page_size: 1–250000; max_pages: 1–100."
+      ]
+    },
+    {
+      "name": "reporting_annotations",
+      "description": "Read annotations in an explicit date range; annotations do not prove causation.",
+      "inputSchema": {
+        "type": "object",
+        "title": "reporting_annotationsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 177,
+          "end_line": 181,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 146,
+          "end_line": 165,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists alpha reporting-data annotations for the property and explicit UTC date interval.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha listReportingDataAnnotations"
+      ],
+      "notes": [
+        "Unconditionally registered but returns unsupported if the installed Admin client lacks ListReportingDataAnnotationsRequest. Handler requires numeric property ID and explicit YYYY-MM-DD dates spanning 1–366 days, which are not constraints in the exposed schema."
+      ]
+    },
+    {
+      "name": "change_history",
+      "description": "Read API-supported changes in UTC dates. Requires edit scope but performs no write.",
+      "inputSchema": {
+        "type": "object",
+        "title": "change_historyArguments",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          }
+        },
+        "required": [
+          "account_id",
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 184,
+          "end_line": 190,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 168,
+          "end_line": 201,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Searches account change-history events filtered to the property and explicit UTC date interval, using edit-scope credentials but performing only reads.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta searchChangeHistoryEvents"
+      ],
+      "notes": [
+        "Requires analytics.edit scope despite being read-only; returns only selected change metadata, omitting actor identities and resource snapshots. Handler requires numeric account/property IDs and explicit YYYY-MM-DD dates spanning 1–366 days."
+      ]
+    },
+    {
+      "name": "audience_template",
+      "description": "Build an offline audience definition. Creating it separately still requires terminal y/N.",
+      "inputSchema": {
+        "type": "object",
+        "title": "audience_templateArguments",
+        "properties": {
+          "template": {
+            "type": "string",
+            "title": "Template"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Events"
+          },
+          "membership_days": {
+            "type": "integer",
+            "default": 30,
+            "title": "Membership Days"
+          },
+          "parameter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parameter"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Threshold"
+          },
+          "window_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Seconds"
+          }
+        },
+        "required": [
+          "template",
+          "display_name",
+          "events"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 193,
+          "end_line": 207,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audience_templates.py",
+          "start_line": 46,
+          "end_line": 139,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds and validates an Audience protobuf definition locally for event participants, numeric event-parameter threshold, or an event sequence; no credentials or GA API calls.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Handler template choices: event_participants, event_parameter_threshold, event_sequence. Membership is 1–540 days; display name 1–100 nonblank characters; events are unique valid event names. Sequence: 2–5 events, window 1–2592000 seconds; simple templates: exactly one event and no window; threshold template requires finite numeric threshold and valid non-eventCount parameter. Schema uses plain strings/numbers without these constraints."
+      ]
+    },
+    {
+      "name": "benchmarks",
+      "description": "Return unverified heuristic bands for a vertical, with provenance labels.",
+      "inputSchema": {
+        "type": "object",
+        "title": "benchmarksArguments",
+        "properties": {
+          "vertical": {
+            "type": "string",
+            "default": "other",
+            "title": "Vertical"
+          }
+        },
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 210,
+          "end_line": 214,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_benchmarks.py",
+          "start_line": 181,
+          "end_line": 185,
+          "role": "handler"
+        },
+        {
+          "path": "scripts/ga4_benchmarks.py",
+          "start_line": 188,
+          "end_line": 192,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Normalizes a vertical and returns bundled heuristic benchmark bands with provenance labels; no GA API calls.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "audit",
+      "description": "Run the full GA4 audit. Returns agent outputs, context, vertical, confidence.",
+      "inputSchema": {
+        "type": "object",
+        "title": "auditArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "days": {
+            "type": "integer",
+            "default": 28,
+            "title": "Days"
+          },
+          "vertical": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Vertical"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 217,
+          "end_line": 229,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audit.py",
+          "start_line": 844,
+          "end_line": 916,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Orchestrates property context and quality, event taxonomy, funnel, key-event, attribution, property configuration and segment audits, returning their findings and resolved vertical confidence.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport",
+        "Data API v1alpha runFunnelReport",
+        "Admin API v1beta getProperty",
+        "Admin API v1beta listDataStreams",
+        "Admin API v1beta listKeyEvents",
+        "Admin API v1beta listConversionEvents",
+        "Admin API v1alpha getAttributionSettings",
+        "Admin API v1beta getDataRetentionSettings",
+        "Admin API v1beta listCustomDimensions",
+        "Admin API v1beta listCustomMetrics"
+      ],
+      "notes": [
+        "Property audit reports data-filter inspection unsupported; attribution audit is skipped when no key events are configured."
+      ]
+    },
+    {
+      "name": "context",
+      "description": "Profile the property's live site: vertical, platform, framework, sitemap.",
+      "inputSchema": {
+        "type": "object",
+        "title": "contextArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "refresh": {
+            "type": "boolean",
+            "default": false,
+            "title": "Refresh"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 232,
+          "end_line": 236,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_context.py",
+          "start_line": 663,
+          "end_line": 707,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Obtains website URLs from Admin data streams, fetches public website HTML/robots/sitemaps, infers vertical/platform/framework and saves or reuses property context locally.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listDataStreams"
+      ],
+      "notes": []
+    },
+    {
+      "name": "funnel",
+      "description": "Build a funnel from an ordered list of event names.",
+      "inputSchema": {
+        "type": "object",
+        "title": "funnelArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Steps"
+          },
+          "days": {
+            "type": "integer",
+            "default": 28,
+            "title": "Days"
+          },
+          "check_postpayment": {
+            "type": "boolean",
+            "default": false,
+            "title": "Check Postpayment"
+          }
+        },
+        "required": [
+          "property_id",
+          "steps"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 239,
+          "end_line": 250,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_funnel.py",
+          "start_line": 56,
+          "end_line": 106,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Validates event steps against a Core report, runs the alpha funnel report, computes step conversion/dropoff rates, and optionally probes postpayment events.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport",
+        "Data API v1alpha runFunnelReport"
+      ],
+      "notes": [
+        "Handler requires 2–10 unique steps, a restriction absent from the input schema. Missing-data validation and optional postpayment diagnostics do not infer sequential ordering."
+      ]
+    },
+    {
+      "name": "events",
+      "description": "List distinct events seen on the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "eventsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "days": {
+            "type": "integer",
+            "default": 7,
+            "title": "Days"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 253,
+          "end_line": 257,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_events.py",
+          "start_line": 35,
+          "end_line": 41,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Runs a Core report of eventCount by eventName to list events observed in the selected lookback.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "check_events",
+      "description": "Check presence of specific events.",
+      "inputSchema": {
+        "type": "object",
+        "title": "check_eventsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "event_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Event Names"
+          },
+          "days": {
+            "type": "integer",
+            "default": 7,
+            "title": "Days"
+          }
+        },
+        "required": [
+          "property_id",
+          "event_names"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 260,
+          "end_line": 264,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_events.py",
+          "start_line": 44,
+          "end_line": 61,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists observed event names with a Core report and marks requested event names present or missing.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "quality",
+      "description": "Run the data-quality audit (sampling, direct share, not-set share).",
+      "inputSchema": {
+        "type": "object",
+        "title": "qualityArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "days": {
+            "type": "integer",
+            "default": 28,
+            "title": "Days"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 267,
+          "end_line": 271,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audit.py",
+          "start_line": 89,
+          "end_line": 253,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads Core reports to assess sampling/completeness, direct traffic and not-set shares, returning findings.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "conversions",
+      "description": "Audit key-events (conversions) configuration.",
+      "inputSchema": {
+        "type": "object",
+        "title": "conversionsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 274,
+          "end_line": 278,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audit.py",
+          "start_line": 431,
+          "end_line": 488,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads configured key events (with legacy conversion-event fallback) and checks configuration/capacity; no write.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listKeyEvents",
+        "Admin API v1beta listConversionEvents",
+        "Admin API v1beta getProperty"
+      ],
+      "notes": []
+    },
+    {
+      "name": "attribution",
+      "description": "Channel attribution analysis.",
+      "inputSchema": {
+        "type": "object",
+        "title": "attributionArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "days": {
+            "type": "integer",
+            "default": 28,
+            "title": "Days"
+          },
+          "primary_event": {
+            "type": "string",
+            "default": "purchase",
+            "title": "Primary Event"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 281,
+          "end_line": 287,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audit.py",
+          "start_line": 494,
+          "end_line": 566,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads property attribution settings and a Core channel report filtered to the primary event, then computes channel analysis.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha getAttributionSettings",
+        "Data API v1beta runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "property_config",
+      "description": "Property configuration audit.",
+      "inputSchema": {
+        "type": "object",
+        "title": "property_configArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 290,
+          "end_line": 294,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_audit.py",
+          "start_line": 572,
+          "end_line": 669,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads property details, retention, streams and custom definitions and produces configuration findings; public data-filter coverage is reported unsupported.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta getProperty",
+        "Admin API v1beta getDataRetentionSettings",
+        "Admin API v1beta listDataStreams",
+        "Admin API v1beta listCustomDimensions",
+        "Admin API v1beta listCustomMetrics"
+      ],
+      "notes": [
+        "Data filters are a structured unsupported placeholder because this implementation has no public Admin API method for them."
+      ]
+    },
+    {
+      "name": "user_provided_data_settings",
+      "description": "Read property UPD configuration; does not establish event consent.",
+      "inputSchema": {
+        "type": "object",
+        "title": "user_provided_data_settingsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 297,
+          "end_line": 301,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 447,
+          "end_line": 472,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads the alpha property user-provided-data configuration and returns structured settings/status.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha getUserProvidedDataSettings"
+      ],
+      "notes": [
+        "Unconditionally registered; returns unsupported when the installed alpha Admin client lacks this method."
+      ]
+    },
+    {
+      "name": "consent_diagnostics",
+      "description": "Read UPD/identity settings and list the tag/export evidence still needed.",
+      "inputSchema": {
+        "type": "object",
+        "title": "consent_diagnosticsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 304,
+          "end_line": 308,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 475,
+          "end_line": 498,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Combines user-provided-data and reporting identity settings with a list of missing tag/export evidence; cannot infer consent from configuration.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha getUserProvidedDataSettings",
+        "Admin API v1alpha getReportingIdentitySettings"
+      ],
+      "notes": [
+        "Installed-client method availability and API errors are returned separately for each setting; tool remains registered."
+      ]
+    },
+    {
+      "name": "report",
+      "description": "Generic GA4 runReport.",
+      "inputSchema": {
+        "type": "object",
+        "title": "reportArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "days": {
+            "type": "integer",
+            "default": 28,
+            "title": "Days"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 311,
+          "end_line": 317,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_data.py",
+          "start_line": 195,
+          "end_line": 278,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Runs a Core report with requested metric/dimension names and relative days, inheriting local cache, paging, quota and PII scrubbing.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "report_metadata",
+      "description": "Discover standard/custom report fields; property 0 returns standard fields only.",
+      "inputSchema": {
+        "type": "object",
+        "title": "report_metadataArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "use_cache": {
+            "type": "boolean",
+            "default": true,
+            "title": "Use Cache"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 320,
+          "end_line": 324,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_data.py",
+          "start_line": 146,
+          "end_line": 166,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads Data API metadata for property-specific standard/custom fields, optionally using local cache; property 0 requests standard metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": []
+    },
+    {
+      "name": "conversion_metadata",
+      "description": "Discover alpha conversion action identifiers and advertising report fields.",
+      "inputSchema": {
+        "type": "object",
+        "title": "conversion_metadataArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 327,
+          "end_line": 331,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_advertising.py",
+          "start_line": 28,
+          "end_line": 41,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads alpha Data metadata including conversion actions/comparisons if the installed client supports ConversionSpec; otherwise returns unsupported.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1alpha getMetadata"
+      ],
+      "notes": [
+        "Registered unconditionally; returns unsupported if installed Data client lacks alpha ConversionSpec."
+      ]
+    },
+    {
+      "name": "advertising_report",
+      "description": "Explicit alpha advertising conversion report, separate from key-event reports.",
+      "inputSchema": {
+        "type": "object",
+        "title": "advertising_reportArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "conversion_actions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conversion Actions"
+          },
+          "attribution_model": {
+            "type": "string",
+            "default": "DATA_DRIVEN",
+            "title": "Attribution Model"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10000,
+            "title": "Limit"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 334,
+          "end_line": 356,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_advertising.py",
+          "start_line": 44,
+          "end_line": 98,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds and pages an alpha runReport with ConversionSpec, explicit dates/actions/attribution model; returns metadata and verifies the Advertising section.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1alpha runReport"
+      ],
+      "notes": [
+        "Registered unconditionally; returns unsupported if installed Data client lacks alpha ConversionSpec. Handler accepts only DATA_DRIVEN or LAST_CLICK and conversionActions/ID action identifiers, validates explicit dates and limit 1–250000; not expressed in input schema."
+      ]
+    },
+    {
+      "name": "check_compatibility",
+      "description": "Explicit uncached Core report compatibility read, not a funnel/realtime check.\n\nUses report dimension-filter semantics; filter_dict takes precedence.\nIncompatible selected fields may return an API error.",
+      "inputSchema": {
+        "type": "object",
+        "title": "check_compatibilityArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions"
+          },
+          "filter_expr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filter Expr"
+          },
+          "filter_dict": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filter Dict"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics",
+          "dimensions"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 359,
+          "end_line": 375,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_data.py",
+          "start_line": 169,
+          "end_line": 192,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Sends an uncached Core checkCompatibility request with selected fields and optional dimension-filter semantics; filter_dict takes precedence over filter_expr.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta checkCompatibility"
+      ],
+      "notes": [
+        "filter_dict is intentionally arbitrary JSON; handler builds GA dimension filter objects rather than exposing the protobuf schema."
+      ]
+    },
+    {
+      "name": "propose_admin_write",
+      "description": "Save one exact write for the user's terminal approval; never execute it.",
+      "inputSchema": {
+        "type": "object",
+        "title": "propose_admin_writeArguments",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation"
+          },
+          "arguments": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Arguments"
+          },
+          "expires_seconds": {
+            "type": "integer",
+            "default": 300,
+            "title": "Expires Seconds"
+          }
+        },
+        "required": [
+          "operation",
+          "arguments"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 387,
+          "end_line": 393,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_approval.py",
+          "start_line": 74,
+          "end_line": 105,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Binds and validates an allowlisted Admin operation and arbitrary argument object, persists an expiring immutable local proposal, and returns digest and terminal approval command. Never calls an Admin writer.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Operation must be one of the 15 ga4_approval.OPERATIONS Admin writers; arguments bind to that writer signature rather than an exposed nested model. expires_seconds must be 30–900; sensitive/scrubbed values and proposals exceeding 64 KB are rejected."
+      ]
+    },
+    {
+      "name": "admin_proposal_status",
+      "description": "Inspect a proposal's outcome. This tool cannot approve or execute a write.",
+      "inputSchema": {
+        "type": "object",
+        "title": "admin_proposal_statusArguments",
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "digest": {
+            "type": "string",
+            "title": "Digest"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "digest"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 396,
+          "end_line": 400,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_approval.py",
+          "start_line": 122,
+          "end_line": 137,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Loads and verifies a local proposal and digest, then reports pending, expired, execution-unknown or stored result; never approves or executes.",
+      "scope": "ga4",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "add_key_event",
+      "description": "Create a key event (conversion). Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_key_eventArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "event_name": {
+            "type": "string",
+            "title": "Event Name"
+          },
+          "counting_method": {
+            "type": "string",
+            "default": "ONCE_PER_EVENT",
+            "title": "Counting Method"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "event_name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 407,
+          "end_line": 420,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 760,
+          "end_line": 784,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for key-event creation with capacity checks. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta getProperty",
+        "Admin API v1beta listKeyEvents",
+        "Admin API v1beta listConversionEvents",
+        "Admin API v1beta createKeyEvent"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "delete_key_event",
+      "description": "Delete a key event by full resource name. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_key_eventArguments",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 423,
+          "end_line": 429,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 787,
+          "end_line": 795,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for key-event deletion. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta deleteKeyEvent"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "create_audience",
+      "description": "Create an audience from a definition dict. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "create_audienceArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "definition": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Definition"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "definition"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 432,
+          "end_line": 440,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 609,
+          "end_line": 621,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for audience creation from an arbitrary definition converted to an Audience protobuf. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1alpha createAudience"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "archive_audience",
+      "description": "Archive an audience by full resource name. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "archive_audienceArguments",
+        "properties": {
+          "audience_name": {
+            "type": "string",
+            "title": "Audience Name"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "audience_name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 443,
+          "end_line": 449,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 648,
+          "end_line": 656,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for audience archiving. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1alpha archiveAudience"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "add_custom_dimension",
+      "description": "Create a custom dimension. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_custom_dimensionArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "parameter_name": {
+            "type": "string",
+            "title": "Parameter Name"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "scope": {
+            "type": "string",
+            "default": "EVENT",
+            "title": "Scope"
+          },
+          "description": {
+            "type": "string",
+            "default": "",
+            "title": "Description"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "parameter_name",
+          "display_name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 452,
+          "end_line": 476,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 677,
+          "end_line": 696,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for custom-dimension creation. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta createCustomDimension"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "add_custom_metric",
+      "description": "Create a custom metric. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_custom_metricArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "parameter_name": {
+            "type": "string",
+            "title": "Parameter Name"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "measurement_unit": {
+            "type": "string",
+            "title": "Measurement Unit"
+          },
+          "scope": {
+            "type": "string",
+            "default": "EVENT",
+            "title": "Scope"
+          },
+          "description": {
+            "type": "string",
+            "default": "",
+            "title": "Description"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "parameter_name",
+          "display_name",
+          "measurement_unit"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 479,
+          "end_line": 505,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 710,
+          "end_line": 730,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for custom-metric creation. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta createCustomMetric"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "archive_custom_dimension",
+      "description": "Archive a custom dimension by full resource name. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "archive_custom_dimensionArguments",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 508,
+          "end_line": 514,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 699,
+          "end_line": 707,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for custom-dimension archiving. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta archiveCustomDimension"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "archive_custom_metric",
+      "description": "Archive a custom metric by full resource name. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "archive_custom_metricArguments",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 517,
+          "end_line": 523,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 733,
+          "end_line": 741,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for custom-metric archiving. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1beta archiveCustomMetric"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "add_event_edit_rule",
+      "description": "Create an event edit rule on a data stream. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_event_edit_ruleArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "stream_id": {
+            "type": "string",
+            "title": "Stream Id"
+          },
+          "definition": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Definition"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "stream_id",
+          "definition"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 526,
+          "end_line": 534,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 513,
+          "end_line": 524,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for event edit rule creation from an arbitrary definition converted to a protobuf. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1alpha createEventEditRule"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "add_event_create_rule",
+      "description": "Create an event create rule on a data stream. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "add_event_create_ruleArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "stream_id": {
+            "type": "string",
+            "title": "Stream Id"
+          },
+          "definition": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Definition"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "property_id",
+          "stream_id",
+          "definition"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 537,
+          "end_line": 545,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 563,
+          "end_line": 574,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for event create rule creation from an arbitrary definition converted to a protobuf. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1alpha createEventCreateRule"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "delete_event_edit_rule",
+      "description": "Delete an event edit rule by full resource name. Preview by default; execution also requires interactive y/N approval.",
+      "inputSchema": {
+        "type": "object",
+        "title": "delete_event_edit_ruleArguments",
+        "properties": {
+          "rule_name": {
+            "type": "string",
+            "title": "Rule Name"
+          },
+          "confirm": {
+            "type": "boolean",
+            "default": false,
+            "title": "Confirm"
+          }
+        },
+        "required": [
+          "rule_name"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 548,
+          "end_line": 554,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 542,
+          "end_line": 549,
+          "role": "handler"
+        }
+      ],
+      "behavior": "With confirm=false returns a local dry-run preview. With confirm=true delegates to the underlying Admin writer for event edit rule deletion. The writer requires interactive terminal y/N approval before obtaining write credentials or making API calls; stdio MCP cannot approve it.",
+      "scope": "ga4",
+      "effect": "mixed",
+      "api_methods": [
+        "Admin API v1alpha deleteEventEditRule"
+      ],
+      "notes": [
+        "confirm=true is not approval: non-TTY stdio returns confirmation_required with applied=false before any API call. Plain definition/parameter strings have no exposed protobuf/enum constraints."
+      ]
+    },
+    {
+      "name": "property_details",
+      "description": "Fetch the property summary from the Admin API.",
+      "inputSchema": {
+        "type": "object",
+        "title": "property_detailsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 557,
+          "end_line": 561,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 219,
+          "end_line": 231,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads and optionally caches the Admin property summary.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta getProperty"
+      ],
+      "notes": []
+    },
+    {
+      "name": "data_streams",
+      "description": "List the data streams configured on the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "data_streamsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 564,
+          "end_line": 568,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 234,
+          "end_line": 247,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists Admin data streams for the property.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listDataStreams"
+      ],
+      "notes": []
+    },
+    {
+      "name": "custom_defs",
+      "description": "List custom dimensions and metrics on the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "custom_defsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 571,
+          "end_line": 575,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 292,
+          "end_line": 310,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists Admin custom dimensions and custom metrics for the property.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listCustomDimensions",
+        "Admin API v1beta listCustomMetrics"
+      ],
+      "notes": []
+    },
+    {
+      "name": "key_events",
+      "description": "List the key events (conversions) on the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "key_eventsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 578,
+          "end_line": 582,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 313,
+          "end_line": 333,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists and caches Admin key events; falls back to legacy conversion events when supported methods are absent.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listKeyEvents",
+        "Admin API v1beta listConversionEvents"
+      ],
+      "notes": []
+    },
+    {
+      "name": "attribution_settings",
+      "description": "Read the property's attribution settings.",
+      "inputSchema": {
+        "type": "object",
+        "title": "attribution_settingsArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 585,
+          "end_line": 589,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 336,
+          "end_line": 352,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads alpha Admin attribution settings and returns status when unavailable.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha getAttributionSettings"
+      ],
+      "notes": []
+    },
+    {
+      "name": "reporting_identity",
+      "description": "Read the selected reporting identity; does not change the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "reporting_identityArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 592,
+          "end_line": 596,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 420,
+          "end_line": 441,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads alpha Admin reporting identity settings, without changing the property.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha getReportingIdentitySettings"
+      ],
+      "notes": [
+        "Unconditionally registered; returns unsupported when the installed alpha Admin client lacks this method."
+      ]
+    },
+    {
+      "name": "list_audiences",
+      "description": "List the audiences on the property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_audiencesArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 599,
+          "end_line": 603,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 590,
+          "end_line": 599,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists alpha Admin audiences for the property.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha listAudiences"
+      ],
+      "notes": []
+    },
+    {
+      "name": "list_event_rules",
+      "description": "List event edit and create rules for a data stream.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_event_rulesArguments",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "stream_id": {
+            "type": "string",
+            "title": "Stream Id"
+          }
+        },
+        "required": [
+          "property_id",
+          "stream_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 606,
+          "end_line": 610,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_admin.py",
+          "start_line": 501,
+          "end_line": 510,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Lists alpha Admin event edit and event create rules under the property/data-stream parent.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha listEventEditRules",
+        "Admin API v1alpha listEventCreateRules"
+      ],
+      "notes": []
+    },
+    {
+      "name": "list_segments",
+      "description": "List locally stored segment definitions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_segmentsArguments",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 613,
+          "end_line": 616,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_definitions.py",
+          "start_line": 73,
+          "end_line": 85,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads locally saved segment-definition JSON files; no GA API calls.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "list_saved_reports",
+      "description": "List locally stored custom report definitions.",
+      "inputSchema": {
+        "type": "object",
+        "title": "list_saved_reportsArguments",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 619,
+          "end_line": 622,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_definitions.py",
+          "start_line": 186,
+          "end_line": 204,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads locally saved custom-report-definition JSON files; no GA API calls.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "run_saved_report",
+      "description": "Run a saved custom report definition against a property.",
+      "inputSchema": {
+        "type": "object",
+        "title": "run_saved_reportArguments",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Days"
+          }
+        },
+        "required": [
+          "name",
+          "property_id"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "scripts/ga4_mcp.py",
+          "start_line": 625,
+          "end_line": 629,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "scripts/ga4_definitions.py",
+          "start_line": 223,
+          "end_line": 302,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Loads a saved report definition locally and runs a Core report using its metrics/dimensions/filter/paging/date options, overriding relative days when supplied; renders its configured output format.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Output depends on saved default_format and may be JSON, CSV, Markdown, HTML or PDF bytes; optional PDF rendering dependencies may be required."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no upstream code, tools/list, authenticated requests or runtime server executed.",
+    "Source has no .git; supplied revision is authoritative.",
+    "All 47 decorators register unconditionally in scripts/ga4_mcp.py. No optional module adds tools. Optional MCP dependency (mcp>=1.2,<2) is required for ga4-mcp; BigQuery and PDF capability dependencies are optional.",
+    "Schemas reconstructed from AST annotations/defaults and full function docstrings. No Context injection, Pydantic input models, Field constraints or parameter docstrings are present. dict[str,Any] remains arbitrary object; dict[str,str] has string additionalProperties. Runtime FastMCP/Pydantic presentation details may vary with installed versions.",
+    "Admin writer tools default to previews; the non-TTY MCP transport cannot satisfy interactive terminal approval. Local proposal support deliberately has no MCP execution tool.",
+    "Auth-guarded tools apply a read budget, PII scrubbing and structured auth/API/confirmation error handling; cache and support file writes may accompany read operations."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root independently compared all 47 signatures, defaults, required sets and full descriptions with AST; reviewed core dispatch, read-only previews, terminal approval and GA4 BigQuery dry-run behavior."
+  }
+}

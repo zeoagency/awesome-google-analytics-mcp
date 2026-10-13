@@ -1,0 +1,1868 @@
+{
+  "repo": "delaren47/gsc-ga4-mcp",
+  "revision": "b21d75c0baa66e4a9f992aa864ef6aaa5196794f",
+  "status": "included",
+  "reason": "Stdio MCP registers actual read-only GA4 Admin/Data API reports, Search Console tools, combined page analyses and local mapping tools.",
+  "registration_sources": [
+    {
+      "path": "src/index.ts",
+      "start_line": 31,
+      "end_line": 236,
+      "role": "registration/schema/handler"
+    }
+  ],
+  "tool_count": 20,
+  "tools": [
+    {
+      "name": "project_mappings",
+      "description": "List local domain/client mappings from PROJECTS_CONFIG.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 44,
+          "end_line": 44,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 51,
+          "end_line": 58,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads PROJECTS_CONFIG JSON and returns its projects array, or an empty array for an unset/missing file. Returns JSON-stringified data in MCP text content.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "project_lookup",
+      "description": "Find a local project mapping by project name, client, or domain.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "nameOrDomain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nameOrDomain"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 46,
+          "end_line": 51,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 60,
+          "end_line": 67,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads local mappings and returns the first project whose name, client or domain equals or contains the case-insensitive query, otherwise {found:false}. Returns JSON-stringified data in MCP text content.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    },
+    {
+      "name": "gsc_list_sites",
+      "description": "List Google Search Console sites visible to the current credentials.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 53,
+          "end_line": 53,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 29,
+          "end_line": 31,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GETs Search Console sites visible to credentials. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 sites.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_search_analytics",
+      "description": "Run a raw Search Console Search Analytics query.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "query"
+            ]
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "startRow": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ]
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 55,
+          "end_line": 67,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "POSTs startDate/endDate, named dimensions, capped rowLimit, startRow (default 0), type (default web) to the encoded site searchAnalytics/query endpoint. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "Internal dimensionFilterGroups is not exposed in the registered schema.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "gsc_top_queries",
+      "description": "Top GSC queries by clicks/impressions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 69,
+          "end_line": 74,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Queries GSC with dimensions [query]. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "gsc_top_pages",
+      "description": "Top GSC pages by clicks/impressions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 81,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Queries GSC with dimensions [page]. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "gsc_query_page_matrix",
+      "description": "GSC query/page matrix for finding page-level keyword opportunities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 1000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 83,
+          "end_line": 88,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Queries GSC with dimensions [query,page]. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "gsc_url_inspection",
+      "description": "Inspect Google index status for a URL under a GSC property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "inspectionUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "languageCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "inspectionUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 90,
+          "end_line": 99,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 60,
+          "end_line": 67,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "POSTs siteUrl and inspectionUrl to index:inspect; omitted languageCode becomes es-MX. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console URL Inspection API v1 urlInspection.index.inspect"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix."
+      ]
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List GA4 accounts and property summaries visible to the credentials.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 101,
+          "end_line": 101,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 69,
+          "end_line": 81,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GETs accountSummaries with pageSize 200, following nextPageToken until exhausted, and returns all account summaries. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a raw GA4 Data API report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate",
+          "dimensions",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 103,
+          "end_line": 115,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "POSTs one date range, dimensions/metrics converted from names to {name} objects, capped limit and offset (default 0) encoded as strings to the property runReport endpoint. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "Internal dimensionFilter, metricFilter and orderBys are not exposed in the registered schema.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "ga4_top_pages",
+      "description": "Top GA4 pages by views, users, and sessions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 117,
+          "end_line": 129,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Runs report with pagePathPlusQueryString,pageTitle and screenPageViews,activeUsers,sessions. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "ga4_traffic_sources",
+      "description": "GA4 traffic sources by default channel group and source/medium.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 131,
+          "end_line": 143,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Runs report with sessionDefaultChannelGroup,sessionSourceMedium and sessions,activeUsers,engagedSessions,conversions. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "ga4_landing_pages",
+      "description": "GA4 landing pages with engagement metrics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 145,
+          "end_line": 157,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Runs report with landingPagePlusQueryString and sessions,engagedSessions,engagementRate. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "ga4_events",
+      "description": "GA4 events by event name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 159,
+          "end_line": 171,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Runs report with eventName and eventCount,activeUsers. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "ga4_realtime",
+      "description": "GA4 realtime active users report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "unifiedScreenName"
+            ]
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "activeUsers"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 100
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 173,
+          "end_line": 183,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 109,
+          "end_line": 122,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "POSTs dimensions and metrics converted to {name} objects and capped string limit to property runRealtimeReport. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination."
+      ]
+    },
+    {
+      "name": "find_high_impression_low_ctr_pages",
+      "description": "Find GSC pages with high impressions and low CTR.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "minImpressions": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "default": 500
+          },
+          "maxCtr": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "default": 0.02
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 5000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 185,
+          "end_line": 196,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 16,
+          "end_line": 45,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Queries GSC page rows, keeps impressions >= minImpressions and ctr <= maxCtr, emits metrics and opportunityScore = round(impressions*(maxCtr-ctr+0.001)), sorted descending. Returns JSON-stringified data in MCP text content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation."
+      ]
+    },
+    {
+      "name": "compare_gsc_ga4_pages",
+      "description": "Join GSC page performance with GA4 landing-page engagement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 5000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 198,
+          "end_line": 203,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 47,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 3,
+          "end_line": 14,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 47,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Concurrently requests GSC page rows and GA4 landingPagePlusQueryString with sessions, engagedSessions, engagementRate. Maps GA4 rows by normalized path, then emits each GSC page with joined metrics; missing GA4 engagement is null and other GA4 metrics are zero. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query",
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation.",
+        "Join uses a Map with last row winning for duplicate normalized GA4 paths, without aggregating. Absolute URLs lose queries through URL.pathname, whereas relative landing paths keep query strings in the fallback; this can prevent matches. Results use only returned GSC rows."
+      ]
+    },
+    {
+      "name": "find_pages_with_clicks_but_low_engagement",
+      "description": "Find pages with GSC clicks but weak GA4 engagement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "minClicks": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "default": 20
+          },
+          "maxEngagementRate": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "default": 0.35
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 5000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 205,
+          "end_line": 217,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 101,
+          "end_line": 116,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 3,
+          "end_line": 14,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 47,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 101,
+          "end_line": 116,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Concurrently requests GSC page rows and GA4 landingPagePlusQueryString with sessions, engagedSessions, engagementRate. Maps GA4 rows by normalized path, then emits each GSC page with joined metrics; missing GA4 engagement is null and other GA4 metrics are zero. Filters gscClicks >= minClicks and engagement <= maxEngagementRate (missing engagement treated as 1), sorts descending by clicks. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query",
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation.",
+        "Join uses a Map with last row winning for duplicate normalized GA4 paths, without aggregating. Absolute URLs lose queries through URL.pathname, whereas relative landing paths keep query strings in the fallback; this can prevent matches. Results use only returned GSC rows."
+      ]
+    },
+    {
+      "name": "content_refresh_candidates",
+      "description": "Rank pages that may deserve a content refresh based on GSC opportunity and GA4 engagement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 5000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 219,
+          "end_line": 224,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 118,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 3,
+          "end_line": 14,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 47,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 118,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Concurrently requests GSC page rows and GA4 landingPagePlusQueryString with sessions, engagedSessions, engagementRate. Maps GA4 rows by normalized path, then emits each GSC page with joined metrics; missing GA4 engagement is null and other GA4 metrics are zero. Computes refreshScore = impressions*max(0,0.08-ctr)+clicks*max(0,0.5-(engagementRate??0.5))*10, retains positive scores and sorts descending. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query",
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation.",
+        "Join uses a Map with last row winning for duplicate normalized GA4 paths, without aggregating. Absolute URLs lose queries through URL.pathname, whereas relative landing paths keep query strings in the fallback; this can prevent matches. Results use only returned GSC rows."
+      ]
+    },
+    {
+      "name": "seo_opportunity_report",
+      "description": "Compact SEO opportunity report combining high-impression/low-CTR and low-engagement candidates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "GSC property, e.g. sc-domain:example.com or https://www.example.com/"
+          },
+          "property": {
+            "type": "string",
+            "description": "GA4 property, e.g. properties/123456789 or 123456789"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "rowLimit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 5000
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 226,
+          "end_line": 236,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 16,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 39,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 17,
+          "end_line": 19,
+          "role": "handler"
+        },
+        {
+          "path": "src/config.ts",
+          "start_line": 34,
+          "end_line": 37,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 3,
+          "end_line": 14,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 47,
+          "end_line": 99,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 33,
+          "end_line": 58,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 83,
+          "end_line": 107,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 101,
+          "end_line": 116,
+          "role": "handler"
+        },
+        {
+          "path": "src/analysis.ts",
+          "start_line": 118,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/google.ts",
+          "start_line": 6,
+          "end_line": 15,
+          "role": "handler"
+        },
+        {
+          "path": "src/auth.ts",
+          "start_line": 48,
+          "end_line": 65,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 31,
+          "end_line": 42,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Sequentially calls highImpressionLowCtrPages, pagesWithClicksButLowEngagement and contentRefreshCandidates with default thresholds and returns their three lists. Each independently fetches reports: total three GSC queries and two GA4 reports. Returns JSON-stringified data in MCP text content.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query",
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Optional siteUrl/property requires MCP_DEFAULT_GSC_SITE/MCP_DEFAULT_GA4_PROPERTY respectively when omitted; missing effective value throws. Numeric GA4 property IDs gain properties/ prefix.",
+        "Handler caps rows via MAX_ROWS (default 25000); omitted raw report/query limit becomes 1000. No automatic row pagination.",
+        "YYYY-MM-DD is descriptive only; dates have no format or regex validation.",
+        "Join uses a Map with last row winning for duplicate normalized GA4 paths, without aggregating. Absolute URLs lose queries through URL.pathname, whereas relative landing paths keep query strings in the fallback; this can prevent matches. Results use only returned GSC rows."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution, or live requests.",
+    "All 20 tools are registered unconditionally in src/index.ts. Auth CLI is a separate npm auth command, not an MCP tool.",
+    "Zod raw shapes are expanded including shared dateRange/gscSite/ga4Property objects. Zod objects strip unknown keys; additionalProperties false reflects exposed schema.",
+    "API requests require OAuth token/client files or service-account key. Authentication requests read-only webmasters and analytics scopes. No concrete unusable entrypoint found by source inspection."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root reviewed all 20 tool registrations and shared Zod date/property shapes, enums/positive integers/defaults, GA4 and GSC dispatch and joined normalized landing pages."
+  }
+}

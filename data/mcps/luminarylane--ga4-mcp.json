@@ -1,0 +1,412 @@
+{
+  "repo": "luminarylane/ga4-mcp",
+  "revision": "90e80869b6ad043956e8fb2d551332d5dec5312a",
+  "status": "included",
+  "reason": "Seven unconditionally registered FastMCP tools implement GA4 Data API reports/realtime reporting and Admin API account/property discovery. Published console entrypoint invokes ga4_server.main.",
+  "registration_sources": [
+    {
+      "path": "ga4_server.py",
+      "start_line": 399,
+      "end_line": 767
+    }
+  ],
+  "tool_count": 7,
+  "tools": [
+    {
+      "name": "ga4_list_properties",
+      "description": "List all GA4 properties accessible by the service account.\nReturns property IDs and display names.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "title": "ga4_list_propertiesArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 402,
+          "end_line": 437,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Creates an AnalyticsAdminServiceClient using service account credentials, eagerly lists accessible accounts, and lists properties filtered by parent account for each account. Returns account names plus property IDs and display names as text. These synchronous Admin API calls run directly in the async handler without the report retry/token wrapper.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listAccounts",
+        "Admin API v1beta listProperties"
+      ],
+      "notes": [
+        "Properties are discovered only under accounts returned by list_accounts; no separate direct-property discovery path."
+      ]
+    },
+    {
+      "name": "ga4_get_report",
+      "description": "Run a custom GA4 report with any combination of dimensions and metrics.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.\n    dimensions: Comma-separated dimension names (e.g., \"date\", \"sessionSource,sessionMedium\",\n                \"pagePath\", \"country\", \"deviceCategory\"). Default: \"date\".\n    metrics: Comma-separated metric names (e.g., \"sessions,totalUsers,screenPageViews\",\n             \"bounceRate,averageSessionDuration,conversions\"). Default: \"sessions,totalUsers,screenPageViews\".\n    days: Lookback period in days (default: 28).\n    row_limit: Max rows to return (default: 20, max: 100).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          },
+          "dimensions": {
+            "type": "string",
+            "title": "Dimensions",
+            "default": "date",
+            "description": "Comma-separated dimension names (e.g., \"date\", \"sessionSource,sessionMedium\", \"pagePath\", \"country\", \"deviceCategory\"). Default: \"date\"."
+          },
+          "metrics": {
+            "type": "string",
+            "title": "Metrics",
+            "default": "sessions,totalUsers,screenPageViews",
+            "description": "Comma-separated metric names (e.g., \"sessions,totalUsers,screenPageViews\", \"bounceRate,averageSessionDuration,conversions\"). Default: \"sessions,totalUsers,screenPageViews\"."
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 28,
+            "description": "Lookback period in days (default: 28)."
+          },
+          "row_limit": {
+            "type": "integer",
+            "title": "Row Limit",
+            "default": 20,
+            "description": "Max rows to return (default: 20, max: 100)."
+          }
+        },
+        "title": "ga4_get_reportArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 440,
+          "end_line": 491,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Splits comma-separated dimension and metric names, strips whitespace and drops empty names. Calls run_report with one UTC date range from today minus days through today, row limit clamped to 1–100, and descending order on the first metric when present. Returns a formatted text table.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "The 1–100 row limit is imposed in the handler, not JSON Schema. No positivity constraint is declared for days."
+      ]
+    },
+    {
+      "name": "ga4_get_top_pages",
+      "description": "Get top pages by sessions. Shows page path, sessions, users, pageviews,\nbounce rate, and average session duration.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.\n    days: Lookback period in days (default: 28).\n    row_limit: Max rows to return (default: 20).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 28,
+            "description": "Lookback period in days (default: 28)."
+          },
+          "row_limit": {
+            "type": "integer",
+            "title": "Row Limit",
+            "default": 20,
+            "description": "Max rows to return (default: 20)."
+          }
+        },
+        "title": "ga4_get_top_pagesArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 494,
+          "end_line": 536,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Report preset: calls run_report with pagePath dimension and sessions, totalUsers, screenPageViews, bounceRate, averageSessionDuration metrics; UTC date range from today minus days through today; row limit clamped to 1–100; descending sessions order. Returns a formatted text table.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "The handler clamps row_limit to 1–100 although its docstring does not mention the upper bound."
+      ]
+    },
+    {
+      "name": "ga4_get_traffic_sources",
+      "description": "Get traffic sources breakdown by source/medium. Shows sessions, users,\nbounce rate, and conversions per traffic source.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.\n    days: Lookback period in days (default: 28).\n    row_limit: Max rows to return (default: 20).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 28,
+            "description": "Lookback period in days (default: 28)."
+          },
+          "row_limit": {
+            "type": "integer",
+            "title": "Row Limit",
+            "default": 20,
+            "description": "Max rows to return (default: 20)."
+          }
+        },
+        "title": "ga4_get_traffic_sourcesArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 539,
+          "end_line": 583,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Report preset: calls run_report with sessionSource and sessionMedium dimensions and sessions, totalUsers, bounceRate, conversions metrics; UTC date range from today minus days through today; row limit clamped to 1–100; descending sessions order. Returns a formatted text table.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "The handler clamps row_limit to 1–100 although its docstring does not mention the upper bound."
+      ]
+    },
+    {
+      "name": "ga4_get_conversions",
+      "description": "Get conversion events and their counts. Shows which events are firing\nand how often, broken down by event name.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.\n    days: Lookback period in days (default: 28).\n    row_limit: Max rows to return (default: 20).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 28,
+            "description": "Lookback period in days (default: 28)."
+          },
+          "row_limit": {
+            "type": "integer",
+            "title": "Row Limit",
+            "default": 20,
+            "description": "Max rows to return (default: 20)."
+          }
+        },
+        "title": "ga4_get_conversionsArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 586,
+          "end_line": 628,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Report preset: calls run_report with eventName dimension and eventCount, totalUsers, conversions metrics; UTC date range from today minus days through today; row limit clamped to 1–100; descending eventCount order. Returns a formatted text table; no filter limits results to conversion events.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "All events are returned; the handler does not filter to conversion events. The handler clamps row_limit to 1–100 although its docstring does not mention the upper bound."
+      ]
+    },
+    {
+      "name": "ga4_get_realtime",
+      "description": "Get realtime active users and current events on the site.\nShows what's happening RIGHT NOW — active users, top pages, traffic sources.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          }
+        },
+        "title": "ga4_get_realtimeArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 631,
+          "end_line": 677,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Calls run_realtime_report with unifiedScreenName dimension, activeUsers metric and fixed limit 10. Sums activeUsers from returned rows and prints that sum plus page/user rows. Returns a no-active-users message when no rows are returned.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Despite the description mentioning current events and traffic sources, only activeUsers grouped by unifiedScreenName is requested. The displayed total sums only up to 10 returned rows, not a separate property-wide aggregate."
+      ]
+    },
+    {
+      "name": "ga4_compare_periods",
+      "description": "Compare current period vs previous period for key metrics.\nShows absolute values and percentage change for each metric.\n\nArgs:\n    property_id: GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var.\n    metrics: Comma-separated metrics to compare (default: sessions, users, pageviews,\n             bounce rate, avg session duration, conversions).\n    days: Period length in days (default: 28). Compares last N days vs the N days before that.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id",
+            "default": "",
+            "description": "GA4 property ID (numeric). Leave empty to use GA4_PROPERTY_ID env var."
+          },
+          "metrics": {
+            "type": "string",
+            "title": "Metrics",
+            "default": "sessions,totalUsers,screenPageViews,bounceRate,averageSessionDuration,conversions",
+            "description": "Comma-separated metrics to compare (default: sessions, users, pageviews, bounce rate, avg session duration, conversions)."
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 28,
+            "description": "Period length in days (default: 28). Compares last N days vs the N days before that."
+          }
+        },
+        "title": "ga4_compare_periodsArguments",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "ga4_server.py",
+          "start_line": 680,
+          "end_line": 767,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 376,
+          "end_line": 396,
+          "role": "property and date helpers"
+        },
+        {
+          "path": "ga4_server.py",
+          "start_line": 181,
+          "end_line": 254,
+          "role": "client/rate limit/retry helpers"
+        }
+      ],
+      "behavior": "Splits comma-separated metric names and calls run_report with no requested dimensions and two date ranges: today minus days through today, and today minus twice days through today minus days. Treats first two returned rows as current and previous; formats absolute values and percent changes, using N/A for a zero previous value.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "The two inclusive date ranges share their boundary date, and each contains days + 1 calendar dates. The handler assumes row order corresponds to current then previous rather than inspecting a dateRange dimension."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list or live requests. Git HEAD matches the supplied revision.",
+    "All seven decorators are unconditional. No other modules, optional tool sets, aliases, nested input models or injected Context parameters are present.",
+    "Schemas reconstructed from primitive Python signatures/defaults and parameter docstrings; parameter descriptions are source-derived documentation, not claimed runtime tools/list output. No minimum/maximum or enum constraints are exposed by annotations.",
+    "Service-account authentication only: GA4_CREDENTIALS_PATH, GSC_CREDENTIALS_PATH or known service_account_credentials.json paths; analytics.readonly scope. Reports also need a property_id argument or GA4_PROPERTY_ID. OAuth is mentioned in module prose but has no implementation.",
+    "Shared _format_value accesses MetricType.TYPE_SECONDS (line 262); this member reference requires dependency compatibility and was not runtime-tested. Integer formatting evaluates that attribute after the TYPE_FLOAT check.",
+    "Reports use a shared token bucket and retry transient API errors three times; tool exceptions are returned as text. Admin account/property discovery bypasses those helpers.",
+    "pyproject.toml packages ga4_server and exposes luminarylane-ga4-mcp = ga4_server:main; required Google, MCP and Sentry dependencies are declared."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently checked every Python signature/default/docstring and read report, realtime, comparison and discovery handlers; confirmed source-only constraints, overlapping dates and formatting dependency caveat."
+  }
+}

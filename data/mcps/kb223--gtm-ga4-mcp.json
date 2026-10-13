@@ -1,0 +1,1221 @@
+{
+  "repo": "kb223/gtm-ga4-mcp",
+  "revision": "40862b6e92d0b70e04b543a6f7ec854258e392cd",
+  "status": "included",
+  "reason": "Concrete GA4 Data/Admin API report, metadata, account and entity handlers with GTM v2 tools; MCPServer v2 registration via ToolSpec registry.",
+  "registration_sources": [
+    {
+      "path": "src/gtm_ga4_mcp/registry.py",
+      "start_line": 1,
+      "end_line": 75
+    },
+    {
+      "path": "src/gtm_ga4_mcp/server.py",
+      "start_line": 1,
+      "end_line": 40
+    },
+    {
+      "path": "src/gtm_ga4_mcp/config.py",
+      "start_line": 1,
+      "end_line": 113
+    }
+  ],
+  "tool_count": 16,
+  "tools": [
+    {
+      "name": "ga4_account_summaries",
+      "description": "List every GA4 account and property the authenticated user can access.\n\nThis is the entry point for all GA4 work — it returns the property IDs the\nother ga4_* tools need.",
+      "inputSchema": {
+        "properties": {
+          "page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Pagination token from a previous response.",
+            "title": "Page Token"
+          }
+        },
+        "type": "object",
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 49,
+          "end_line": 83,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 133,
+          "end_line": 138,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Lists account summaries with pageSize 200 and optional page token; returns trimmed accounts and property summaries.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsadmin v1beta accountSummaries.list"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "ga4_admin_create",
+      "description": "Create a GA4 custom dimension, custom metric, key event, or data stream on a property.\n\nDefaults to dry-run: nothing is sent until called with dry_run=False.",
+      "inputSchema": {
+        "$defs": {
+          "Ga4WriteEntityType": {
+            "enum": [
+              "custom_dimensions",
+              "custom_metrics",
+              "key_events",
+              "data_streams",
+              "property"
+            ],
+            "title": "Ga4WriteEntityType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "entity_type": {
+            "$ref": "#/$defs/Ga4WriteEntityType",
+            "description": "What to create: custom_dimensions, custom_metrics, key_events, or data_streams."
+          },
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          },
+          "body": {
+            "additionalProperties": true,
+            "description": "Entity JSON per the Admin API, e.g. a custom dimension: {'parameterName': 'lead_type', 'displayName': 'Lead Type', 'scope': 'EVENT'}.",
+            "title": "Body",
+            "type": "object"
+          },
+          "dry_run": {
+            "default": true,
+            "description": "True (default) echoes the request without sending it.",
+            "title": "Dry Run",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entity_type",
+          "property_id",
+          "body"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_write.py",
+          "start_line": 41,
+          "end_line": 83,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_write.py",
+          "start_line": 145,
+          "end_line": 145,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Returns the request locally when dry_run is true; otherwise creates the selected property sub-entity using the arbitrary JSON body.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "analyticsadmin v1beta properties.customDimensions.create",
+        "analyticsadmin v1beta properties.customMetrics.create",
+        "analyticsadmin v1beta properties.keyEvents.create",
+        "analyticsadmin v1beta properties.dataStreams.create"
+      ],
+      "notes": [
+        "Schema enum also accepts property, but handler rejects creating properties.",
+        "Requires write/destructive tier; dry_run defaults true. Arbitrary dict bodies expose additionalProperties=true, not an API-specific body model."
+      ],
+      "permission_tier": "WRITE"
+    },
+    {
+      "name": "ga4_admin_delete",
+      "description": "Delete or archive a GA4 entity by resource name. Two-phase.\n\nCustom dimensions/metrics are ARCHIVED (permanent — GA4 has no unarchive\nor true delete for them); key events and data streams are DELETED.\nDeleting a data stream stops collection for it. Properties cannot be\ndeleted through this tool by design.",
+      "inputSchema": {
+        "properties": {
+          "name": {
+            "description": "Full resource name from a read tool, e.g. 'properties/123/customDimensions/456' or 'properties/123/dataStreams/789'.",
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "confirm_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Omit on the first call — it returns a token and a summary instead of deleting. Pass the token back (same name) to execute.",
+            "title": "Confirm Token"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_destructive.py",
+          "start_line": 27,
+          "end_line": 91,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_destructive.py",
+          "start_line": 95,
+          "end_line": 100,
+          "role": "registration"
+        }
+      ],
+      "behavior": "First call issues an operation-bound confirmation token. Redeeming it archives a custom dimension/metric or deletes a key event/data stream.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "analyticsadmin v1beta properties.customDimensions.archive",
+        "analyticsadmin v1beta properties.customMetrics.archive",
+        "analyticsadmin v1beta properties.keyEvents.delete",
+        "analyticsadmin v1beta properties.dataStreams.delete"
+      ],
+      "notes": [
+        "Only four-segment properties/{id}/{collection}/{id} names accepted; collection must be customDimensions, customMetrics, keyEvents or dataStreams. Return key for archive is archived; delete produces deleted.",
+        "Requires destructive tier. Confirmation tokens are in-memory, single-use, expire after 600 seconds and bind to exact operation arguments; consumed before API execution."
+      ],
+      "permission_tier": "DESTRUCTIVE"
+    },
+    {
+      "name": "ga4_admin_list",
+      "description": "List a GA4 property's sub-entities.\n\nCovers data streams, key events, custom dimensions/metrics, Google Ads\nlinks, and Firebase links.",
+      "inputSchema": {
+        "$defs": {
+          "Ga4AdminEntityType": {
+            "enum": [
+              "data_streams",
+              "key_events",
+              "custom_dimensions",
+              "custom_metrics",
+              "google_ads_links",
+              "firebase_links"
+            ],
+            "title": "Ga4AdminEntityType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "entity_type": {
+            "$ref": "#/$defs/Ga4AdminEntityType",
+            "description": "Which property sub-entity to list."
+          },
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          },
+          "page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Pagination token from a previous response.",
+            "title": "Page Token"
+          }
+        },
+        "required": [
+          "entity_type",
+          "property_id"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 97,
+          "end_line": 129,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 140,
+          "end_line": 140,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Dispatches entity type to property resource list and returns items with pagination token.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsadmin v1beta properties.dataStreams.list",
+        "analyticsadmin v1beta properties.keyEvents.list",
+        "analyticsadmin v1beta properties.customDimensions.list",
+        "analyticsadmin v1beta properties.customMetrics.list",
+        "analyticsadmin v1beta properties.googleAdsLinks.list",
+        "analyticsadmin v1beta properties.firebaseLinks.list"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "ga4_admin_update",
+      "description": "Update a GA4 entity (or the property itself) by resource name. Defaults to dry-run.\n\nUnlike GTM, GA4 updates are partial: only fields named in update_mask change.",
+      "inputSchema": {
+        "$defs": {
+          "Ga4WriteEntityType": {
+            "enum": [
+              "custom_dimensions",
+              "custom_metrics",
+              "key_events",
+              "data_streams",
+              "property"
+            ],
+            "title": "Ga4WriteEntityType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "entity_type": {
+            "$ref": "#/$defs/Ga4WriteEntityType",
+            "description": "What to update, including 'property' for the property itself."
+          },
+          "name": {
+            "description": "Full resource name from a read tool, e.g. 'properties/123/customDimensions/456' or 'properties/123' for the property.",
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "body": {
+            "additionalProperties": true,
+            "description": "Fields to change, e.g. {'displayName': 'New name'}.",
+            "title": "Body",
+            "type": "object"
+          },
+          "update_mask": {
+            "description": "Comma-separated field names being updated (e.g. 'displayName,description'), or '*' to update every field present in body.",
+            "minLength": 1,
+            "title": "Update Mask",
+            "type": "string"
+          },
+          "dry_run": {
+            "default": true,
+            "description": "True (default) echoes the request without sending it.",
+            "title": "Dry Run",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entity_type",
+          "name",
+          "body",
+          "update_mask"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_write.py",
+          "start_line": 86,
+          "end_line": 141,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_write.py",
+          "start_line": 146,
+          "end_line": 146,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Returns the request locally when dry_run is true; otherwise patches the selected resource with the arbitrary JSON body and updateMask.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "analyticsadmin v1beta properties.patch",
+        "analyticsadmin v1beta properties.customDimensions.patch",
+        "analyticsadmin v1beta properties.customMetrics.patch",
+        "analyticsadmin v1beta properties.keyEvents.patch",
+        "analyticsadmin v1beta properties.dataStreams.patch"
+      ],
+      "notes": [
+        "Resource name must start with properties/; validation does not verify selected entity type matches the name.",
+        "Requires write/destructive tier; dry_run defaults true. Arbitrary dict bodies expose additionalProperties=true, not an API-specific body model."
+      ],
+      "permission_tier": "WRITE"
+    },
+    {
+      "name": "ga4_metadata",
+      "description": "List the dimension/metric API names available on a property (standard + custom).\n\nUse this before ga4_run_report to find exact API names.",
+      "inputSchema": {
+        "properties": {
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional case-insensitive filter on API/UI names, e.g. 'revenue'.",
+            "title": "Search"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 120,
+          "end_line": 166,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 177,
+          "end_line": 177,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Fetches property metadata, trims dimensions/metrics to API name, UI name and custom flag, optionally filters case-insensitively.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsdata v1beta properties.getMetadata"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "ga4_property_get",
+      "description": "Fetch one GA4 property's full configuration (timezone, currency, industry, service level).",
+      "inputSchema": {
+        "properties": {
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 86,
+          "end_line": 94,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_admin.py",
+          "start_line": 139,
+          "end_line": 139,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Normalizes numeric property ID and fetches full property configuration.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsadmin v1beta properties.get"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "ga4_run_realtime_report",
+      "description": "Run a GA4 realtime report (last 30 minutes) — e.g. to verify events are firing now.",
+      "inputSchema": {
+        "properties": {
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          },
+          "metrics": {
+            "description": "Realtime metric API names, e.g. ['activeUsers', 'eventCount'].",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Metrics",
+            "type": "array"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Realtime dimension API names, e.g. ['eventName', 'country'].",
+            "title": "Dimensions"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Maximum rows to return.",
+            "maximum": 250,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 85,
+          "end_line": 117,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 171,
+          "end_line": 176,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Builds a realtime report; normalizes property ID, executes runRealtimeReport and reshapes response rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsdata v1beta properties.runRealtimeReport"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a GA4 report over a date range and return one dict per row.\n\nRows are keyed by the requested dimension/metric API names. `row_count` is\nthe total available on the server; raise `limit` or refine dimensions if\nrows were truncated.",
+      "inputSchema": {
+        "properties": {
+          "property_id": {
+            "description": "GA4 property ID, e.g. '123456' or 'properties/123456'.",
+            "title": "Property Id",
+            "type": "string"
+          },
+          "metrics": {
+            "description": "Metric API names, e.g. ['sessions', 'conversions', 'totalRevenue']. Discover names via ga4_metadata.",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Metrics",
+            "type": "array"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Dimension API names, e.g. ['date', 'sessionDefaultChannelGroup'].",
+            "title": "Dimensions"
+          },
+          "start_date": {
+            "default": "28daysAgo",
+            "description": "Start date: 'YYYY-MM-DD', 'NdaysAgo', 'yesterday', or 'today'.",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "default": "today",
+            "description": "End date: 'YYYY-MM-DD', 'NdaysAgo', 'yesterday', or 'today'.",
+            "title": "End Date",
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Maximum rows to return.",
+            "maximum": 250,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 33,
+          "end_line": 82,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/ga4_data.py",
+          "start_line": 170,
+          "end_line": 170,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Builds a date-range report from metric/dimension names; normalizes property ID, executes runReport, reshapes parallel arrays into rows and returns rowCount.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "analyticsdata v1beta properties.runReport"
+      ],
+      "notes": [],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "gtm_create",
+      "description": "Create a GTM entity in a workspace (or a new workspace/environment in a container).\n\nDefaults to dry-run: nothing is sent until called with dry_run=False.\nChanges land in the workspace only — nothing goes live without gtm_publish.",
+      "inputSchema": {
+        "$defs": {
+          "GtmEntityType": {
+            "enum": [
+              "accounts",
+              "user_permissions",
+              "containers",
+              "destinations",
+              "environments",
+              "versions",
+              "workspaces",
+              "built_in_variables",
+              "clients",
+              "folders",
+              "tags",
+              "templates",
+              "transformations",
+              "triggers",
+              "variables",
+              "zones"
+            ],
+            "title": "GtmEntityType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "entity_type": {
+            "$ref": "#/$defs/GtmEntityType",
+            "description": "Entity to create: tags, triggers, variables, workspaces, ..."
+          },
+          "parent": {
+            "description": "Parent path: a container path for workspaces/environments, a workspace path for tags/triggers/variables/etc.",
+            "minLength": 1,
+            "title": "Parent",
+            "type": "string"
+          },
+          "body": {
+            "additionalProperties": true,
+            "description": "Entity JSON per the GTM API, e.g. a tag: {'name': ..., 'type': 'gaawe', 'parameter': [...], 'firingTriggerId': [...]}. Read a similar existing entity with gtm_get to see the expected shape.",
+            "title": "Body",
+            "type": "object"
+          },
+          "dry_run": {
+            "default": true,
+            "description": "True (default) echoes the request without sending it.",
+            "title": "Dry Run",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entity_type",
+          "parent",
+          "body"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_write.py",
+          "start_line": 54,
+          "end_line": 105,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_write.py",
+          "start_line": 172,
+          "end_line": 172,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Validates writable entity type and parent segment count. Dry-run echoes request; otherwise forwards arbitrary JSON to resource create.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "tagmanager v2 accounts.containers.workspaces.create",
+        "tagmanager v2 accounts.containers.environments.create",
+        "tagmanager v2 accounts.containers.workspaces.tags.create",
+        "tagmanager v2 accounts.containers.workspaces.triggers.create",
+        "tagmanager v2 accounts.containers.workspaces.variables.create",
+        "tagmanager v2 accounts.containers.workspaces.folders.create",
+        "tagmanager v2 accounts.containers.workspaces.templates.create",
+        "tagmanager v2 accounts.containers.workspaces.clients.create",
+        "tagmanager v2 accounts.containers.workspaces.transformations.create",
+        "tagmanager v2 accounts.containers.workspaces.zones.create"
+      ],
+      "notes": [
+        "Enum includes read-only entities; handler restricts to workspaces, environments, tags, triggers, variables, folders, templates, clients, transformations, zones. Parent path validation checks segment count only.",
+        "Requires write/destructive tier; dry_run defaults true. Arbitrary dict bodies expose additionalProperties=true, not an API-specific body model."
+      ],
+      "permission_tier": "WRITE"
+    },
+    {
+      "name": "gtm_delete",
+      "description": "Delete a GTM entity (tag, trigger, variable, workspace, version, ...). Two-phase.\n\nWithout confirm_token nothing is deleted; you get a summary + token to\nconfirm with. Deleting a workspace discards its unpublished changes.",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "Full path of the entity to delete, from gtm_list/gtm_get.",
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "confirm_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Omit on the first call — it returns a token and a summary instead of deleting. Pass the token back (same path) to execute.",
+            "title": "Confirm Token"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 46,
+          "end_line": 93,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 243,
+          "end_line": 243,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Validates deletable collection; first call issues a confirmation token, second matching call deletes the entity.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "tagmanager v2 accounts.containers.workspaces.delete",
+        "tagmanager v2 accounts.containers.environments.delete",
+        "tagmanager v2 accounts.containers.workspaces.tags.delete",
+        "tagmanager v2 accounts.containers.workspaces.triggers.delete",
+        "tagmanager v2 accounts.containers.workspaces.variables.delete",
+        "tagmanager v2 accounts.containers.workspaces.folders.delete",
+        "tagmanager v2 accounts.containers.workspaces.templates.delete",
+        "tagmanager v2 accounts.containers.workspaces.clients.delete",
+        "tagmanager v2 accounts.containers.workspaces.transformations.delete",
+        "tagmanager v2 accounts.containers.workspaces.zones.delete",
+        "tagmanager v2 accounts.containers.versions.delete"
+      ],
+      "notes": [
+        "Only workspaces, environments, tags, triggers, variables, folders, templates, clients, transformations, zones, versions collections may be deleted; accounts and containers excluded.",
+        "Requires destructive tier. Confirmation tokens are in-memory, single-use, expire after 600 seconds and bind to exact operation arguments; consumed before API execution."
+      ],
+      "permission_tier": "DESTRUCTIVE"
+    },
+    {
+      "name": "gtm_get",
+      "description": "Fetch one GTM entity's complete JSON by its path (tag, trigger, variable, version, ...).\n\nNote: fetching a version returns the entire published container (large).",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "Full GTM entity path from a gtm_list result, e.g. 'accounts/123/containers/456/workspaces/7/tags/8' or 'accounts/123/containers/456/versions/42'.",
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm.py",
+          "start_line": 214,
+          "end_line": 244,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm.py",
+          "start_line": 249,
+          "end_line": 249,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Validates alternating path segments, dispatches final collection to its discovery resource and gets full JSON.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "tagmanager v2 accounts.get",
+        "tagmanager v2 accounts.user_permissions.get",
+        "tagmanager v2 accounts.containers.get",
+        "tagmanager v2 accounts.containers.destinations.get",
+        "tagmanager v2 accounts.containers.environments.get",
+        "tagmanager v2 accounts.containers.versions.get",
+        "tagmanager v2 accounts.containers.workspaces.get",
+        "tagmanager v2 accounts.containers.workspaces.built_in_variables.get",
+        "tagmanager v2 accounts.containers.workspaces.clients.get",
+        "tagmanager v2 accounts.containers.workspaces.folders.get",
+        "tagmanager v2 accounts.containers.workspaces.tags.get",
+        "tagmanager v2 accounts.containers.workspaces.templates.get",
+        "tagmanager v2 accounts.containers.workspaces.transformations.get",
+        "tagmanager v2 accounts.containers.workspaces.triggers.get",
+        "tagmanager v2 accounts.containers.workspaces.variables.get",
+        "tagmanager v2 accounts.containers.workspaces.zones.get"
+      ],
+      "notes": [
+        "Handler checks even segment count and known final collection; schema only enforces nonempty string. Built-in-variable paths are dispatched to get without a special endpoint check."
+      ],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "gtm_list",
+      "description": "List Google Tag Manager entities one hierarchy level at a time.\n\nReturns trimmed summaries (path, name, type, IDs) to keep context small;\neach item's `path` feeds gtm_get (full detail) or a deeper gtm_list call.",
+      "inputSchema": {
+        "$defs": {
+          "GtmEntityType": {
+            "enum": [
+              "accounts",
+              "user_permissions",
+              "containers",
+              "destinations",
+              "environments",
+              "versions",
+              "workspaces",
+              "built_in_variables",
+              "clients",
+              "folders",
+              "tags",
+              "templates",
+              "transformations",
+              "triggers",
+              "variables",
+              "zones"
+            ],
+            "title": "GtmEntityType",
+            "type": "string"
+          }
+        },
+        "properties": {
+          "entity_type": {
+            "$ref": "#/$defs/GtmEntityType",
+            "description": "Which GTM entity to list. Walk the hierarchy: accounts -> containers -> workspaces -> tags/triggers/variables/..."
+          },
+          "parent": {
+            "default": "",
+            "description": "Parent path from a previous result, e.g. '' for accounts, 'accounts/123' for containers, 'accounts/123/containers/456' for workspaces/versions/environments, 'accounts/123/containers/456/workspaces/7' for tags/triggers/variables.",
+            "title": "Parent",
+            "type": "string"
+          },
+          "page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Pagination token from a previous response.",
+            "title": "Page Token"
+          },
+          "full": {
+            "default": false,
+            "description": "Return complete entity JSON instead of trimmed summaries. Prefer gtm_get for a single entity.",
+            "title": "Full",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entity_type"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm.py",
+          "start_line": 152,
+          "end_line": 211,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm.py",
+          "start_line": 248,
+          "end_line": 248,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Dispatches an entity type to a GTM resource list, validates parent segment count, returns full JSON or trimmed summaries and pagination token.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "tagmanager v2 accounts.list",
+        "tagmanager v2 accounts.user_permissions.list",
+        "tagmanager v2 accounts.containers.list",
+        "tagmanager v2 accounts.containers.destinations.list",
+        "tagmanager v2 accounts.containers.environments.list",
+        "tagmanager v2 accounts.containers.version_headers.list",
+        "tagmanager v2 accounts.containers.workspaces.list",
+        "tagmanager v2 accounts.containers.workspaces.built_in_variables.list",
+        "tagmanager v2 accounts.containers.workspaces.clients.list",
+        "tagmanager v2 accounts.containers.workspaces.folders.list",
+        "tagmanager v2 accounts.containers.workspaces.tags.list",
+        "tagmanager v2 accounts.containers.workspaces.templates.list",
+        "tagmanager v2 accounts.containers.workspaces.transformations.list",
+        "tagmanager v2 accounts.containers.workspaces.triggers.list",
+        "tagmanager v2 accounts.containers.workspaces.variables.list",
+        "tagmanager v2 accounts.containers.workspaces.zones.list"
+      ],
+      "notes": [
+        "Handler enforces parent segment count by entity, but does not validate collection names in parent path."
+      ],
+      "permission_tier": "READ"
+    },
+    {
+      "name": "gtm_permissions",
+      "description": "Grant, update, or revoke a user's access to a GTM account. Two-phase.\n\nAccess changes are security-sensitive: always show the summary to the\nuser before confirming.",
+      "inputSchema": {
+        "properties": {
+          "action": {
+            "description": "'grant' (new user), 'update' (existing permission), or 'revoke'.",
+            "title": "Action",
+            "type": "string"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "For 'grant': the GTM account ID, e.g. '123456'.",
+            "title": "Account Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "For 'update'/'revoke': the permission path from gtm_list(user_permissions), e.g. 'accounts/123/user_permissions/456'.",
+            "title": "Path"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "For 'grant'/'update': permission JSON, e.g. {'emailAddress': ..., 'accountAccess': {'permission': 'user'}, 'containerAccess': [{'containerId': ..., 'permission': 'edit'}]}.",
+            "title": "Body"
+          },
+          "confirm_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Omit first to get a summary + token; pass back to execute.",
+            "title": "Confirm Token"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 171,
+          "end_line": 239,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 247,
+          "end_line": 252,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Validates action and conditional arguments; issues confirmation token, then creates, updates or deletes an account user permission.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "tagmanager v2 accounts.user_permissions.create",
+        "tagmanager v2 accounts.user_permissions.update",
+        "tagmanager v2 accounts.user_permissions.delete"
+      ],
+      "notes": [
+        "action is unconstrained string in schema; handler allows grant/update/revoke only. grant requires nonempty account_id/body; update requires path/body; revoke requires path.",
+        "Requires destructive tier. Confirmation tokens are in-memory, single-use, expire after 600 seconds and bind to exact operation arguments; consumed before API execution."
+      ],
+      "permission_tier": "DESTRUCTIVE"
+    },
+    {
+      "name": "gtm_publish",
+      "description": "Compile a GTM workspace into a version and publish it LIVE. Two-phase.\n\nPublishing deploys the container to every page that loads it — treat it\nlike a production release. The source workspace is consumed by versioning.",
+      "inputSchema": {
+        "properties": {
+          "workspace_path": {
+            "description": "Workspace to publish, e.g. 'accounts/123/containers/456/workspaces/7'.",
+            "minLength": 1,
+            "title": "Workspace Path",
+            "type": "string"
+          },
+          "version_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Name for the created version.",
+            "title": "Version Name"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Notes for the created version.",
+            "title": "Notes"
+          },
+          "confirm_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Omit on the first call — it returns a token and a summary instead of publishing. Pass the token back (same arguments) to execute.",
+            "title": "Confirm Token"
+          }
+        },
+        "required": [
+          "workspace_path"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 96,
+          "end_line": 168,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_destructive.py",
+          "start_line": 244,
+          "end_line": 246,
+          "role": "registration"
+        }
+      ],
+      "behavior": "First call issues confirmation. Redeeming compiles workspace into a version, checks compilerError and version path, then publishes the version live.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "tagmanager v2 accounts.containers.workspaces.create_version",
+        "tagmanager v2 accounts.containers.versions.publish"
+      ],
+      "notes": [
+        "Workspace path must have six nonempty segments and penultimate collection workspaces. Compilation consumes the source workspace before publish; compiler failure or missing version path aborts publishing.",
+        "Requires destructive tier. Confirmation tokens are in-memory, single-use, expire after 600 seconds and bind to exact operation arguments; consumed before API execution."
+      ],
+      "permission_tier": "DESTRUCTIVE"
+    },
+    {
+      "name": "gtm_update",
+      "description": "Update (replace) a GTM entity by path. Defaults to dry-run.\n\nGTM updates are full replacements — always start from gtm_get output.",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "Full path of the entity to update, from gtm_list/gtm_get.",
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "body": {
+            "additionalProperties": true,
+            "description": "COMPLETE entity JSON (the GTM API replaces the entity, not merges). Fetch with gtm_get, modify, and send the whole object back.",
+            "title": "Body",
+            "type": "object"
+          },
+          "fingerprint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional optimistic-lock fingerprint from gtm_get; the update fails if someone changed the entity since.",
+            "title": "Fingerprint"
+          },
+          "dry_run": {
+            "default": true,
+            "description": "True (default) echoes the request without sending it.",
+            "title": "Dry Run",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "body"
+        ],
+        "type": "object"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_write.py",
+          "start_line": 108,
+          "end_line": 168,
+          "role": "schema/handler/description"
+        },
+        {
+          "path": "src/gtm_ga4_mcp/tools/gtm_write.py",
+          "start_line": 173,
+          "end_line": 173,
+          "role": "registration"
+        }
+      ],
+      "behavior": "Validates path and writable collection. Dry-run echoes request; otherwise sends full replacement JSON to update with optional fingerprint.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "tagmanager v2 accounts.containers.workspaces.update",
+        "tagmanager v2 accounts.containers.environments.update",
+        "tagmanager v2 accounts.containers.workspaces.tags.update",
+        "tagmanager v2 accounts.containers.workspaces.triggers.update",
+        "tagmanager v2 accounts.containers.workspaces.variables.update",
+        "tagmanager v2 accounts.containers.workspaces.folders.update",
+        "tagmanager v2 accounts.containers.workspaces.templates.update",
+        "tagmanager v2 accounts.containers.workspaces.clients.update",
+        "tagmanager v2 accounts.containers.workspaces.transformations.update",
+        "tagmanager v2 accounts.containers.workspaces.zones.update"
+      ],
+      "notes": [
+        "Only workspaces, environments, tags, triggers, variables, folders, templates, clients, transformations, zones collections may be updated. Body is intentionally unconstrained JSON and replaces the entity.",
+        "Requires write/destructive tier; dry_run defaults true. Arbitrary dict bodies expose additionalProperties=true, not an API-specific body model."
+      ],
+      "permission_tier": "WRITE"
+    }
+  ],
+  "notes": [
+    "Source review only; no upstream execution, tools/list or live requests. HEAD matches supplied revision.",
+    "Inventory is full union of 16 tools: READ 8, WRITE 4, DESTRUCTIVE 4. Default advertises READ only (8); --allow-write or GTM_GA4_MCP_ALLOW_WRITE enables READ+WRITE (12); --allow-destructive or GTM_GA4_MCP_ALLOW_DESTRUCTIVE enables all (16). --deny TOOL and comma-separated GTM_GA4_MCP_DENY remove named tools at registration.",
+    "OAuth scopes are cumulative by tier and configured before registration; denylist does not reduce scopes. ADC clients are created lazily and cached per thread. No OAuth, GCP setup, auth, diagnostic, or support function is registered as a tool.",
+    "pyproject.toml uses mcp>=2,<3 and imports mcp.server.mcpserver.MCPServer (current v2 API); do not infer a v1 FastMCP import defect. Dependencies are not authenticated/runtime tested."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 16 function signatures/defaults/docstrings across seven registry modules; read Annotated Field bounds/descriptions and entity enums, merged ToolSpec registry, permission filtering, dry-run Admin writes and two-phase deletes/publishing. Default eight tools versus complete sixteen-tool union is documented."
+  }
+}

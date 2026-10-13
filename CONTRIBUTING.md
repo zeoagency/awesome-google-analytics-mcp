@@ -1,13 +1,13 @@
 # Contributing
 
-Help developers discover Google Analytics 4 MCP servers, CLI tools, and SDKs. Read [AGENTS.md](AGENTS.md) for the scope, evidence requirements, and entry format.
+Help developers discover what Google Analytics 4 tools actually do. Read [AGENTS.md](AGENTS.md) for scope and the source-review process.
 
 ## Pull request checklist
 
-- [ ] The project implements GA4 functionality and belongs to one of the three tool categories.
-- [ ] The implementation is publicly inspectable; the description is supported by upstream source or official SDK documentation.
-- [ ] The entry is not a duplicate, trivial clone, or wrapper around another listed implementation.
-- [ ] The description covers the Google Analytics functionality in one or two concise English sentences.
-- [ ] The inspected revision, source links, and decision are recorded in [the verification log](docs/verification.md).
-- [ ] Category counts and links are correct.
-- [ ] `python3 scripts/check_catalog.py` and `npx --yes markdownlint-cli2 "**/*.md"` pass.
+- [ ] The project implements GA4 functionality as an MCP server, CLI or SDK and is not a duplicate or trivial wrapper.
+- [ ] Its upstream revision, implementation evidence and inclusion decision are recorded in [the verification log](docs/verification.md).
+- [ ] An MCP record includes every registered tool, exact names, full descriptions, complete nested input schemas and pinned source links.
+- [ ] The extraction was independently reviewed; optional exposure, write effects and material limitations are documented.
+- [ ] Its primary task and featured tools follow actual GA4 handlers. Multi-service totals clearly separate GA4 from other tools.
+- [ ] Reviewed JSON is updated and `python3 scripts/build_catalog.py` regenerates the main page, server references and searchable index.
+- [ ] `python3 -m unittest discover -s tests`, `python3 scripts/build_catalog.py --check`, `python3 scripts/check_catalog.py` and `npx --yes markdownlint-cli2 "**/*.md"` pass.

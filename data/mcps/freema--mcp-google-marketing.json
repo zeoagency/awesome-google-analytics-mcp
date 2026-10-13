@@ -1,0 +1,2009 @@
+{
+  "repo": "freema/mcp-google-marketing",
+  "revision": "adda0be8151627308d903820b7b9a914face1ca8",
+  "status": "included",
+  "reason": "Implements GA4 Admin and Data API calls with 22 GA4 tools; also exposes 6 Search Console, 6 AdSense and 1 authentication-status tool.",
+  "registration_sources": [
+    {
+      "path": "src/tools/analytics/index.ts",
+      "start_line": 1,
+      "end_line": 104
+    },
+    {
+      "path": "src/tools/search-console/index.ts",
+      "start_line": 1,
+      "end_line": 37
+    },
+    {
+      "path": "src/tools/adsense/index.ts",
+      "start_line": 1,
+      "end_line": 26
+    },
+    {
+      "path": "src/index.ts",
+      "start_line": 1,
+      "end_line": 352
+    },
+    {
+      "path": "src/tools/index.ts",
+      "start_line": 1,
+      "end_line": 32
+    }
+  ],
+  "tool_count": 35,
+  "tools": [
+    {
+      "name": "auth_status",
+      "description": "Check the authentication status of the Google Marketing MCP server. Use this to verify OAuth is configured correctly before using other tools.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 162,
+          "end_line": 171,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 175,
+          "end_line": 218,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Checks GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET presence and locally stored tokens; reports status. Token validity here means a stored refresh_token is nonempty, with no Google API verification.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "No OAuth flow is invoked by this tool; authentication/login/logout are CLI commands, not MCP tools."
+      ]
+    },
+    {
+      "name": "ga4_list_accounts",
+      "description": "List all GA4 accounts accessible by the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-accounts.ts",
+          "start_line": 6,
+          "end_line": 14,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-accounts.ts",
+          "start_line": 16,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listAccounts"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API listAccounts and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List all GA4 properties under a specific account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "GA4 account ID (e.g., \"accounts/123456\")"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-properties.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-properties.ts",
+          "start_line": 21,
+          "end_line": 51,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listProperties"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Lists properties using Admin listProperties with filter parent:<accountId>; returns names and property metadata."
+    },
+    {
+      "name": "ga4_create_property",
+      "description": "Create a new GA4 property under an account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "GA4 account ID (e.g., \"accounts/123456\")"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for the property"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "Time zone (e.g., \"Europe/Prague\")"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "Currency code (e.g., \"CZK\", \"USD\")"
+          },
+          "industryCategory": {
+            "type": "string",
+            "description": "Industry category (optional)"
+          }
+        },
+        "required": [
+          "accountId",
+          "displayName",
+          "timeZone",
+          "currencyCode"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-property.ts",
+          "start_line": 6,
+          "end_line": 35,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-property.ts",
+          "start_line": 37,
+          "end_line": 79,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createProperty"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Creates an Admin property under accountId with displayName, timeZone, currencyCode and optional industryCategory."
+    },
+    {
+      "name": "ga4_get_property",
+      "description": "Get details of a specific GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/get-property.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/get-property.ts",
+          "start_line": 21,
+          "end_line": 47,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API getProperty"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API getProperty and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_update_property",
+      "description": "Update settings of a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "New display name (optional)"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "New time zone (optional)"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "New currency code (optional)"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/update-property.ts",
+          "start_line": 6,
+          "end_line": 31,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/update-property.ts",
+          "start_line": 33,
+          "end_line": 85,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API updateProperty"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "At least one update field must be provided; this requirement is handler-only."
+      ],
+      "behavior": "Updates supplied displayName, timeZone and/or currencyCode via Admin updateProperty with an explicit updateMask."
+    },
+    {
+      "name": "ga4_delete_property",
+      "description": "Soft-delete a GA4 property (moves to trash, can be recovered within 35 days)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/delete-property.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/delete-property.ts",
+          "start_line": 21,
+          "end_line": 46,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API deleteProperty"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Admin deleteProperty and returns the deleted property metadata and trash confirmation."
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List all data streams for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-data-streams.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-data-streams.ts",
+          "start_line": 21,
+          "end_line": 66,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listDataStreams"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API listDataStreams and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_create_web_stream",
+      "description": "Create a web data stream for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for the stream"
+          },
+          "defaultUri": {
+            "type": "string",
+            "description": "Default URI (e.g., \"https://example.com\")"
+          }
+        },
+        "required": [
+          "propertyId",
+          "displayName",
+          "defaultUri"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-web-stream.ts",
+          "start_line": 6,
+          "end_line": 27,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-web-stream.ts",
+          "start_line": 29,
+          "end_line": 59,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createDataStream"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Creates a WEB_DATA_STREAM under propertyId with displayName and webStreamData.defaultUri; returns measurement ID and stream metadata."
+    },
+    {
+      "name": "ga4_create_app_stream",
+      "description": "Create a mobile app data stream for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for the stream"
+          },
+          "packageName": {
+            "type": "string",
+            "description": "iOS bundle ID or Android package name"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "IOS",
+              "ANDROID"
+            ],
+            "description": "Platform type"
+          }
+        },
+        "required": [
+          "propertyId",
+          "displayName",
+          "packageName",
+          "platform"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-app-stream.ts",
+          "start_line": 6,
+          "end_line": 32,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-app-stream.ts",
+          "start_line": 34,
+          "end_line": 84,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createDataStream"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Creates an IOS_APP_DATA_STREAM with iosAppStreamData.bundleId or ANDROID_APP_DATA_STREAM with androidAppStreamData.packageName under propertyId."
+    },
+    {
+      "name": "ga4_update_data_stream",
+      "description": "Update a data stream settings",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "streamId": {
+            "type": "string",
+            "description": "Full stream ID (e.g., \"properties/123/dataStreams/456\")"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "New display name (optional)"
+          }
+        },
+        "required": [
+          "streamId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/update-data-stream.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/update-data-stream.ts",
+          "start_line": 25,
+          "end_line": 54,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API updateDataStream"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "Nonempty displayName is required by handler although advertised as optional."
+      ],
+      "behavior": "Updates displayName for streamId using Admin updateDataStream and updateMask displayName."
+    },
+    {
+      "name": "ga4_get_measurement_id",
+      "description": "Get the measurement ID (G-XXXXXXXXXX) for a web data stream",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "streamId": {
+            "type": "string",
+            "description": "Full stream ID (e.g., \"properties/123/dataStreams/456\")"
+          }
+        },
+        "required": [
+          "streamId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/get-measurement-id.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/get-measurement-id.ts",
+          "start_line": 21,
+          "end_line": 48,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API getDataStream"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "Returns an error when webStreamData.measurementId is absent."
+      ],
+      "behavior": "Fetches a data stream using Admin getDataStream and returns web measurement ID, name and URI."
+    },
+    {
+      "name": "ga4_list_conversion_events",
+      "description": "List all conversion events for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-conversion-events.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-conversion-events.ts",
+          "start_line": 21,
+          "end_line": 48,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listConversionEvents"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API listConversionEvents and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_create_conversion_event",
+      "description": "Mark an event as a conversion in GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "eventName": {
+            "type": "string",
+            "description": "Event name to mark as conversion"
+          }
+        },
+        "required": [
+          "propertyId",
+          "eventName"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-conversion-event.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-conversion-event.ts",
+          "start_line": 25,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createConversionEvent"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Creates a conversionEvent under propertyId with eventName using Admin createConversionEvent."
+    },
+    {
+      "name": "ga4_delete_conversion_event",
+      "description": "Remove conversion marking from an event in GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "eventName": {
+            "type": "string",
+            "description": "Event name to unmark as conversion"
+          }
+        },
+        "required": [
+          "propertyId",
+          "eventName"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/delete-conversion-event.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/delete-conversion-event.ts",
+          "start_line": 25,
+          "end_line": 61,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API listConversionEvents",
+        "Analytics Admin API deleteConversionEvent"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "Returns errors for missing events and nondeletable system events."
+      ],
+      "behavior": "Lists property conversion events, finds an exact eventName match, checks deletable, then deletes that event by resource name."
+    },
+    {
+      "name": "ga4_get_realtime",
+      "description": "Get real-time visitor data from GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions (e.g., [\"country\", \"city\", \"deviceCategory\"])"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Metrics (e.g., [\"activeUsers\", \"screenPageViews\"])"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/get-realtime.ts",
+          "start_line": 6,
+          "end_line": 29,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/get-realtime.ts",
+          "start_line": 31,
+          "end_line": 82,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "When omitted, metrics default to activeUsers; dimensions are omitted unless a nonempty array is supplied."
+      ],
+      "behavior": "Runs Data runRealtimeReport for propertyId; transforms dimension and metric names into name objects, maps response values into rows."
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a custom GA4 report with dimensions and metrics",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string"
+                },
+                "endDate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ]
+            },
+            "description": "Date ranges (e.g., [{\"startDate\": \"30daysAgo\", \"endDate\": \"today\"}])"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions (e.g., [\"date\", \"country\", \"pagePath\"])"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Metrics (e.g., [\"sessions\", \"totalUsers\", \"screenPageViews\"])"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum rows to return (default 10000)"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Row offset for pagination"
+          }
+        },
+        "required": [
+          "propertyId",
+          "dateRanges",
+          "dimensions",
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/run-report.ts",
+          "start_line": 6,
+          "end_line": 49,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/run-report.ts",
+          "start_line": 51,
+          "end_line": 118,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Data API v1beta runReport"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "Description mentions limit default 10000, but handler does not set a default; omitted limit is left to API behavior."
+      ],
+      "behavior": "Runs Data runReport using propertyId, dateRanges, dimension and metric name objects, and optional limit/offset; returns rows, headers, total row count, currency and time zone."
+    },
+    {
+      "name": "ga4_run_pivot_report",
+      "description": "Run a pivot table report in GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string"
+                },
+                "endDate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ]
+            },
+            "description": "Date ranges for the report"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Metrics"
+          },
+          "pivots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldNames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "fieldNames"
+              ]
+            },
+            "description": "Pivot configurations"
+          }
+        },
+        "required": [
+          "propertyId",
+          "dateRanges",
+          "dimensions",
+          "metrics",
+          "pivots"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/run-pivot-report.ts",
+          "start_line": 6,
+          "end_line": 56,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/run-pivot-report.ts",
+          "start_line": 58,
+          "end_line": 108,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Data API v1beta runPivotReport"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Runs Data runPivotReport with dateRanges, dimension/metric names and each pivot fieldNames/limit; returns dimension values, metric-value arrays, pivot headers and report headers."
+    },
+    {
+      "name": "ga4_batch_run_reports",
+      "description": "Run multiple GA4 reports in a single request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dateRanges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startDate": {
+                        "type": "string"
+                      },
+                      "endDate": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "startDate",
+                      "endDate"
+                    ]
+                  }
+                },
+                "dimensions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "dateRanges",
+                "dimensions",
+                "metrics"
+              ]
+            },
+            "description": "Array of report requests"
+          }
+        },
+        "required": [
+          "propertyId",
+          "requests"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/batch-run-reports.ts",
+          "start_line": 6,
+          "end_line": 48,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/batch-run-reports.ts",
+          "start_line": 50,
+          "end_line": 102,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Data API v1beta batchRunReports"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Runs Data batchRunReports with propertyId and supplied report requests; converts dimension/metric strings into name objects and returns mapped rows and headers for each report."
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "List all custom dimensions for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-custom-dimensions.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-custom-dimensions.ts",
+          "start_line": 21,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listCustomDimensions"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API listCustomDimensions and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_create_custom_dimension",
+      "description": "Create a custom dimension in GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "parameterName": {
+            "type": "string",
+            "description": "Event parameter name to use"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for the dimension (special characters will be replaced with underscores)"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "EVENT",
+              "USER",
+              "ITEM"
+            ],
+            "description": "Dimension scope"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description (optional)"
+          }
+        },
+        "required": [
+          "propertyId",
+          "parameterName",
+          "displayName",
+          "scope"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-custom-dimension.ts",
+          "start_line": 36,
+          "end_line": 67,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-custom-dimension.ts",
+          "start_line": 69,
+          "end_line": 117,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createCustomDimension"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Sanitizes displayName (trim, replace special characters, collapse/trim underscores), maps EVENT/USER/ITEM to numeric scope, then calls Admin createCustomDimension under propertyId; returns metadata and sanitization note."
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "List all custom metrics for a GA4 property",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          }
+        },
+        "required": [
+          "propertyId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/list-custom-metrics.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/list-custom-metrics.ts",
+          "start_line": 21,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API listCustomMetrics"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false."
+      ],
+      "behavior": "Calls Analytics Admin API listCustomMetrics and returns selected response fields as JSON text."
+    },
+    {
+      "name": "ga4_create_custom_metric",
+      "description": "Create a custom metric in GA4",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"properties/123456789\")"
+          },
+          "parameterName": {
+            "type": "string",
+            "description": "Event parameter name to use"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for the metric (special characters will be replaced with underscores)"
+          },
+          "measurementUnit": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "CURRENCY",
+              "FEET",
+              "METERS",
+              "KILOMETERS",
+              "MILES",
+              "MILLISECONDS",
+              "SECONDS",
+              "MINUTES",
+              "HOURS"
+            ],
+            "description": "Measurement unit"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description (optional)"
+          }
+        },
+        "required": [
+          "propertyId",
+          "parameterName",
+          "displayName",
+          "measurementUnit"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/analytics/create-custom-metric.ts",
+          "start_line": 40,
+          "end_line": 82,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/analytics/create-custom-metric.ts",
+          "start_line": 84,
+          "end_line": 135,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/analytics.ts",
+          "start_line": 1,
+          "end_line": 226,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API createCustomMetric"
+      ],
+      "notes": [
+        "Handler validates with a strict Zod object; unadvertised top-level fields are rejected although exposed JSON Schema omits additionalProperties: false.",
+        "Internal Zod validator accepts optional scope with default EVENT; scope is absent from the exposed JSON Schema and handler ignores it."
+      ],
+      "behavior": "Sanitizes displayName, maps measurementUnit to numeric enum, fixes scope to EVENT (1), then calls Admin createCustomMetric under propertyId; returns metadata and sanitization note."
+    },
+    {
+      "name": "gsc_list_sites",
+      "description": "List all sites you have access to in Google Search Console",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/list-sites.ts",
+          "start_line": 4,
+          "end_line": 12,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/list-sites.ts",
+          "start_line": 14,
+          "end_line": 33,
+          "role": "handler"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 sites.list"
+      ],
+      "notes": [],
+      "behavior": "Calls Search Console API v1 sites.list and returns selected response fields as JSON text."
+    },
+    {
+      "name": "gsc_get_site",
+      "description": "Get information about a specific site in Google Search Console",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Site URL (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/get-site.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/get-site.ts",
+          "start_line": 21,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/search-console.ts",
+          "start_line": 1,
+          "end_line": 79,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 sites.get"
+      ],
+      "notes": [],
+      "behavior": "Calls Search Console API v1 sites.get and returns selected response fields as JSON text."
+    },
+    {
+      "name": "gsc_search_analytics",
+      "description": "Query search analytics data from Google Search Console (impressions, clicks, CTR, position)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Site URL"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD)"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD)"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions to group by (country, device, page, query, searchAppearance, date)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Search type filter (web, image, video, news, discover, googleNews)"
+          },
+          "dimensionFilterGroups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupType": {
+                  "type": "string"
+                },
+                "filters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dimension": {
+                        "type": "string"
+                      },
+                      "operator": {
+                        "type": "string"
+                      },
+                      "expression": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Filter groups for query"
+          },
+          "aggregationType": {
+            "type": "string",
+            "description": "How to aggregate data (auto, byPage, byProperty)"
+          },
+          "rowLimit": {
+            "type": "number",
+            "description": "Maximum rows to return (default 1000, max 25000)"
+          },
+          "startRow": {
+            "type": "number",
+            "description": "Row offset for pagination"
+          },
+          "dataState": {
+            "type": "string",
+            "description": "Data freshness (all includes fresh data, final for finalized data)"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/search-analytics.ts",
+          "start_line": 6,
+          "end_line": 75,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/search-analytics.ts",
+          "start_line": 77,
+          "end_line": 162,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/search-console.ts",
+          "start_line": 1,
+          "end_line": 79,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 searchanalytics.query"
+      ],
+      "notes": [
+        "Handler-only Zod constraints: dimensions enum country/device/page/query/searchAppearance/date; type enum web/image/video/news/discover/googleNews; aggregationType enum auto/byPage/byProperty; dataState enum all/final; rowLimit 1..25000, startRow >= 0.",
+        "Filter-group validator requires filters; groupType if present must be and; every filter requires dimension, operator and expression. Filter dimension enum country/device/page/query/searchAppearance; operator enum contains/equals/notContains/notEquals/includingRegex/excludingRegex. These required fields and enums are not exposed in JSON Schema.",
+        "Descriptions mention rowLimit default 1000, but handler leaves it unset when omitted."
+      ],
+      "behavior": "Queries Search Console searchanalytics.query with siteUrl and a requestBody containing date bounds and supplied grouping, search type, filter groups, aggregation, pagination and freshness; returns clicks, impressions, CTR and position rows."
+    },
+    {
+      "name": "gsc_list_sitemaps",
+      "description": "List all sitemaps submitted for a site in Google Search Console",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Site URL"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/list-sitemaps.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/list-sitemaps.ts",
+          "start_line": 21,
+          "end_line": 57,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/search-console.ts",
+          "start_line": 1,
+          "end_line": 79,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 sitemaps.list"
+      ],
+      "notes": [],
+      "behavior": "Calls Search Console API v1 sitemaps.list and returns selected response fields as JSON text."
+    },
+    {
+      "name": "gsc_submit_sitemap",
+      "description": "Submit a sitemap to Google Search Console",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Site URL"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "Full URL of the sitemap (e.g., \"https://example.com/sitemap.xml\")"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "feedpath"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/submit-sitemap.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/submit-sitemap.ts",
+          "start_line": 25,
+          "end_line": 46,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/search-console.ts",
+          "start_line": 1,
+          "end_line": 79,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console API v1 sitemaps.submit"
+      ],
+      "notes": [],
+      "behavior": "Calls Search Console API v1 sitemaps.submit and returns selected response fields as JSON text."
+    },
+    {
+      "name": "gsc_delete_sitemap",
+      "description": "Delete a sitemap from Google Search Console",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "Site URL"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "Full URL of the sitemap to delete"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "feedpath"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/search-console/delete-sitemap.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/search-console/delete-sitemap.ts",
+          "start_line": 25,
+          "end_line": 46,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/search-console.ts",
+          "start_line": 1,
+          "end_line": 79,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console API v1 sitemaps.delete"
+      ],
+      "notes": [],
+      "behavior": "Calls Search Console API v1 sitemaps.delete and returns selected response fields as JSON text."
+    },
+    {
+      "name": "adsense_list_accounts",
+      "description": "List all AdSense accounts accessible by the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/list-accounts.ts",
+          "start_line": 5,
+          "end_line": 13,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/list-accounts.ts",
+          "start_line": 15,
+          "end_line": 35,
+          "role": "handler"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.list"
+      ],
+      "notes": [
+        "Only the first response page is returned; no nextPageToken handling."
+      ],
+      "behavior": "Calls AdSense accounts.list and returns selected account metadata and count."
+    },
+    {
+      "name": "adsense_get_account",
+      "description": "Get details for a specific AdSense account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "AdSense account ID (e.g., \"accounts/pub-1234567890123456\")"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/get-account.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/get-account.ts",
+          "start_line": 21,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/adsense.ts",
+          "start_line": 1,
+          "end_line": 35,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.get"
+      ],
+      "notes": [],
+      "behavior": "Calls AdSense API v2 accounts.get and returns selected response fields as JSON text."
+    },
+    {
+      "name": "adsense_list_ad_clients",
+      "description": "List all ad clients for an AdSense account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "AdSense account ID (e.g., \"accounts/pub-1234567890123456\")"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Maximum number of ad clients to return (default 50)"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/list-ad-clients.ts",
+          "start_line": 6,
+          "end_line": 23,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/list-ad-clients.ts",
+          "start_line": 25,
+          "end_line": 49,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/adsense.ts",
+          "start_line": 1,
+          "end_line": 35,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.adclients.list"
+      ],
+      "notes": [
+        "Only the first response page is returned; no nextPageToken handling."
+      ],
+      "behavior": "Calls AdSense accounts.adclients.list with parent accountId and pageSize || 50; returns selected client fields and count."
+    },
+    {
+      "name": "adsense_list_ad_units",
+      "description": "List all ad units for an ad client",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "AdSense account ID (e.g., \"accounts/pub-1234567890123456\")"
+          },
+          "adClientId": {
+            "type": "string",
+            "description": "Ad client ID (e.g., \"ca-pub-1234567890123456\")"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Maximum number of ad units to return (default 50)"
+          }
+        },
+        "required": [
+          "accountId",
+          "adClientId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/list-ad-units.ts",
+          "start_line": 6,
+          "end_line": 27,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/list-ad-units.ts",
+          "start_line": 29,
+          "end_line": 54,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/adsense.ts",
+          "start_line": 1,
+          "end_line": 35,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.adclients.adunits.list"
+      ],
+      "notes": [
+        "Only the first response page is returned; no nextPageToken handling."
+      ],
+      "behavior": "Calls AdSense accounts.adclients.adunits.list with parent <accountId>/adclients/<adClientId> and pageSize || 50; returns ad unit fields and count."
+    },
+    {
+      "name": "adsense_list_payments",
+      "description": "List payments for an AdSense account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "AdSense account ID (e.g., \"accounts/pub-1234567890123456\")"
+          }
+        },
+        "required": [
+          "accountId"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/list-payments.ts",
+          "start_line": 6,
+          "end_line": 19,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/list-payments.ts",
+          "start_line": 21,
+          "end_line": 43,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/adsense.ts",
+          "start_line": 1,
+          "end_line": 35,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.payments.list"
+      ],
+      "notes": [],
+      "behavior": "Calls AdSense API v2 accounts.payments.list and returns selected response fields as JSON text."
+    },
+    {
+      "name": "adsense_generate_report",
+      "description": "Generate an AdSense report with earnings, page views, clicks, and impressions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "AdSense account ID (e.g., \"accounts/pub-1234567890123456\")"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD)"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD)"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Metrics to include (default: ESTIMATED_EARNINGS, PAGE_VIEWS, CLICKS, IMPRESSIONS)"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions to group by (e.g., DATE, COUNTRY_NAME, AD_UNIT_NAME)"
+          }
+        },
+        "required": [
+          "accountId",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/adsense/generate-report.ts",
+          "start_line": 6,
+          "end_line": 38,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/tools/adsense/generate-report.ts",
+          "start_line": 40,
+          "end_line": 85,
+          "role": "handler"
+        },
+        {
+          "path": "src/types/adsense.ts",
+          "start_line": 1,
+          "end_line": 35,
+          "role": "handler validation"
+        }
+      ],
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "AdSense API v2 accounts.reports.generate"
+      ],
+      "notes": [
+        "Handler sends date components under `dateRange.startDate.*` and `dateRange.endDate.*` keys; these are not the standard AdSense v2 `startDate.*` and `endDate.*` parameters, so date selection is defective.",
+        "Date strings are not validated beyond being strings before numeric splitting."
+      ],
+      "behavior": "Splits startDate/endDate strings into numeric year/month/day components and calls AdSense accounts.reports.generate; defaults metrics to ESTIMATED_EARNINGS/PAGE_VIEWS/CLICKS/IMPRESSIONS and dimensions to DATE; maps cells into header-keyed rows and returns totals/averages."
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live authenticated requests.",
+    "Registration is unconditional: auth_status plus analytics, Search Console and AdSense tool arrays. OAuth credentials are required at startup; missing stored refresh token permits startup but blocks every tool except auth_status. Token check is local refresh-token presence, not a live validity check.",
+    "Node >=20 and package dependencies required; package bin points to built dist/index.js, generated by tsup.",
+    "CLI auth, auth --status, auth --logout and help are not MCP tools. No Google Ads implementation is registered.",
+    "Explicit JSON Schemas are preserved literally, including omissions; runtime Zod restrictions are documented separately rather than inserted into advertised schemas."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root AST parser exactly compared all 35 input schemas/full descriptions, checked combined allTools/allHandlers exports and the call dispatcher; inspected GA4 provisioning/report handlers and marked GSC/AdSense separately."
+  }
+}

@@ -1,27 +1,21 @@
 # Catalog maintenance
 
-This repository lists Google Analytics 4 (GA4) MCP servers, command-line tools, and SDKs. The README is an English catalog; keep entries concise and factual.
+This repository catalogs implemented Google Analytics 4 MCP servers, CLI tools and SDKs. Keep reader-facing text concise and in English.
 
 ## Scope
 
-Include tools with an implemented GA4 integration: Data API reporting, Admin API management, Measurement Protocol events, or GA4 event collection SDKs. Multi-service tools qualify when their GA4 integration is implemented; describe that integration.
+Include GA4 Data API reporting, Admin API management, Measurement Protocol events or GA4 collection SDKs. Multi-service servers qualify through their implemented GA4 tools; show their GA4 and total tool counts separately. Exclude unrelated utilities, Universal Analytics-only tools, empty scaffolds, documentation-only projects, standalone apps without an MCP/CLI/SDK interface, trivial mirrors and installations with incompatible dependencies and no usable documented lockfile path.
 
-Exclude Universal Analytics-only tools, generic cloud/database/MCP utilities, standalone dashboards or agents without an MCP server, CLI, or SDK, empty scaffolds, documentation-only projects, and projects whose documented installation resolves incompatible dependencies without a usable locked installation path. List the original implementation instead of a trivial fork, mirror, or launcher. A fork qualifies when its GA4 implementation adds a substantive capability.
+## Review and update
 
-## Review process
+1. Inventory existing records and inspect the upstream revision, registration modules, handlers and package entrypoints. Trace every MCP tool into its implementation; enumerate imported and optional tools as well as default tools. For CLI/SDK entries, trace commands or client methods into GA4 behavior.
+2. For each MCP, preserve exact names, full registered descriptions and complete exposed input schemas in `data/mcps/<owner>--<repo>.json`. Include shared/nested models, local references, defaults, required fields, enums and constraints. Preserve loose native objects. Distinguish declared schema restrictions from handler checks and upstream API restrictions.
+3. Review extracted data against source independently before setting `review`. Record actual behavior, GA4/other-service/support scope, read/write/local effects, exposure conditions and material defects. Record the pinned revision and inclusion/removal decision in `docs/verification.md`. Static source inspection does not establish successful installation or live API behavior.
+4. Place each MCP once in `data/catalog.json`, using its implemented GA4 tools to choose its primary task. Featured tools must exist and have GA4 scope. Keep `data/clients.json` for CLI/SDK entries. Omit popularity rankings, frozen stars, authentication/language tiers and unsupported claims.
+5. Run `python3 scripts/build_catalog.py`, then the checks in `.github/workflows/ci.yml`. Review the generated main page, tool index and affected server pages. Completion requires every tool and provider to be linked, every schema reference to resolve, and every inclusion decision and revision to match.
 
-1. Inventory every existing entry and supporting file before editing.
-2. Inspect the upstream source and package metadata. For an MCP server, trace tool registration to a GA4 API handler; for a CLI, trace a command to its GA4 implementation; for an SDK, inspect its GA4 client or collection API.
-3. Record the inspected revision, source links, and inclusion/removal reason in `docs/verification.md`. Distinguish source inspection from runtime testing. If the implementation cannot be verified, leave the candidate out and record why.
-4. Correct retained descriptions and add verified missing tools. Use current canonical upstream links. Check copied implementations before listing them separately.
-5. Update category counts, run `python3 scripts/check_catalog.py` and `npx --yes markdownlint-cli2 "**/*.md"`, then review the full diff.
+## Data and generated pages
 
-Use upstream code, official package repositories, and publisher documentation as evidence. Stars, marketing claims, and commit age alone do not establish functionality or quality. Archived projects may be useful; label their status when included. Never imply a live API test was performed unless it was.
+`README.md`, `docs/tool-index.md` and `docs/mcps/*.md` are generated from reviewed JSON. Edit the records and renderer, then regenerate; direct page edits fail the drift check. Server pages show concise behavior with full descriptions and schemas in expandable blocks. Keep upstream descriptions verbatim even when they overstate functionality; explain the actual behavior and limitation separately.
 
-## README format
-
-Use three numbered sections: MCP servers, CLI tools, and SDKs. The contents and section headings carry matching entry counts. Each tool appears once, in its primary category; mention additional interfaces in its description. Count SDK packages separately when they expose different APIs or languages.
-
-Use a two-column table (`Project | What it does`). Each description is one or two sentences, starts with a verb, and states the implemented GA4 capability and relevant language or interface. For SDKs, identify whether the publisher is Google or a community maintainer. Prefer substantive differences over exact tool counts, frozen star counts, or subjective tiers.
-
-Keep the catalog focused on tools. Put verification evidence and maintenance instructions in supporting documents rather than adding general tutorials or unrelated resource lists to the README.
+The main page groups MCPs by tasks, followed by CLI tools and SDKs. Each server appears once; its reference page and the alphabetical index expose secondary capabilities. Scope labels distinguish unrelated tools inside a qualifying multi-service server. Count SDK packages separately when they expose different APIs or languages.

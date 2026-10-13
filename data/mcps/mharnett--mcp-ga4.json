@@ -1,0 +1,598 @@
+{
+  "repo": "mharnett/mcp-ga4",
+  "revision": "e44f8b02cb84e7b1f7c56b5b25ea7e0590c330a5",
+  "status": "included",
+  "reason": "Implements GA4 historical/realtime Data API reporting and Admin API dimension, metric and stream operations with actual Google SDK clients.",
+  "registration_sources": [
+    {
+      "path": "src/tools.ts",
+      "start_line": 3,
+      "end_line": 130,
+      "role": "registration/schema"
+    },
+    {
+      "path": "src/index.ts",
+      "start_line": 440,
+      "end_line": 591,
+      "role": "registration/dispatcher"
+    },
+    {
+      "path": "src/writeGate.ts",
+      "start_line": 1,
+      "end_line": 57,
+      "role": "conditional registration"
+    }
+  ],
+  "tool_count": 9,
+  "tools": [
+    {
+      "name": "ga4_get_client_context",
+      "description": "Get the current GA4 client context and health status based on working directory. Call this first to confirm which GA4 property you're working with.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "The current working directory"
+          }
+        },
+        "required": [
+          "working_directory"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 4,
+          "end_line": 15,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 458,
+          "end_line": 477,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 163,
+          "end_line": 174,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Resolves a configured client by working directory: returns the default client in single-property mode, otherwise first folder-prefix or client-key substring match. Returns client name, property ID, folder and measurement IDs, or an error and available clients. Performs no health/API request.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Description mentions health status, but handler only reads configuration.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Query GA4 historical report. Common patterns: top pages (dimensions=\"pagePath\", metrics=\"screenPageViews\"), traffic sources (dimensions=\"sessionSource,sessionMedium\", metrics=\"sessions,totalUsers\"), daily trend (dimensions=\"date\", metrics=\"sessions\").",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          },
+          "dimensions": {
+            "type": "string",
+            "description": "Comma-separated dimensions (e.g., \"eventName,date\")"
+          },
+          "metrics": {
+            "type": "string",
+            "description": "Comma-separated metrics (e.g., \"eventCount,activeUsers\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD or \"7daysAgo\")"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD or \"today\")"
+          },
+          "dimension_filter": {
+            "type": "string",
+            "description": "Optional equality filter (e.g., \"eventName==page_view\")"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max rows (default 100)"
+          },
+          "order_by": {
+            "type": "string",
+            "description": "Optional metric to sort by descending (e.g., \"eventCount\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 16,
+          "end_line": 34,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 479,
+          "end_line": 488,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 236,
+          "end_line": 294,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Builds Data API runReport request for properties/{property_id}; splits comma-separated dimensions/metrics, defaults to eventName/eventCount and 7daysAgo/today, applies optional dimension equality filter and descending metric order. Defaults limit to 100 and caps it at 10000. Returns flattened string-valued rows, returned row_count and date_range; future start date yields empty rows with error.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Defaults and limit cap are implemented in handler rather than JSON Schema; limit has no minimum/integer constraint. Filters lacking == are silently ignored; supplied filter splits only the first two segments and does not explicitly set stringFilter.matchType. Start-date future check is lexical and skips strings containing daysAgo/yesterday/today.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_realtime_report",
+      "description": "Query GA4 Realtime Report (last 30 minutes).",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          },
+          "dimensions": {
+            "type": "string",
+            "description": "Comma-separated dimension names (e.g., \"eventName\")"
+          },
+          "metrics": {
+            "type": "string",
+            "description": "Comma-separated metric names (e.g., \"eventCount,activeUsers\")"
+          },
+          "dimension_filter": {
+            "type": "string",
+            "description": "Optional equality filter (e.g., \"eventName==pardot_form_submit\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 35,
+          "end_line": 49,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 490,
+          "end_line": 495,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 296,
+          "end_line": 326,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Builds Data API runRealtimeReport for properties/{property_id}, splitting comma-separated dimensions/metrics (defaults eventName/eventCount) and optional dimension equality filter. Returns flattened string-valued rows and returned row_count.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Filters lacking == are silently ignored; supplied filter splits only first two segments and does not explicitly set stringFilter.matchType.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "List all registered custom dimensions for a GA4 property.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 50,
+          "end_line": 61,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 497,
+          "end_line": 498,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 330,
+          "end_line": 342,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Calls Admin API listCustomDimensions with property parent, maps displayName, parameterName, scope and description to custom_dimensions plus count.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listCustomDimensions"
+      ],
+      "notes": [
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_create_custom_dimension",
+      "description": "Register a new custom dimension in a GA4 property.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          },
+          "parameter_name": {
+            "type": "string",
+            "description": "The event parameter name (e.g., \"form_type\")"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable name (e.g., \"Form Type\")"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Either \"EVENT\" or \"USER\" (default: EVENT)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description"
+          }
+        },
+        "required": [
+          "property_id",
+          "parameter_name",
+          "display_name"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 62,
+          "end_line": 77,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 500,
+          "end_line": 506,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 344,
+          "end_line": 369,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        },
+        {
+          "path": "src/writeGate.ts",
+          "start_line": 1,
+          "end_line": 57,
+          "role": "conditional registration/call gating"
+        }
+      ],
+      "behavior": "Calls Admin API createCustomDimension with property parent and supplied parameter/display names; maps case-insensitive USER to USER, every other scope to EVENT, and missing description to empty string. Returns created display name, parameter_name and scope.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Admin API createCustomDimension"
+      ],
+      "notes": [
+        "Conditionally advertised and callable only with GA4_MCP_WRITE=true; write gate is delegated to mcp-write-gate. Scope is unrestricted string in schema, with implementation coercion to EVENT except USER.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "List all registered custom metrics for a GA4 property.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 78,
+          "end_line": 89,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 508,
+          "end_line": 509,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 371,
+          "end_line": 384,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Calls Admin API listCustomMetrics with property parent and returns display names, parameter names, scopes, measurement units and descriptions plus count.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listCustomMetrics"
+      ],
+      "notes": [
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List all data streams for a GA4 property.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (numeric)"
+          }
+        },
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 90,
+          "end_line": 101,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 511,
+          "end_line": 512,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 386,
+          "end_line": 400,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Calls Admin API listDataStreams with property parent and returns display name/type; web streams also include measurement_id and default_uri, plus count.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listDataStreams"
+      ],
+      "notes": [
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_send_feedback",
+      "description": "Send feedback about the GA4 MCP tools. Use when a query didn't work as expected.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "feedback_type": {
+            "type": "string",
+            "description": "One of: bug, feature, question"
+          },
+          "message": {
+            "type": "string",
+            "description": "Description of the issue, request, or question"
+          },
+          "query_context": {
+            "type": "string",
+            "description": "Optional context about what was queried"
+          }
+        },
+        "required": [
+          "feedback_type",
+          "message"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 102,
+          "end_line": 115,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 514,
+          "end_line": 527,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 404,
+          "end_line": 408,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Validates feedback type against bug/feature/question; appends type, message, optional query_context and ISO timestamp as JSONL to ~/.config/mcp-ga4/feedback/feedback.jsonl. Returns recorded status; invalid feedback type returns error object. Does not send feedback remotely.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "feedback_type choices are enforced by handler, but schema has no enum. Local logging remains enabled with remote writes disabled.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    },
+    {
+      "name": "ga4_suggest_improvement",
+      "description": "Log a GA4 query pattern that didn't work well, so it can be improved.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "failed_query": {
+            "type": "string",
+            "description": "The natural language question the user asked"
+          },
+          "expected_result": {
+            "type": "string",
+            "description": "What the user expected to see"
+          },
+          "actual_result": {
+            "type": "string",
+            "description": "What actually happened"
+          }
+        },
+        "required": [
+          "failed_query",
+          "expected_result"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools.ts",
+          "start_line": 116,
+          "end_line": 129,
+          "role": "registration/schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 529,
+          "end_line": 538,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 410,
+          "end_line": 414,
+          "role": "handler"
+        },
+        {
+          "path": "src/errors.ts",
+          "start_line": 41,
+          "end_line": 56,
+          "role": "handler validation"
+        }
+      ],
+      "behavior": "Appends improvement type, failed_query, expected_result, optional actual_result and ISO timestamp as JSONL to ~/.config/mcp-ga4/feedback/improvements.jsonl and returns recorded status/message.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Local logging remains enabled with remote writes disabled.",
+        "Required string arguments reject missing/null, non-string, whitespace-only and literal undefined/null sentinel values at handler time (src/errors.ts:41-56); numeric property ID format is not validated."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live requests. Git HEAD matches supplied revision.",
+    "Nine total tools: eight advertised by default; ga4_create_custom_dimension additionally appears when GA4_MCP_WRITE=true. CLI auth/setup commands are not MCP tools.",
+    "Startup requires GA4_PROPERTY_ID or config.json and valid configuration of service-account keyfile or user OAuth trio; missing config/auth prevents startup (src/index.ts:106-161,186-193; src/oauthClient.ts). Startup attempts listDataStreams unless MCP_GA4_SKIP_STARTUP_CHECK is set, warning and continuing on failed API health check.",
+    "All results use safeResponse: arrays in responses above 200000 bytes are recursively shortened with truncated=true; row_count updated for shortened rows (src/resilience.ts:32-85). Google API methods use 30-second aggressive timeout, retries and per-operation circuit breakers (src/resilience.ts:87-127)."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all nine literal tool schemas and full descriptions exactly; read dispatcher, report defaults/filters, write gate, custom-definition API calls and local feedback logging. Count includes the disabled-by-default creation tool."
+  }
+}

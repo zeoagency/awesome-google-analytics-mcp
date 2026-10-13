@@ -1,0 +1,2324 @@
+{
+  "repo": "leonardosepulvedat/mcp-google-analytics",
+  "revision": "97731c9bcf801297b0c8f0cd34cdde903730f2a2",
+  "status": "included",
+  "reason": "Implements GA4 Data/Admin API reads and Measurement Protocol event collection/debug validation with 26 unconditional registered tools.",
+  "registration_sources": [
+    {
+      "path": "src/index.ts",
+      "start_line": 119,
+      "end_line": 668
+    }
+  ],
+  "tool_count": 26,
+  "tools": [
+    {
+      "name": "ga_run_report",
+      "description": "Run a custom Google Analytics report with dimensions and metrics.\n\n⚠️ TOKEN OPTIMIZATION: Use 'limit' to control result size (default: 10).\nThis tool can consume significant tokens with large datasets.\n\nCommon dimensions: date, city, country, deviceCategory, browser, pagePath, eventName\nCommon metrics: activeUsers, sessions, screenPageViews, conversions, totalRevenue",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "description": "Start date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "endDate": {
+                  "type": "string",
+                  "description": "End date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Optional name for the date range"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Date ranges for the report"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Dimensions to group by (e.g., [{name: \"date\"}])"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Metrics to measure (e.g., [{name: \"activeUsers\"}])"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Maximum number of rows to return (default: 10)"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of rows to skip (for pagination)"
+          },
+          "orderBys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Sorting specification"
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Dimension filter expression"
+          },
+          "metricFilter": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Metric filter expression"
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [
+          "dateRanges",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 119,
+          "end_line": 144,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 83,
+          "end_line": 94,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs the report arguments to Data API v1beta properties:runReport and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "The handler supplies limit=10 when omitted; this is an implementation default, not a Zod schema default."
+      ]
+    },
+    {
+      "name": "ga_run_realtime_report",
+      "description": "Get real-time Google Analytics data (last 30 minutes).\n\n⚠️ TOKEN OPTIMIZATION: Use 'limit' to control result size (default: 10).\n\nCommon dimensions: city, country, deviceCategory, unifiedScreenName\nCommon metrics: activeUsers, screenPageViews, conversions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Dimensions to group by"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Metrics to measure"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Maximum number of rows (default: 10)"
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 146,
+          "end_line": 165,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 95,
+          "end_line": 116,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs the report arguments to Data API v1beta properties:runRealtimeReport and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "The handler supplies limit=10 when omitted; this is an implementation default, not a Zod schema default."
+      ]
+    },
+    {
+      "name": "ga_get_metadata",
+      "description": "Get available dimensions and metrics metadata for your GA4 property.\n\n⚠️ TOKEN OPTIMIZATION: This returns ALL available dimensions and metrics.\nResponse can be large (~500+ items). Use sparingly and cache results when possible.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 167,
+          "end_line": 178,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 189,
+          "end_line": 199,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Data API v1beta properties/{id}/metadata and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed."
+      ]
+    },
+    {
+      "name": "ga_list_accounts",
+      "description": "List all Google Analytics accounts accessible to the service account.\n\nUse this to find account IDs for listing properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 180,
+          "end_line": 190,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 200,
+          "end_line": 212,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta accounts and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listAccounts"
+      ],
+      "notes": [
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_list_properties",
+      "description": "List Google Analytics properties.\n\nOptionally filter by account ID. Without an account ID, properties from all\naccessible accounts are aggregated.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "Optional account ID to filter properties (e.g., \"123456789\")"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 192,
+          "end_line": 205,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 213,
+          "end_line": 236,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties with parent:accounts/{accountId}; without accountId, GETs accounts then sequentially lists and aggregates properties for each returned account.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listProperties"
+      ],
+      "notes": [
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_get_property",
+      "description": "Get details about a GA4 property (the configured one, or any accessible property via propertyId).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 207,
+          "end_line": 215,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 237,
+          "end_line": 247,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id} and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta getProperty"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed."
+      ]
+    },
+    {
+      "name": "ga_list_data_streams",
+      "description": "List data streams for the configured GA4 property.\n\nUse this to find measurement IDs for Measurement Protocol.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 217,
+          "end_line": 227,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 248,
+          "end_line": 259,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id}/dataStreams and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listDataStreams"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_run_pivot_report",
+      "description": "Run a pivot table report with row and column dimensions.\n\n⚠️ TOKEN OPTIMIZATION: Pivot reports can be VERY large.\nLimit dimensions and use small date ranges. Recommended for analysis, not raw data extraction.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "description": "Start date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "endDate": {
+                  "type": "string",
+                  "description": "End date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Optional name for the date range"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "pivots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldNames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "fieldNames"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Pivot specifications with fieldNames"
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [
+          "dateRanges",
+          "metrics",
+          "pivots"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 229,
+          "end_line": 254,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 117,
+          "end_line": 134,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs exposed arguments to Data API v1beta properties:runPivotReport unchanged; no pivot limit default is supplied.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runPivotReport"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed."
+      ]
+    },
+    {
+      "name": "ga_run_funnel_report",
+      "description": "Run a funnel analysis report to track user progression through steps (Data API v1alpha).\n\nEach step matches an event: set 'eventName' per step (defaults to the step name).\nFor advanced matching, pass a full 'filterExpression' instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "description": "Start date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "endDate": {
+                  "type": "string",
+                  "description": "End date (YYYY-MM-DD or \"yesterday\", \"today\", \"7daysAgo\")"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Optional name for the date range"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "funnelSteps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Display name for the step"
+                },
+                "eventName": {
+                  "type": "string",
+                  "description": "Event that defines the step (defaults to name)"
+                },
+                "isDirectlyFollowedBy": {
+                  "type": "boolean"
+                },
+                "withinDurationFromPriorStep": {
+                  "type": "string",
+                  "description": "e.g., \"3600s\""
+                },
+                "filterExpression": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Advanced FunnelFilterExpression (overrides eventName)"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Steps in the funnel"
+          },
+          "funnelBreakdown": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "description": "Optional dimension to break down funnel"
+          },
+          "funnelVisualizationType": {
+            "type": "string",
+            "enum": [
+              "STANDARD_FUNNEL",
+              "TRENDED_FUNNEL"
+            ]
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [
+          "dateRanges",
+          "funnelSteps"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 256,
+          "end_line": 284,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 135,
+          "end_line": 174,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds Data API v1alpha funnel.steps with supplied filterExpression or funnelEventFilter eventName (fallback step name); wraps funnelBreakdown.name as breakdownDimension and POSTs properties:runFunnelReport.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1alpha runFunnelReport"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed."
+      ]
+    },
+    {
+      "name": "ga_batch_run_reports",
+      "description": "Run multiple reports in a single request.\n\n⚠️ TOKEN OPTIMIZATION: Can return LARGE amounts of data.\nLimit to 2-5 reports per batch. Each report should have small limits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of report requests (same format as ga_run_report)"
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [
+          "requests"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 286,
+          "end_line": 301,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 175,
+          "end_line": 188,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs requests to Data API v1beta properties:batchRunReports, adding limit=10 to each request when absent. Arbitrary request keys are forwarded.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta batchRunReports"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "The handler supplies limit=10 when omitted; this is an implementation default, not a Zod schema default.",
+        "Native API allows at most 5 requests per batch, for the same property; registration does not enforce this. [Official batchRunReports reference](https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/batchRunReports)."
+      ]
+    },
+    {
+      "name": "ga_get_account_summaries",
+      "description": "Get a compact overview of all accessible GA accounts and their properties in a single call.\n\nThe fastest way to discover account IDs, property IDs, and property names.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 303,
+          "end_line": 313,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 260,
+          "end_line": 268,
+          "role": "handler"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta accountSummaries and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta getAccountSummaries"
+      ],
+      "notes": [
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_list_custom_dimensions",
+      "description": "List all custom dimensions defined for the configured GA4 property.\n\nUse this to discover custom dimension API names (e.g., \"customEvent:plan_type\") for reports.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 315,
+          "end_line": 325,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 269,
+          "end_line": 279,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id}/customDimensions and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listCustomDimensions"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_list_custom_metrics",
+      "description": "List all custom metrics defined for the configured GA4 property.\n\nUse this to discover custom metric API names for reports.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 327,
+          "end_line": 337,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 280,
+          "end_line": 290,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id}/customMetrics and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listCustomMetrics"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_list_key_events",
+      "description": "List the key events (conversions) configured for the GA4 property.\n\nUseful to know which event names count as conversions before building reports or sending events.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 339,
+          "end_line": 349,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 291,
+          "end_line": 301,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id}/keyEvents and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listKeyEvents"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_list_google_ads_links",
+      "description": "List Google Ads accounts linked to a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 351,
+          "end_line": 359,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 302,
+          "end_line": 316,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "GETs Admin API v1beta properties/{id}/googleAdsLinks and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listGoogleAdsLinks"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed.",
+        "No pageToken iteration: only the first API response page is returned (or first page per account for unfiltered properties)."
+      ]
+    },
+    {
+      "name": "ga_check_compatibility",
+      "description": "Check whether a combination of dimensions and metrics is valid for this property BEFORE running a report.\n\nAvoids wasted report requests and token-heavy error loops. Also lists which other fields remain compatible with the given combination.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Dimensions to check (e.g., [{name: \"city\"}])"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Metrics to check (e.g., [{name: \"activeUsers\"}])"
+          },
+          "compatibilityFilter": {
+            "type": "string",
+            "enum": [
+              "COMPATIBLE",
+              "INCOMPATIBLE"
+            ],
+            "description": "Only return fields with this compatibility (recommended: COMPATIBLE)"
+          },
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID to query (overrides the default GA_PROPERTY_ID). Accepts \"123456789\" or \"properties/123456789\". Use ga_get_account_summaries to discover IDs."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 361,
+          "end_line": 380,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/ga-data-client.ts",
+          "start_line": 317,
+          "end_line": 335,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs exposed arguments to Data API v1beta properties:checkCompatibility and returns response.data.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta checkCompatibility"
+      ],
+      "notes": [
+        "propertyId overrides GA_PROPERTY_ID; a missing effective ID fails in the handler. A leading properties/ prefix is removed."
+      ]
+    },
+    {
+      "name": "ga_send_event",
+      "description": "Send a custom event to Google Analytics via Measurement Protocol.\n\nUse this for tracking custom user actions, conversions, or any GA4 event.\nEvents are processed asynchronously and appear in reports within minutes.\n\nCommon events: click, form_submit, video_play, file_download, custom_conversion",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Client ID (UUID format recommended). Auto-generated if not provided."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Optional User ID for cross-device tracking"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Event name (e.g., \"purchase\", \"sign_up\")"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Event parameters (key-value pairs)"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Events to send (can send multiple in one request)"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 391,
+          "end_line": 409,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 27,
+          "end_line": 41,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 386,
+          "end_line": 389,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs the provided event body unchanged to https://www.google-analytics.com/mp/collect with configured measurement_id and api_secret query parameters. Returns success:true and HTTP status; does not validate ingestion.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "client_id is optional in the exposed schema, but this direct handler does not generate one. ga_send_event description claims auto-generation, which is implemented only by convenience event helpers. Native Measurement Protocol requires client_id for web streams.",
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_validate_event",
+      "description": "Validate an event before sending it to Google Analytics.\n\nUses GA4's debug endpoint to check for errors without recording the event.\nReturns validation messages and errors if any.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Event name (e.g., \"purchase\", \"sign_up\")"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Event parameters (key-value pairs)"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 411,
+          "end_line": 427,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 56,
+          "end_line": 60,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 386,
+          "end_line": 389,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "POSTs the provided event body unchanged to https://www.google-analytics.com/debug/mp/collect, via sendEvent(debug=true), and returns validation response data. Does not record events.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Measurement Protocol debug/mp/collect"
+      ],
+      "notes": [
+        "client_id is optional in the exposed schema, but this direct handler does not generate one. ga_send_event description claims auto-generation, which is implemented only by convenience event helpers. Native Measurement Protocol requires client_id for web streams.",
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_send_pageview",
+      "description": "Send a page view event to Google Analytics.\n\nStandard event for tracking page/screen views. Automatically uses 'page_view' event name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Client ID (auto-generated if not provided)"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Optional User ID"
+          },
+          "page_location": {
+            "type": "string",
+            "description": "Full URL of the page"
+          },
+          "page_title": {
+            "type": "string",
+            "description": "Page title"
+          },
+          "page_referrer": {
+            "type": "string",
+            "description": "Referrer URL"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "page_location"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 429,
+          "end_line": 456,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 61,
+          "end_line": 89,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one page_view event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields.",
+        "Optional string event parameters are only included when truthy; numeric tax/shipping fields (purchase) are included when defined."
+      ]
+    },
+    {
+      "name": "ga_send_purchase",
+      "description": "Send an ecommerce purchase event to Google Analytics.\n\nStandard event for tracking completed purchases with transaction details and items.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction ID"
+          },
+          "value": {
+            "type": "number",
+            "description": "Total purchase value"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code (e.g., USD, EUR)"
+          },
+          "tax": {
+            "type": "number",
+            "description": "Tax amount"
+          },
+          "shipping": {
+            "type": "number",
+            "description": "Shipping cost"
+          },
+          "coupon": {
+            "type": "string",
+            "description": "Coupon code used"
+          },
+          "affiliation": {
+            "type": "string",
+            "description": "Store or affiliation"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "affiliation": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "index": {
+                  "type": "number"
+                },
+                "item_brand": {
+                  "type": "string"
+                },
+                "item_category": {
+                  "type": "string"
+                },
+                "item_category2": {
+                  "type": "string"
+                },
+                "item_category3": {
+                  "type": "string"
+                },
+                "item_category4": {
+                  "type": "string"
+                },
+                "item_category5": {
+                  "type": "string"
+                },
+                "item_list_id": {
+                  "type": "string"
+                },
+                "item_list_name": {
+                  "type": "string"
+                },
+                "item_variant": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Purchased items"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "transaction_id",
+          "value",
+          "currency",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 458,
+          "end_line": 495,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 90,
+          "end_line": 128,
+          "role": "handler"
+        },
+        {
+          "path": "src/types.ts",
+          "start_line": 101,
+          "end_line": 121,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one purchase event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields.",
+        "Optional string event parameters are only included when truthy; numeric tax/shipping fields (purchase) are included when defined."
+      ]
+    },
+    {
+      "name": "ga_send_login",
+      "description": "Send a login event to Google Analytics.\n\nStandard event for tracking user logins with authentication method.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID (recommended for login events)"
+          },
+          "method": {
+            "type": "string",
+            "description": "Login method (e.g., \"Google\", \"Email\", \"Facebook\")"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 497,
+          "end_line": 520,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 129,
+          "end_line": 151,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one login event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_send_signup",
+      "description": "Send a sign-up event to Google Analytics.\n\nStandard event for tracking new user registrations.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID for the new user"
+          },
+          "method": {
+            "type": "string",
+            "description": "Sign-up method (e.g., \"Google\", \"Email\")"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 522,
+          "end_line": 545,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 152,
+          "end_line": 174,
+          "role": "handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one sign_up event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_send_add_to_cart",
+      "description": "Send an add to cart event to Google Analytics.\n\nEcommerce event for tracking when items are added to shopping cart.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          },
+          "value": {
+            "type": "number",
+            "description": "Total value of items added"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "affiliation": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "index": {
+                  "type": "number"
+                },
+                "item_brand": {
+                  "type": "string"
+                },
+                "item_category": {
+                  "type": "string"
+                },
+                "item_category2": {
+                  "type": "string"
+                },
+                "item_category3": {
+                  "type": "string"
+                },
+                "item_category4": {
+                  "type": "string"
+                },
+                "item_category5": {
+                  "type": "string"
+                },
+                "item_list_id": {
+                  "type": "string"
+                },
+                "item_list_name": {
+                  "type": "string"
+                },
+                "item_variant": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Items added to cart"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "currency",
+          "value",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 547,
+          "end_line": 574,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 175,
+          "end_line": 201,
+          "role": "handler"
+        },
+        {
+          "path": "src/types.ts",
+          "start_line": 101,
+          "end_line": 121,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one add_to_cart event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_send_begin_checkout",
+      "description": "Send a begin checkout event to Google Analytics.\n\nEcommerce event for tracking when users start the checkout process.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          },
+          "value": {
+            "type": "number",
+            "description": "Total value of cart"
+          },
+          "coupon": {
+            "type": "string",
+            "description": "Coupon code applied"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "affiliation": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "index": {
+                  "type": "number"
+                },
+                "item_brand": {
+                  "type": "string"
+                },
+                "item_category": {
+                  "type": "string"
+                },
+                "item_category2": {
+                  "type": "string"
+                },
+                "item_category3": {
+                  "type": "string"
+                },
+                "item_category4": {
+                  "type": "string"
+                },
+                "item_category5": {
+                  "type": "string"
+                },
+                "item_list_id": {
+                  "type": "string"
+                },
+                "item_list_name": {
+                  "type": "string"
+                },
+                "item_variant": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Items in checkout"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "currency",
+          "value",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 576,
+          "end_line": 605,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 202,
+          "end_line": 232,
+          "role": "handler"
+        },
+        {
+          "path": "src/types.ts",
+          "start_line": 101,
+          "end_line": 121,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one begin_checkout event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields.",
+        "Optional string event parameters are only included when truthy; numeric tax/shipping fields (purchase) are included when defined."
+      ]
+    },
+    {
+      "name": "ga_send_view_item",
+      "description": "Send a view item event to Google Analytics.\n\nEcommerce event for tracking product/item detail views. Completes the standard\nfunnel: view_item → add_to_cart → begin_checkout → purchase.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          },
+          "value": {
+            "type": "number",
+            "description": "Value of the viewed item(s)"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "affiliation": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "index": {
+                  "type": "number"
+                },
+                "item_brand": {
+                  "type": "string"
+                },
+                "item_category": {
+                  "type": "string"
+                },
+                "item_category2": {
+                  "type": "string"
+                },
+                "item_category3": {
+                  "type": "string"
+                },
+                "item_category4": {
+                  "type": "string"
+                },
+                "item_category5": {
+                  "type": "string"
+                },
+                "item_list_id": {
+                  "type": "string"
+                },
+                "item_list_name": {
+                  "type": "string"
+                },
+                "item_variant": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Items viewed"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "currency",
+          "value",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 607,
+          "end_line": 635,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 233,
+          "end_line": 259,
+          "role": "handler"
+        },
+        {
+          "path": "src/types.ts",
+          "start_line": 101,
+          "end_line": 121,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one view_item event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields."
+      ]
+    },
+    {
+      "name": "ga_send_refund",
+      "description": "Send a refund event to Google Analytics.\n\nEcommerce event for full or partial refunds. Omit 'items' for a full refund;\ninclude them (with quantities) for a partial refund. Use the same transaction_id\nas the original purchase.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "Transaction ID of the original purchase"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          },
+          "value": {
+            "type": "number",
+            "description": "Refunded amount"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "affiliation": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "string"
+                },
+                "currency": {
+                  "type": "string"
+                },
+                "discount": {
+                  "type": "number"
+                },
+                "index": {
+                  "type": "number"
+                },
+                "item_brand": {
+                  "type": "string"
+                },
+                "item_category": {
+                  "type": "string"
+                },
+                "item_category2": {
+                  "type": "string"
+                },
+                "item_category3": {
+                  "type": "string"
+                },
+                "item_category4": {
+                  "type": "string"
+                },
+                "item_category5": {
+                  "type": "string"
+                },
+                "item_list_id": {
+                  "type": "string"
+                },
+                "item_list_name": {
+                  "type": "string"
+                },
+                "item_variant": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Refunded items (only for partial refunds)"
+          },
+          "user_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "User properties (e.g., {subscription_tier: {value: \"premium\"}})"
+          }
+        },
+        "required": [
+          "transaction_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 637,
+          "end_line": 668,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/measurement-protocol-client.ts",
+          "start_line": 260,
+          "end_line": 291,
+          "role": "handler"
+        },
+        {
+          "path": "src/types.ts",
+          "start_line": 101,
+          "end_line": 121,
+          "role": "shared schema"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 76,
+          "end_line": 95,
+          "role": "shared schema"
+        }
+      ],
+      "behavior": "Builds one refund event from the exposed arguments and posts it to Measurement Protocol /mp/collect. Maps snake_case inputs to helper parameters, generates client_id as timestamp.random when missing or empty, includes user_id/user_properties, and returns success:true plus HTTP status.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Measurement Protocol mp/collect"
+      ],
+      "notes": [
+        "Configured GA_MEASUREMENT_ID/GA_API_SECRET select the web stream; neither can be overridden per call. Native API field/event limits and naming restrictions are not enforced locally; arrays have no size bounds, currency has no ISO validation, and item objects allow neither required identifier constraint nor custom item fields.",
+        "An omitted or empty items array is not sent; truthy currency and defined value are included."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list or live requests. Source snapshot has no .git; supplied revision is authoritative.",
+    "All 26 tools register unconditionally; absent or invalid credentials cause handlers to fail, not conditional tool removal. Data/Admin tools need GA_SERVICE_ACCOUNT_JSON; Measurement Protocol tools need GA_MEASUREMENT_ID and GA_API_SECRET.",
+    "Build entrypoint is build/index.js; package prepare runs TypeScript build. Node >=20 is declared. No definite unusable entrypoint established by inspection.",
+    "Zod objects strip unknown properties (represented by additionalProperties:false); records of z.any preserve arbitrary JSON values. No runtime parsing of types.ts request validators occurs: only EcommerceItemSchema is imported as an exposed shared validator.",
+    "Four registerPrompt calls and unregistered sendBatchEvents helper are not tools.",
+    "Native Measurement Protocol restrictions are separate from exposed schema: body <130 kB, up to 25 events, 25 parameters/event, event and parameter names <=40 characters, 25 user properties with names <=24 and values <=36 characters. HTTP 2xx acknowledges receipt, not valid ingestion; session_id and engagement_time_msec affect Realtime/user engagement accuracy. Helpers add neither parameter. validation_behavior is not exposed, so debug validation cannot request ENFORCE_RECOMMENDATIONS through these tools. [Official Measurement Protocol reference](https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference)."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently reconstructed all 26 Zod registrations and shared nested/ecommerce shapes and compared full descriptions; union primitive types versus anyOf are equivalent. Read reporting/Admin endpoints and Measurement Protocol collection/debug callbacks; checked missing direct-event client ID generation and distinct helper behavior."
+  }
+}

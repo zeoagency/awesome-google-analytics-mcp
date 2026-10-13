@@ -1,0 +1,670 @@
+{
+  "repo": "gomarble-ai/google-analytics-mcp-server",
+  "revision": "42b4fa21874c66d3b3bb0c5d47d0a8f0541cbc33",
+  "status": "included",
+  "reason": "Seven unconditional FastMCP tool handlers perform real GA4 Admin API account/property reads and Data API v1beta reports.",
+  "registration_sources": [
+    {
+      "path": "server.py",
+      "start_line": 19,
+      "end_line": 753
+    }
+  ],
+  "tool_count": 7,
+  "tools": [
+    {
+      "name": "list_properties",
+      "description": "List all Google Analytics 4 accounts with their associated properties in a hierarchical structure.\n\nArgs:\n    account_id: Optional specific Google Analytics account ID to list properties for.\n               If not provided, will list all accessible accounts with their properties.\n\nReturns:\n    Hierarchical structure showing Account ID/Name with all associated Property IDs/Names",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "Optional specific Google Analytics account ID to list properties for.\nIf not provided, will list all accessible accounts with their properties.",
+            "default": ""
+          }
+        },
+        "required": []
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 24,
+          "end_line": 215,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Account and property listing do not follow nextPageToken; only first pages are included.",
+        "In all-accounts mode property failures can silently produce empty property lists; specific-account mode raises.",
+        "No numeric account-ID constraint is imposed by the signature."
+      ],
+      "api_methods": [
+        "Admin API v1/v1beta accounts.get",
+        "Admin API v1/v1beta accounts.list",
+        "Admin API v1/v1beta properties.list"
+      ],
+      "behavior": "GET a specified account or all accessible accounts, retry v1beta after an unsuccessful v1 account response; GET properties for each account, retry using /properties?filter=parent:accounts/{id} after the initial nested /accounts/{id}/properties URL fails. Return hierarchical account/property details and summary counts. Uses get_headers_with_auto_token for OAuth."
+    },
+    {
+      "name": "get_page_views",
+      "description": "Get page view metrics for a specific date range from Google Analytics 4.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"123456789\")\n    start_date: Start date in YYYY-MM-DD format\n    end_date: End date in YYYY-MM-DD format\n    dimensions: List of dimensions to group by (optional, defaults to [\"pagePath\"])\n\nReturns:\n    Page view metrics grouped by specified dimensions in JSON format",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"123456789\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of dimensions to group by (optional, defaults to [\"pagePath\"])",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 217,
+          "end_line": 282,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": [
+            {
+              "name": "screenPageViews"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "pagePath"
+            }
+          ]
+        },
+        "dimension_override": "Nonempty dimensions replaces default dimensions with one {name: supplied_dimension} object per string; null or [] uses defaults."
+      },
+      "behavior": "Obtain OAuth headers and POST the report_template payload, replacing dimensions when a nonempty list is supplied. Return raw JSON response when rows exist; otherwise return only a message. Unsuccessful HTTP responses raise an exception."
+    },
+    {
+      "name": "get_active_users",
+      "description": "Get active users metrics for a specific date range from Google Analytics 4.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"123456789\")\n    start_date: Start date in YYYY-MM-DD format\n    end_date: End date in YYYY-MM-DD format\n    dimensions: List of dimensions to group by (optional, defaults to [\"date\"])\n\nReturns:\n    Active users metrics grouped by specified dimensions in JSON format",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"123456789\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of dimensions to group by (optional, defaults to [\"date\"])",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 284,
+          "end_line": 349,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": [
+            {
+              "name": "activeUsers"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "date"
+            }
+          ]
+        },
+        "dimension_override": "Nonempty dimensions replaces default dimensions with one {name: supplied_dimension} object per string; null or [] uses defaults."
+      },
+      "behavior": "Obtain OAuth headers and POST the report_template payload, replacing dimensions when a nonempty list is supplied. Return raw JSON response when rows exist; otherwise return only a message. Unsuccessful HTTP responses raise an exception."
+    },
+    {
+      "name": "get_events",
+      "description": "Get event metrics for a specific date range from Google Analytics 4.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"123456789\")\n    start_date: Start date in YYYY-MM-DD format\n    end_date: End date in YYYY-MM-DD format\n    dimensions: List of dimensions to group by (optional, defaults to [\"eventName\"])\n\nReturns:\n    Event metrics grouped by specified dimensions in JSON format",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"123456789\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of dimensions to group by (optional, defaults to [\"eventName\"])",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 351,
+          "end_line": 416,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": [
+            {
+              "name": "eventCount"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "eventName"
+            }
+          ]
+        },
+        "dimension_override": "Nonempty dimensions replaces default dimensions with one {name: supplied_dimension} object per string; null or [] uses defaults."
+      },
+      "behavior": "Obtain OAuth headers and POST the report_template payload, replacing dimensions when a nonempty list is supplied. Return raw JSON response when rows exist; otherwise return only a message. Unsuccessful HTTP responses raise an exception."
+    },
+    {
+      "name": "get_traffic_sources",
+      "description": "Get traffic source metrics for a specific date range from Google Analytics 4.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"123456789\")\n    start_date: Start date in YYYY-MM-DD format\n    end_date: End date in YYYY-MM-DD format\n    dimensions: List of dimensions to group by (optional, defaults to [\"source\", \"medium\"])\n\nReturns:\n    Traffic source metrics grouped by specified dimensions in JSON format",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"123456789\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of dimensions to group by (optional, defaults to [\"source\", \"medium\"])",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 418,
+          "end_line": 483,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": [
+            {
+              "name": "sessions"
+            },
+            {
+              "name": "totalUsers"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "source"
+            },
+            {
+              "name": "medium"
+            }
+          ]
+        },
+        "dimension_override": "Nonempty dimensions replaces default dimensions with one {name: supplied_dimension} object per string; null or [] uses defaults."
+      },
+      "behavior": "Obtain OAuth headers and POST the report_template payload, replacing dimensions when a nonempty list is supplied. Return raw JSON response when rows exist; otherwise return only a message. Unsuccessful HTTP responses raise an exception."
+    },
+    {
+      "name": "get_device_metrics",
+      "description": "Get device metrics for a specific date range from Google Analytics 4.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"123456789\")\n    start_date: Start date in YYYY-MM-DD format\n    end_date: End date in YYYY-MM-DD format\n    dimensions: List of dimensions to group by (optional, defaults to [\"deviceCategory\"])\n\nReturns:\n    Device metrics grouped by specified dimensions in JSON format",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"123456789\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of dimensions to group by (optional, defaults to [\"deviceCategory\"])",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 485,
+          "end_line": 550,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": [
+            {
+              "name": "sessions"
+            },
+            {
+              "name": "screenPageViews"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "deviceCategory"
+            }
+          ]
+        },
+        "dimension_override": "Nonempty dimensions replaces default dimensions with one {name: supplied_dimension} object per string; null or [] uses defaults."
+      },
+      "behavior": "Obtain OAuth headers and POST the report_template payload, replacing dimensions when a nonempty list is supplied. Return raw JSON response when rows exist; otherwise return only a message. Unsuccessful HTTP responses raise an exception."
+    },
+    {
+      "name": "run_report",
+      "description": "Execute a comprehensive Google Analytics 4 report with full customization capabilities.\n\nIMPORTANT: Use STRING ARRAYS for metrics and dimensions, NOT objects!\n\nCORRECT FORMAT:\n- metrics: [\"sessions\", \"totalUsers\", \"screenPageViews\"]  \n- dimensions: [\"country\", \"deviceCategory\"]  \n\nINCORRECT FORMAT (will fail):\n- metrics: [{\"name\": \"sessions\"}]  \n- dimensions: [{\"name\": \"country\"}]  \n\nVALID GA4 METRICS:\n- sessions, totalUsers, activeUsers, newUsers\n- screenPageViews, pageviews, bounceRate, engagementRate\n- averageSessionDuration, userEngagementDuration, engagedSessions\n- conversions, totalRevenue, purchaseRevenue\n- eventCount, eventsPerSession\n\nCOMMON METRIC MISTAKES:\n- uniquePageviews (not valid) → use screenPageViews\n- pageViews (not valid) → use screenPageViews\n- users (not valid) → use totalUsers or activeUsers\n- sessionDuration (not valid) → use averageSessionDuration\n- conversionsPerSession (not valid) → use eventsPerSession\n- conversionRate (not valid) → calculate manually\n\nVALID GA4 DIMENSIONS:\n- country, city, region, continent\n- deviceCategory, operatingSystem, browser\n- source, medium, campaignName, sessionDefaultChannelGroup\n- pagePath, pageTitle, landingPage\n- date, month, year, hour, dayOfWeek\n- sessionSource, sessionMedium, sessionCampaignName\n\nCOMMON DIMENSION MISTAKES:\n- channelGroup (not valid) → use sessionDefaultChannelGroup\n- sessionCampaign (not valid) → use sessionCampaignName\n- campaign (not valid) → use campaignName\n\nSORTING (order_bys) - EXPERIMENTAL:\n- For metrics: [{\"metric\": {\"metricName\": \"sessions\"}, \"desc\": true}]\n- For dimensions: [{\"dimension\": {\"dimensionName\": \"country\"}, \"desc\": false}]\n- WARNING: Sorting may fail due to JSON parsing issues. Test without sorting first.\n\nArgs:\n    property_id: Google Analytics 4 property ID (numeric, e.g., \"421301275\")\n    start_date: Start date in YYYY-MM-DD format (e.g., \"2025-01-01\")\n    end_date: End date in YYYY-MM-DD format (e.g., \"2025-01-31\")\n    metrics: Array of metric names as STRINGS (e.g., [\"sessions\", \"totalUsers\"])\n    dimensions: Optional array of dimension names as STRINGS (e.g., [\"country\", \"deviceCategory\"])\n    limit: Optional maximum number of rows (default: 100)\n    offset: Optional number of rows to skip (default: 0)\n    order_bys: Optional sorting - see format above\n    dimension_filter: Optional filter for dimensions\n    metric_filter: Optional filter for metrics\n    keep_empty_rows: Optional boolean to include empty rows\n\nReturns:\n    Comprehensive JSON report with requested metrics and dimensions\n\nWORKING EXAMPLES:\n\nBasic Sessions Report:\n{\n  \"property_id\": \"421301275\",\n  \"start_date\": \"2025-01-01\",\n  \"end_date\": \"2025-01-31\",\n  \"metrics\": [\"sessions\", \"totalUsers\", \"screenPageViews\"]\n}\n\nTraffic by Country:\n{\n  \"property_id\": \"421301275\", \n  \"start_date\": \"2025-01-01\",\n  \"end_date\": \"2025-01-31\",\n  \"metrics\": [\"sessions\", \"totalUsers\"],\n  \"dimensions\": [\"country\", \"deviceCategory\"],\n  \"limit\": 20\n}\n\nTop Pages Report:\n{\n  \"property_id\": \"421301275\",\n  \"start_date\": \"2025-01-01\", \n  \"end_date\": \"2025-01-31\",\n  \"metrics\": [\"screenPageViews\", \"sessions\"],\n  \"dimensions\": [\"pagePath\"],\n  \"limit\": 10\n}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "Google Analytics 4 property ID (numeric, e.g., \"421301275\")"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date in YYYY-MM-DD format (e.g., \"2025-01-01\")"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date in YYYY-MM-DD format (e.g., \"2025-01-31\")"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of metric names as STRINGS (e.g., [\"sessions\", \"totalUsers\"])"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional array of dimension names as STRINGS (e.g., [\"country\", \"deviceCategory\"])",
+            "default": null
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional maximum number of rows (default: 100)",
+            "default": null
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional number of rows to skip (default: 0)",
+            "default": null
+          },
+          "order_bys": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional sorting - see format above",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional filter for dimensions",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional filter for metrics",
+            "default": null
+          },
+          "keep_empty_rows": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional boolean to include empty rows",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date",
+          "metrics"
+        ]
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "server.py",
+          "start_line": 552,
+          "end_line": 753,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "scope": "ga4",
+      "effect": "read",
+      "notes": [
+        "ctx: Context = None is an injected FastMCP Context and is excluded from the exposed input schema.",
+        "Docstring advertises default limit=100 and offset=0, but signature defaults both to None; omitted values are not sent.",
+        "limit <= 0 and offset < 0 are silently omitted; these are handler conditions, not schema constraints.",
+        "metrics must be nonempty in handler, but signature has no minItems.",
+        "order_bys items and filters are arbitrary Dict[str, Any] objects; nested GA filter/order structures are forwarded unchanged and have no exposed structured validators.",
+        "Metric/dimension examples and validity claims in docstring are not enums or server validation.",
+        "Handler overwrites upstream metadata rather than merging.",
+        "Date format and numeric property ID are docstring guidance only: no schema format, pattern or numeric constraint.",
+        "No report pagination or retry logic; no timeout is passed to requests.post."
+      ],
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "report_template": {
+        "endpoint": "https://analyticsdata.googleapis.com/v1beta/properties/{property_id}:runReport",
+        "method": "POST",
+        "payload": {
+          "dateRanges": [
+            {
+              "startDate": "{start_date}",
+              "endDate": "{end_date}"
+            }
+          ],
+          "metrics": "[{\"name\": metric.strip()} for metric in metrics]"
+        },
+        "optional_fields": {
+          "dimensions": "[{\"name\": dimension.strip()} for dimension in dimensions] when nonempty list",
+          "limit": "limit when int > 0",
+          "offset": "offset when int >= 0",
+          "orderBys": "order_bys unchanged when nonempty list",
+          "dimensionFilter": "dimension_filter unchanged when nonempty dict",
+          "metricFilter": "metric_filter unchanged when nonempty dict",
+          "keepEmptyRows": "keep_empty_rows when non-null bool"
+        }
+      },
+      "behavior": "Validate nonempty string property_id/start_date/end_date and nonempty metrics list, obtain OAuth headers, and POST report_template. Strip metric/dimension names. Return GA response with metadata overwritten by local request metadata and returned row count; no rows returns a message with request metadata and total_rows=0. Unsuccessful HTTP responses raise."
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, server imports/execution, or live requests. Git HEAD matches supplied revision.",
+    "All seven tools are registered unconditionally in server.py. ga4://reference is a resource, not a tool. OAuth module registers no tools.",
+    "Schemas reconstruct signature annotations/defaults and Args docstrings; no custom Pydantic models, Field constraints, enums, or aliases. Unspecified additionalProperties at top level is left unspecified.",
+    "Every GA call can trigger interactive OAuth, refresh credentials, and write google_analytics_token.json beside OAuth config. GOOGLE_ANALYTICS_OAUTH_CONFIG_PATH must point to a readable client config. OAuth scopes include analytics and analytics.readonly; handlers only read GA data.",
+    "requirements.txt uses unpinned fastmcp>=0.8.0; exact runtime-generated schema cosmetic fields are version-dependent. Context logging methods are called without await in synchronous handlers; asynchronous FastMCP logging implementations may not emit these messages.",
+    "OAuth console fallback calls flow.run_console(), whose availability depends on installed google-auth-oauthlib version. Local-server OAuth is the primary path."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all seven Python signatures, required fields, defaults and complete docstrings; read account discovery/version fallback and shared run_report request construction, plus preset handlers. Context is injected, not a parameter."
+  }
+}

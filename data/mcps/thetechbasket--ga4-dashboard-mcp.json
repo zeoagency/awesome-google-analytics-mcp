@@ -1,0 +1,621 @@
+{
+  "repo": "TheTechBasket/GA4-Dashboard-MCP",
+  "revision": "349560e7ba0221dccb152e0a87fd573d8974c785",
+  "status": "included",
+  "reason": "Executable stdio MCP entrypoint registers seven real GA4 Admin/Data tools, two adjacent web APIs and two local inspection tools.",
+  "registration_sources": [
+    {
+      "path": "mcp-server/index.js",
+      "start_line": 138,
+      "end_line": 554
+    }
+  ],
+  "tool_count": 11,
+  "tools": [
+    {
+      "name": "get_account_summaries",
+      "description": "Lists every GA4 account and its properties for the credentials in use. Admin API, no GA4 tokens. Call it once per session to find a property ID, then work on that one property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 138,
+          "end_line": 167,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Lists accounts and property summaries; projects account, displayName, property name/displayName/type; cached metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listAccountSummaries"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_property_details",
+      "description": "Returns details (display name, time zone, currency, industry, create time) for one GA4 property. Admin API, no GA4 tokens; cached 6h.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID, e.g. 257579250"
+          }
+        },
+        "required": [
+          "propertyId"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 193,
+          "end_line": 201,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 169,
+          "end_line": 191,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Reads property details and selects name, displayName, timeZone, currencyCode, industryCategory, propertyType, createTime and parent; cached metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API getProperty"
+      ],
+      "notes": []
+    },
+    {
+      "name": "list_google_ads_links",
+      "description": "Lists the Google Ads accounts linked to a GA4 property. Admin API, no GA4 tokens; cached 6h.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID"
+          }
+        },
+        "required": [
+          "propertyId"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 203,
+          "end_line": 230,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Lists links under properties/{propertyId}; returns name, customerId, canManageClients and createTime; cached metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API listGoogleAdsLinks"
+      ],
+      "notes": []
+    },
+    {
+      "name": "run_report",
+      "description": "Runs a GA4 core report: dimensions x metrics over a date range. Pool: core. Cost grows with rows, dimensions, date range and cardinality, so use orderBys, a small limit and a dimensionFilter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "e.g. 7daysAgo, 28daysAgo, today, or YYYY-MM-DD. Range max 93 days."
+          },
+          "endDate": {
+            "type": "string",
+            "description": "e.g. today, yesterday, or YYYY-MM-DD"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Max 4, e.g. [\"country\", \"sessionSource\"]"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Max 6, e.g. [\"sessions\", \"activeUsers\"]"
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 250,
+            "default": 10,
+            "description": "Rows to return. Max 50 with a high-cardinality dimension."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Row offset for paging"
+          },
+          "orderBys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "metric": {
+                  "type": "string",
+                  "description": "Metric name to sort by, e.g. \"totalAdRevenue\""
+                },
+                "dimension": {
+                  "type": "string",
+                  "description": "Dimension name to sort by instead of a metric"
+                },
+                "desc": {
+                  "type": "boolean",
+                  "default": true
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "description": "Sort rows server-side, e.g. top pages by revenue. Required with pagePath, pageTitle, landingPage and custom dimensions."
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "description": "Dimension to filter on, e.g. \"pagePath\""
+              },
+              "matchType": {
+                "type": "string",
+                "enum": [
+                  "EXACT",
+                  "BEGINS_WITH",
+                  "ENDS_WITH",
+                  "CONTAINS",
+                  "FULL_REGEXP"
+                ],
+                "default": "EXACT"
+              },
+              "value": {
+                "type": "string"
+              },
+              "caseSensitive": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "dimension",
+              "value"
+            ],
+            "additionalProperties": false,
+            "description": "Filter rows server-side instead of pulling them and filtering"
+          },
+          "dimensionFilters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimension": {
+                  "type": "string",
+                  "description": "Dimension to filter on, e.g. \"pagePath\""
+                },
+                "matchType": {
+                  "type": "string",
+                  "enum": [
+                    "EXACT",
+                    "BEGINS_WITH",
+                    "ENDS_WITH",
+                    "CONTAINS",
+                    "FULL_REGEXP"
+                  ],
+                  "default": "EXACT"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "caseSensitive": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "dimension",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Several filters, ANDed"
+          }
+        },
+        "required": [
+          "propertyId",
+          "startDate",
+          "endDate",
+          "dimensions",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 236,
+          "end_line": 300,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 114,
+          "end_line": 132,
+          "role": "schema/handler"
+        },
+        {
+          "path": "mcp-server/lib/guard.js",
+          "start_line": 15,
+          "end_line": 115,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Builds one date range with named dimensions and metrics, limit/offset, metric or dimension sorting and ANDed string dimension filters. Requests property quota; returns compact headers/rows, rowCount, returned/truncated and quota, cached report. Money-like metric names trigger cached Admin getProperty lookup to append currencyCode.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport",
+        "Admin API getProperty"
+      ],
+      "notes": [
+        "Implementation guards, not schema constraints: at most 4 dimensions, 6 metrics and 93 inclusive days when dates parse; pagePath/pageLocation/pageTitle, landingPage* and customEvent:/customUser: dimensions require nonempty orderBys and limit <=50. Validation occurs only on cache miss.",
+        "orderBys objects allow neither or both metric/dimension; handler prefers metric when truthy and otherwise forwards dimension, without enforcing exactly one."
+      ]
+    },
+    {
+      "name": "run_funnel_report",
+      "description": "Runs a GA4 funnel report: how many users completed each step of an ordered event sequence. Pool: funnel. Use few steps and the shortest date range; rows are capped at 100.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "e.g. 7daysAgo or YYYY-MM-DD"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "e.g. today or YYYY-MM-DD"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "eventName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "eventName"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 2,
+            "description": "Ordered funnel steps, each matched by a single eventName"
+          }
+        },
+        "required": [
+          "propertyId",
+          "startDate",
+          "endDate",
+          "steps"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 302,
+          "end_line": 357,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Builds an ordered funnel whose steps filter eventName with stringFilter.value; requests property quota. Compacts funnelTable dimension/metric headers and rows and caps returned rows to 100; cached report.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1alpha runFunnelReport"
+      ],
+      "notes": [
+        "100-row cap is applied after API response; no request row limit or date-range guard. Event stringFilter lacks an explicit matchType."
+      ]
+    },
+    {
+      "name": "get_custom_dimensions_and_metrics",
+      "description": "Lists the custom dimensions and custom metrics defined on a GA4 property. Pool: core (getMetadata spends a few core tokens, no quota is returned). Cached 6h, so call it once.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID"
+          }
+        },
+        "required": [
+          "propertyId"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 359,
+          "end_line": 384,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Reads properties/{propertyId}/metadata; filters dimensions and metrics to customDefinition and returns apiName, uiName and description; cached metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": [
+        "Despite description naming core pool, cachedCall has no pool field, so shared quota gate/record is not used; getMetadata returns no quota."
+      ]
+    },
+    {
+      "name": "run_realtime_report",
+      "description": "Runs a GA4 realtime report covering the last N minutes (max 30). Pool: realtime. Keep dimensions few and the limit small; results are cached 60s.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "Numeric GA4 property ID"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "country"
+            ]
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "activeUsers"
+            ]
+          },
+          "minutesAgo": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 29
+          },
+          "limit": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 250,
+            "default": 10
+          }
+        },
+        "required": [
+          "propertyId"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 390,
+          "end_line": 432,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Uses named dimensions and metrics and minuteRanges from minutesAgo to 0; requests property quota; compacts response with row counts and quota; cached realtime. Money-like metrics trigger cached Admin getProperty currency lookup.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport",
+        "Admin API getProperty"
+      ],
+      "notes": []
+    },
+    {
+      "name": "run_pagespeed_insights",
+      "description": "Runs a PageSpeed Insights audit for one URL (Lighthouse performance/SEO/accessibility/best-practices scores).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "desktop"
+            ],
+            "default": "mobile"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "performance",
+                "accessibility",
+                "best-practices",
+                "seo"
+              ]
+            },
+            "default": [
+              "performance"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 438,
+          "end_line": 492,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "GETs the PageSpeed endpoint with URL, strategy, repeated category parameters and PSI_API_KEY. Returns rounded Lighthouse category scores and display values for LCP, CLS, TBT and FCP; cached PSI.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "PageSpeed Insights v5 runPagespeed"
+      ],
+      "notes": [
+        "Tool is always registered; missing PSI_API_KEY returns an error result."
+      ]
+    },
+    {
+      "name": "request_indexing",
+      "description": "Notifies Google's Indexing API that a URL changed, so it can be recrawled sooner. Requires the GA service account to be added as an Owner of the URL's property in Search Console, otherwise this returns a 403 ownership error. Not cached (it's an action, not a query).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "URL_UPDATED",
+              "URL_DELETED"
+            ],
+            "default": "URL_UPDATED"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 498,
+          "end_line": 525,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Obtains scoped service-account auth and POSTs {url,type} to urlNotifications:publish through the indexing rate limiter; returns response data or caught error plus ownership hint; no cache.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Indexing API v3 urlNotifications.publish"
+      ],
+      "notes": [
+        "Uses the same GA4 service-account credentials with indexing scope; ownership errors become normal text error results."
+      ]
+    },
+    {
+      "name": "get_cache_status",
+      "description": "Lists every cached tool response on disk: which tool, params, age, TTL, and whether it's still fresh.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 531,
+          "end_line": 535,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Reads on-disk cache JSON entries, consulting memory when available, and returns toolName, params, ageSeconds, ttlSeconds and freshness; creates cache directory if absent.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Malformed on-disk cache JSON is not caught by status()."
+      ]
+    },
+    {
+      "name": "get_rate_limit_status",
+      "description": "Shows GA4 quota left per property and pool (from the shared ledger the dashboard also writes), the reserve thresholds, Google's limits and the local throttle state. Costs no GA4 tokens.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "mcp-server/index.js",
+          "start_line": 537,
+          "end_line": 554,
+          "role": "registration/schema/handler"
+        }
+      ],
+      "behavior": "Returns shared ledger project identifier, cooldowns, quota entries, next daily reset, reserve thresholds and standard limits, plus refreshed local token bucket state; no Google calls.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": []
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live requests. Source has no .git; supplied revision is authoritative.",
+    "All 11 tools register unconditionally; package.json mcp script launches mcp-server/index.js and dependencies include SDK, Zod and GA client libraries. GA clients initialize lazily and require GA4_CLIENT_EMAIL and GA4_PRIVATE_KEY from root .env.",
+    "Zod shapes reconstructed as JSON Schema; defaulted parameters are optional inputs. Zod objects strip unknown keys, represented by additionalProperties false. No exposed numeric-ID regex or date-format restriction beyond descriptions.",
+    "cachedCall checks disk/memory cache before guards, then limits property spread (default 3 properties/10 minutes), concurrency (default 3/property), pool quota and cooldowns, and local API-family throttling. Report/realtime/funnel record quota in shared ledger. TTL defaults: metadata 21600s, report 3600s, realtime 60s, PSI 1800s, configurable by environment.",
+    "Every output uses compact JSON text; guard.fitResult removes trailing report rows for default 12000-byte cap. Non-row responses can exceed this cap. API read tools also write local cache/ledger.",
+    "rateLimit permits one retry for unavailable/server errors and concurrency exhaustion; PSI 429 is mapped to code 8 and retried once. No definite entrypoint blocker identified by source inspection."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently reconstructed and compared all eight parameterized Zod schemas/descriptions; directly checked the other three no-input registrations and descriptions. Read native report/funnel/realtime callbacks, compact result limits, cache/quota guards and separate PageSpeed/indexing handlers. The dashboard app is not counted as another MCP."
+  }
+}

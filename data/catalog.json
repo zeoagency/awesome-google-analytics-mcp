@@ -1,0 +1,331 @@
+{
+  "groups": [
+    {
+      "title": "Audit measurement and reporting",
+      "description": "Investigate event health, ecommerce coverage, configuration and cross-property differences.",
+      "servers": [
+        {
+          "repo": "arcbaslow/google-analytics-agent",
+          "summary": "Audit measurement, inspect consent signals and event coverage, and compare reporting periods.",
+          "featured_tools": [
+            "audit",
+            "consent_diagnostics",
+            "funnel"
+          ]
+        },
+        {
+          "repo": "CreativeMetrics/gtm-ga4-mcp",
+          "summary": "Check tag health against GA4 event counts, compare properties and duplicate custom dimensions.",
+          "featured_tools": [
+            "gtm_check_tag_health",
+            "ga4_compare_properties",
+            "ga4_duplicate_custom_dimensions"
+          ]
+        },
+        {
+          "repo": "get-mcp-ads/google-analytics-mcp-server",
+          "summary": "Inspect ecommerce, audiences and export configuration; validate queries and inspect quota state.",
+          "featured_tools": [
+            "ga4_get_ecommerce_diagnostics",
+            "ga4_get_bigquery_export_diagnostics",
+            "ga4_validate_query"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Configure properties and send events",
+      "description": "Create or change GA4 configuration, install collection code, or send Measurement Protocol events.",
+      "servers": [
+        {
+          "repo": "burhan29ee/ga4-mcp-server",
+          "summary": "Create definitions, key events and audiences; manage Measurement Protocol secrets and send events.",
+          "featured_tools": [
+            "create_event_audience",
+            "create_measurement_protocol_secret",
+            "send_ga4_event"
+          ]
+        },
+        {
+          "repo": "codeChap/mcp-server-google-analytics",
+          "summary": "Manage custom dimensions and key events, and add dated property annotations.",
+          "featured_tools": [
+            "create_custom_dimension",
+            "create_key_event",
+            "create_property_annotation"
+          ]
+        },
+        {
+          "repo": "freema/mcp-google-marketing",
+          "summary": "Create and update properties and streams, manage conversion events, and query reports.",
+          "featured_tools": [
+            "ga4_create_property",
+            "ga4_create_web_stream",
+            "ga4_create_custom_metric"
+          ]
+        },
+        {
+          "repo": "HappyMonkeyAI/ai-google-analytics-mcp",
+          "summary": "Provision properties and web streams, then install gtag or scaffold Next.js tracking in local projects.",
+          "featured_tools": [
+            "provision_project_ga4_setup",
+            "scaffold_ga4_nextjs_tracking"
+          ]
+        },
+        {
+          "repo": "kb223/gtm-ga4-mcp",
+          "summary": "Create, update and delete GA4 entities through permission tiers, dry-run previews and confirmation tokens.",
+          "featured_tools": [
+            "ga4_admin_create",
+            "ga4_admin_update",
+            "ga4_admin_delete"
+          ]
+        },
+        {
+          "repo": "leonardosepulvedat/mcp-google-analytics",
+          "summary": "Send and debug-validate custom or ecommerce events; also run reporting and native funnel queries.",
+          "featured_tools": [
+            "ga_send_purchase",
+            "ga_send_refund",
+            "ga_validate_event"
+          ]
+        },
+        {
+          "repo": "mharnett/mcp-ga4",
+          "summary": "Register custom dimensions when writes are enabled; inspect definitions and streams and run reports.",
+          "featured_tools": [
+            "ga4_create_custom_dimension",
+            "ga4_list_custom_metrics"
+          ]
+        },
+        {
+          "repo": "mnsmasum62786/was-ga4-mcp",
+          "summary": "Update properties, create definitions and BigQuery links, or call native GA4 endpoints with an explicit method.",
+          "featured_tools": [
+            "ga4_create_bigquery_link",
+            "ga4_update_property",
+            "ga4_universal_call"
+          ]
+        },
+        {
+          "repo": "stufently/google-webtools-mcp",
+          "summary": "Provision GA4 properties and web streams, retrieve measurement IDs and query historical or realtime reports.",
+          "featured_tools": [
+            "ga4_create_property",
+            "ga4_create_data_stream"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Connect GA4 with search data",
+      "description": "Read GA4 alongside Search Console, or explicitly join landing-page acquisition and engagement.",
+      "servers": [
+        {
+          "repo": "delaren47/gsc-ga4-mcp",
+          "summary": "Join Search Console clicks with GA4 landing-page engagement and identify content refresh opportunities.",
+          "featured_tools": [
+            "compare_gsc_ga4_pages",
+            "content_refresh_candidates",
+            "find_pages_with_clicks_but_low_engagement"
+          ]
+        },
+        {
+          "repo": "fenjo26/OpenGSC",
+          "summary": "Compare sessions, engagement, key events and revenue for a linked GA4 property; one GA4 tool within a larger search toolkit.",
+          "featured_tools": [
+            "get_analytics"
+          ]
+        },
+        {
+          "repo": "Newsstate/ga4-mcp",
+          "summary": "Query GA4 traffic, audiences and events alongside separate Search Console query and page reports.",
+          "featured_tools": [
+            "get_traffic_sources",
+            "get_audience_overview"
+          ]
+        },
+        {
+          "repo": "rablab-mtl/mcp-ga4-gsc",
+          "summary": "Run GA4 reports, pivots and batches alongside separate Search Console and URL inspection tools.",
+          "featured_tools": [
+            "ga4_run_pivot_report",
+            "ga4_batch_run_reports"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Build funnels and multidimensional reports",
+      "description": "Use native funnel APIs, pivot tables, batches or conversion-specific reports.",
+      "servers": [
+        {
+          "repo": "googleanalytics/google-analytics-mcp",
+          "summary": "Run native funnels, conversion reports and realtime queries; inspect custom definitions and annotations.",
+          "featured_tools": [
+            "run_funnel_report",
+            "run_conversions_report"
+          ]
+        },
+        {
+          "repo": "dhawalshah/google-analytics-mcp",
+          "summary": "Build native event funnels, inspect realtime country/device activity and run custom reports.",
+          "featured_tools": [
+            "run_funnel_report",
+            "get_realtime_users"
+          ]
+        },
+        {
+          "repo": "scalably-io/ga4-mcp",
+          "summary": "Run native funnels, pivot and batch reports, preflight compatibility and inspect access reports.",
+          "featured_tools": [
+            "ga4_run_funnel_report",
+            "ga4_run_pivot_report",
+            "ga4_run_access_report"
+          ]
+        },
+        {
+          "repo": "TheTechBasket/GA4-Dashboard-MCP",
+          "summary": "Run native funnels and filtered reports with quota guards and caching; query realtime activity.",
+          "featured_tools": [
+            "run_funnel_report",
+            "run_report"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Analyze GA4 reports with SQL",
+      "description": "Materialize GA4 reports locally and investigate changes across imported tables.",
+      "servers": [
+        {
+          "repo": "sednalabs/ga4-mcp",
+          "summary": "Ingest reports into DuckDB, query them with SQL and investigate release regressions or landing-parameter shifts; scratchpad profile required.",
+          "featured_tools": [
+            "scratchpad_ingest_report",
+            "scratchpad_query",
+            "scratchpad_release_regression_report"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Query traffic and realtime reports",
+      "description": "Discover fields and properties, explore traffic, compare periods or query active users.",
+      "servers": [
+        {
+          "repo": "administrator-prog/ga4-mcp",
+          "summary": "Compare periods and investigate organic traffic, landing pages, device changes, events and site searches.",
+          "featured_tools": [
+            "analyse_conversion_drop",
+            "analyse_events_by_page",
+            "analyse_site_search"
+          ]
+        },
+        {
+          "repo": "ankhangonline/mcp-ga4-team-server",
+          "summary": "Run one configurable historical report with filters, ordering, pagination and a team-specific property mapping.",
+          "featured_tools": [
+            "get_team_ga4_report"
+          ]
+        },
+        {
+          "repo": "buyte-io/GA4-MCP-Server",
+          "summary": "Discover accounts, properties and metadata, then run filtered historical reports through the source entrypoints.",
+          "featured_tools": [
+            "ga4_getMetadata",
+            "ga4_runReport"
+          ]
+        },
+        {
+          "repo": "Callince/ga4-mcp-server",
+          "summary": "Discover properties and metadata and run custom historical or realtime reports.",
+          "featured_tools": [
+            "run_report",
+            "run_realtime_report"
+          ]
+        },
+        {
+          "repo": "CUTolu2021/ga4-mcp-server",
+          "summary": "Query page views, events and user behavior with historical report presets and paginated custom reports.",
+          "featured_tools": [
+            "getUserBehavior",
+            "getEvents"
+          ]
+        },
+        {
+          "repo": "devli13/mcp-ga4",
+          "summary": "Query daily users, top events, cohort retention and realtime data for a configured property.",
+          "featured_tools": [
+            "ga4_retention",
+            "ga4_daily_users"
+          ]
+        },
+        {
+          "repo": "ESGEE-0562/google-analytics-mcp",
+          "summary": "Read account/property metadata, annotations and custom definitions, then query historical or realtime reports.",
+          "featured_tools": [
+            "run_report",
+            "run_realtime_report"
+          ]
+        },
+        {
+          "repo": "gomarble-ai/google-analytics-mcp-server",
+          "summary": "Query page views, active users, events, traffic sources and devices, or supply a custom filtered report.",
+          "featured_tools": [
+            "get_device_metrics",
+            "run_report"
+          ]
+        },
+        {
+          "repo": "gviollaz/iita-ga4-mcp",
+          "summary": "Query traffic sources, top and landing pages, daily trends and device/geography breakdowns; also request realtime reports.",
+          "featured_tools": [
+            "ga4_daily_trend",
+            "ga4_device_geo"
+          ]
+        },
+        {
+          "repo": "K41R0N/ga4-mcp",
+          "summary": "Discover properties and run historical reports using the specified teammate’s Google credentials.",
+          "featured_tools": [
+            "list_properties",
+            "run_report"
+          ]
+        },
+        {
+          "repo": "luminarylane/ga4-mcp",
+          "summary": "Query top pages, traffic sources, conversion events and realtime activity, or compare two reporting periods.",
+          "featured_tools": [
+            "ga4_compare_periods",
+            "ga4_get_realtime"
+          ]
+        },
+        {
+          "repo": "minholi/google-analytics-mcp",
+          "summary": "Explore traffic, geography, devices, events and conversion presets with nested options and JSON or Markdown output.",
+          "featured_tools": [
+            "google_analytics_get_geographic_performance",
+            "google_analytics_get_conversions"
+          ]
+        },
+        {
+          "repo": "onionst/ga4-toolkit",
+          "summary": "Query acquisition, page and event presets, or request custom historical and realtime reports with quota metadata.",
+          "featured_tools": [
+            "ga4_acquisition",
+            "ga4_realtime"
+          ]
+        },
+        {
+          "repo": "surendranb/google-analytics-mcp",
+          "summary": "Search the configured property’s cached dimension/metric schema, then query filtered historical data with volume checks.",
+          "featured_tools": [
+            "search_schema",
+            "get_ga4_data"
+          ]
+        }
+      ]
+    }
+  ]
+}

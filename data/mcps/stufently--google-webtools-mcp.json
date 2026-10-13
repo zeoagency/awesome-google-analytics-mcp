@@ -1,0 +1,2855 @@
+{
+  "repo": "stufently/google-webtools-mcp",
+  "revision": "2d18361dffddb441b92abc79667a11df1b19ac42",
+  "status": "included",
+  "reason": "Implements GA4 Admin v1beta property and stream operations and Data v1beta reporting, alongside Search Console and Site Verification tools.",
+  "registration_sources": [
+    {
+      "path": "src/server.ts",
+      "start_line": 18,
+      "end_line": 41
+    },
+    {
+      "path": "src/tools/ga4-admin/index.ts",
+      "start_line": 1,
+      "end_line": 333
+    },
+    {
+      "path": "src/tools/ga4-reporting/index.ts",
+      "start_line": 1,
+      "end_line": 180
+    },
+    {
+      "path": "src/tools/indexing/index.ts",
+      "start_line": 1,
+      "end_line": 825
+    },
+    {
+      "path": "src/tools/opportunities/index.ts",
+      "start_line": 1,
+      "end_line": 1411
+    },
+    {
+      "path": "src/tools/performance/index.ts",
+      "start_line": 1,
+      "end_line": 824
+    },
+    {
+      "path": "src/tools/queries/index.ts",
+      "start_line": 1,
+      "end_line": 785
+    },
+    {
+      "path": "src/tools/reports/index.ts",
+      "start_line": 1,
+      "end_line": 1057
+    },
+    {
+      "path": "src/tools/sitemaps/index.ts",
+      "start_line": 1,
+      "end_line": 224
+    },
+    {
+      "path": "src/tools/sites/index.ts",
+      "start_line": 1,
+      "end_line": 172
+    },
+    {
+      "path": "src/tools/verification/index.ts",
+      "start_line": 1,
+      "end_line": 139
+    }
+  ],
+  "tool_count": 39,
+  "tools": [
+    {
+      "name": "ga4_list_accounts",
+      "description": "List every Google Analytics 4 account the credentials can reach, and the properties under each account. Use when the user does not yet know the account or property id. Call ga4_list_properties when they already named an account, and call ga4_get_property for one property settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 10,
+          "end_line": 49,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Paginates account summaries in pages of 200, lists reachable accounts and nested property summaries, and formats a Markdown summary.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta accountSummaries.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List Google Analytics 4 properties under one account, including timezone, currency, and when each property was created. Use when the user names an account and wants its properties. Call ga4_list_accounts when the account id is unknown, and call ga4_get_property to open one property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "GA4 account ID (e.g., \"123456\" or \"accounts/123456\")"
+          }
+        },
+        "required": [
+          "account_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 52,
+          "end_line": 98,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes account ID into a parent filter, paginates properties in pages of 200, and formats their settings.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_property",
+      "description": "Read one Google Analytics 4 property display name, timezone, currency, industry, and parent account. Use when the user asks how a known property is configured. Call ga4_list_properties to find the id first, and call ga4_list_data_streams for the streams on that property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 101,
+          "end_line": 139,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes the property resource name, fetches one property, and formats settings and timestamps.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_create_property",
+      "description": "Create a new Google Analytics 4 property under an account, with a display name, timezone, and currency. Use when the user asks to provision a GA4 property. This server cannot remove the property afterwards. Call ga4_list_properties to see properties that already exist, and call ga4_create_data_stream next when they need a measurement id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "GA4 account ID (e.g., \"123456\" or \"accounts/123456\")"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name for the new property"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Reporting timezone (e.g., \"America/New_York\", \"Europe/Moscow\")"
+          },
+          "currency_code": {
+            "type": "string",
+            "default": "USD",
+            "description": "Currency code (e.g., \"USD\", \"EUR\")"
+          },
+          "industry_category": {
+            "type": "string",
+            "description": "Industry category (e.g., \"TECHNOLOGY\", \"FINANCE\")"
+          }
+        },
+        "required": [
+          "account_id",
+          "display_name",
+          "timezone"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 142,
+          "end_line": 192,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes the account parent and creates a property with display name, timezone, currency and optional industry category; formats the created property.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.create"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_create_data_stream",
+      "description": "Create a web data stream on a Google Analytics 4 property and return its measurement id for the tag. Use when the user needs a measurement id to install analytics on a site. This server cannot delete the stream afterwards. Call ga4_list_data_streams if a stream may already exist, and call ga4_create_property first when the property itself does not exist yet.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          },
+          "url": {
+            "type": "string",
+            "description": "Website URL for the data stream (e.g., \"https://example.com\")"
+          },
+          "stream_name": {
+            "type": "string",
+            "description": "Display name for the stream (defaults to hostname)"
+          }
+        },
+        "required": [
+          "property_id",
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 195,
+          "end_line": 245,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes the property parent, parses the URL hostname for the default stream name, creates a WEB_DATA_STREAM, and returns measurement ID and installation advice.",
+      "scope": "ga4",
+      "effect": "write",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.dataStreams.create"
+      ],
+      "notes": [
+        "url is only a string in the input schema, but the handler requires it to parse with new URL(url)."
+      ]
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List the data streams on a Google Analytics 4 property, including each web stream measurement id and default URI. Use when the user asks which streams or measurement ids a property already has. Call ga4_get_data_stream for one stream, and call ga4_create_data_stream only when they want a new stream.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 248,
+          "end_line": 289,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Paginates data streams in pages of 200 and formats stream names, types, measurement IDs, URIs and timestamps.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.dataStreams.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_data_stream",
+      "description": "Read one Google Analytics 4 data stream, including its measurement id, default URI, and created and updated times. Use when the user names a stream and wants its measurement id or settings. Call ga4_list_data_streams when the stream id is not known yet.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          },
+          "stream_id": {
+            "type": "string",
+            "description": "Data stream ID (numeric, e.g., \"789012\")"
+          }
+        },
+        "required": [
+          "property_id",
+          "stream_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-admin/index.ts",
+          "start_line": 292,
+          "end_line": 332,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Builds properties/{property}/dataStreams/{stream} and fetches and formats a single stream.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Analytics Admin API v1beta properties.dataStreams.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a Google Analytics 4 report for chosen metrics, dimensions, and an absolute or relative date range. Use when the user asks for historical GA4 numbers such as users, sessions, or page views. Call ga4_run_realtime_report for who is on the site right now, and call ga4_get_metadata before guessing a custom metric name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          },
+          "start_date": {
+            "type": "string",
+            "pattern": "^(\\d{4}-\\d{2}-\\d{2}|\\d+daysAgo|yesterday|today)$",
+            "description": "Start date: YYYY-MM-DD or relative (\"7daysAgo\", \"30daysAgo\", \"yesterday\", \"today\")"
+          },
+          "end_date": {
+            "type": "string",
+            "pattern": "^(\\d{4}-\\d{2}-\\d{2}|\\d+daysAgo|yesterday|today)$",
+            "description": "End date: YYYY-MM-DD or relative (\"yesterday\", \"today\")"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Metrics to retrieve (e.g., [\"activeUsers\", \"sessions\", \"screenPageViews\"])"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions to group by (e.g., [\"date\", \"country\", \"pagePath\"])"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100000,
+            "default": 100,
+            "description": "Maximum rows to return (1-100000, default 100)"
+          }
+        },
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-reporting/index.ts",
+          "start_line": 37,
+          "end_line": 85,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Maps metric and dimension names to API objects and sends one date range and row limit to runReport; formats returned rows as a Markdown table. Does not expose filters, ordering or pagination despite those fields existing in internal request types.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_run_realtime_report",
+      "description": "Run a Google Analytics 4 realtime report of active users and on-site activity from the last thirty minutes. Use when the user asks who is on the site right now. Call ga4_run_report for any date range older than that live window, and call ga4_get_metadata if a realtime metric name is rejected.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Realtime metrics (e.g., [\"activeUsers\", \"screenPageViews\", \"conversions\"])"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Realtime dimensions (e.g., [\"country\", \"city\", \"unifiedScreenName\"])"
+          }
+        },
+        "required": [
+          "property_id",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-reporting/index.ts",
+          "start_line": 88,
+          "end_line": 122,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Maps metric and dimension names to API objects and runs a realtime report; formats returned rows as a Markdown table.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.runRealtimeReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_metadata",
+      "description": "List the dimensions and metrics a Google Analytics 4 property accepts, including custom definitions. Use when a report needs valid metric and dimension names and guessing would be wrong. Call ga4_run_report once the names are known; this tool does not return the numbers.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID (e.g., \"123456\" or \"properties/123456\")"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/ga4-reporting/index.ts",
+          "start_line": 125,
+          "end_line": 179,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/ga4-client.ts",
+          "start_line": 1,
+          "end_line": 172,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Retrieves property metadata, combines metrics and dimensions, groups them by category and marks custom definitions in Markdown.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.getMetadata"
+      ],
+      "notes": []
+    },
+    {
+      "name": "inspect_url",
+      "description": "Inspect one URL in the Google Search Console index for coverage, mobile usability, and rich-result verdicts, including the issues behind a failure. Use when the user asks why a single URL is missing from search or looks wrong. Call batch_inspect_urls for a list of URLs, and call check_indexing_issues to audit the top traffic pages of the property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The fully qualified URL to inspect"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/indexing/index.ts",
+          "start_line": 478,
+          "end_line": 509,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/url-inspection.ts",
+          "start_line": 1,
+          "end_line": 217,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Inspects one URL, normalizes index, mobile, rich result and canonical status and formats findings and recommendations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 urlInspection.index.inspect"
+      ],
+      "notes": []
+    },
+    {
+      "name": "batch_inspect_urls",
+      "description": "Inspect up to 50 URLs in one call and group them into indexed, not indexed, and errors. Indexed URLs show coverage state and last crawl; not-indexed URLs show verdict, coverage state, robots.txt state, and page fetch state; URLs without index data are listed as errors. Use when the user hands over a list of URLs to check. Call inspect_url for a single URL, and call check_indexing_issues when they want the top traffic pages audited without supplying the list.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "description": "Array of URLs to inspect (max 50)"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "urls"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/indexing/index.ts",
+          "start_line": 513,
+          "end_line": 631,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/url-inspection.ts",
+          "start_line": 1,
+          "end_line": 217,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Sequentially inspects up to 50 URLs and formats aggregate and per-URL findings; an unhandled individual failure aborts the batch.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v1 urlInspection.index.inspect"
+      ],
+      "notes": []
+    },
+    {
+      "name": "check_indexing_issues",
+      "description": "Audit the top traffic pages of a property for indexing failures, canonical mismatches, missing canonicals, and mobile problems. Use when the user wants an indexing health pass rather than a check of URLs they already named. Call inspect_url or batch_inspect_urls when they already have the URL list.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "description": "Number of top pages to check (default 20, max 100)"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/indexing/index.ts",
+          "start_line": 635,
+          "end_line": 816,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/url-inspection.ts",
+          "start_line": 1,
+          "end_line": 217,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries top pages from Search Analytics, inspects selected URLs with per-URL settled outcomes, and reports indexability, canonical and coverage issues plus inspection failures.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query",
+        "Search Console API v1 urlInspection.index.inspect"
+      ],
+      "notes": []
+    },
+    {
+      "name": "find_quick_wins",
+      "description": "Find query and page pairs that rank well but are under-clicked, sit just off page one, or would gain clicks from a small position push. Use when the user asks where search traffic is being left on the table. Call find_ctr_opportunities for page-level CTR gaps, and call find_declining_content when the problem is traffic that is already falling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "number",
+            "minimum": 0,
+            "default": 100,
+            "description": "Minimum impressions to consider a query"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/opportunities/index.ts",
+          "start_line": 272,
+          "end_line": 408,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query/page Search Analytics rows, filters minimum impressions, classifies mutually exclusive CTR, position gain and page-two opportunities, scores them and estimates click potential.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Analysis requests use an internal rowLimit of 25000; this limit is not exposed as an input parameter."
+      ]
+    },
+    {
+      "name": "find_declining_content",
+      "description": "Compare the current Search Console period with the previous one and rank the pages and the queries that lost clicks. Use when the user asks what stopped getting traffic or what dropped recently. Call find_quick_wins for under-clicked rankings that are not necessarily declining, and call weekly_seo_report for a full weekly digest.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minClicksInPrevious": {
+            "type": "number",
+            "minimum": 0,
+            "default": 10,
+            "description": "Minimum clicks in the previous period to consider a page or query"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/opportunities/index.ts",
+          "start_line": 413,
+          "end_line": 629,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries current and previous periods for pages and queries, filters minimum prior clicks and finds traffic declines with local recommendations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Analysis requests use an internal rowLimit of 25000; this limit is not exposed as an input parameter."
+      ]
+    },
+    {
+      "name": "find_ctr_opportunities",
+      "description": "Find pages whose Search Console click-through rate sits well below the benchmark for their average position, with a fix note for each page. Use when the user asks which titles or snippets are wasting impressions. Call find_quick_wins for query and page pairs near page one, and call get_top_pages for a plain traffic ranking.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "number",
+            "minimum": 0,
+            "default": 50,
+            "description": "Minimum impressions to include a page"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/opportunities/index.ts",
+          "start_line": 634,
+          "end_line": 817,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries page Search Analytics rows, filters minimum impressions and compares CTR against position benchmarks to rank potential click gains.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Analysis requests use an internal rowLimit of 25000; this limit is not exposed as an input parameter."
+      ]
+    },
+    {
+      "name": "find_content_gaps",
+      "description": "Find Search Console queries that land on the wrong page, high-impression queries with no clicks, and topics that still need a dedicated page. Use when the user asks what content is missing. Call find_what_to_build_next to group that demand by intent, and call find_cannibalization when several pages already compete for one query.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "number",
+            "minimum": 0,
+            "default": 20,
+            "description": "Minimum impressions to consider a query"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/opportunities/index.ts",
+          "start_line": 822,
+          "end_line": 1117,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query/page rows across current and previous periods and locally identifies zero-click demand, landing-page mismatches and related content opportunities.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Analysis requests use an internal rowLimit of 25000; this limit is not exposed as an input parameter."
+      ]
+    },
+    {
+      "name": "find_what_to_build_next",
+      "description": "Group Search Console queries by user intent, covering questions, comparisons, problems, and buying signals, into topic clusters for what to write next. Use when the user asks what content to create. Call find_content_gaps for mismatched landing pages and zero-click queries, and call analyze_query_landscape for the overall intent mix.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "number",
+            "minimum": 0,
+            "default": 10,
+            "description": "Minimum impressions to consider a query"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/opportunities/index.ts",
+          "start_line": 1122,
+          "end_line": 1410,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query/page rows, filters impressions, aggregates by query, classifies intent and builds local topic clusters and suggested content.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Analysis requests use an internal rowLimit of 25000; this limit is not exposed as an input parameter."
+      ]
+    },
+    {
+      "name": "get_search_analytics",
+      "description": "Query raw Google Search Console search analytics with explicit dates, dimensions, filters, search type, row limit, and data state. Use when the user needs a custom breakdown that the shaped reports do not offer. Call get_performance_summary for a period overview, call get_top_queries or get_top_pages for a ranking, and call compare_periods for two named date ranges.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "startDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "End date in YYYY-MM-DD format"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "date",
+                "query",
+                "page",
+                "country",
+                "device",
+                "searchAppearance"
+              ],
+              "description": "Dimension to group results by"
+            },
+            "description": "Dimensions to group by (e.g. query, page, date, country, device, searchAppearance)"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimension": {
+                  "type": "string",
+                  "description": "Dimension to filter on (query, page, country, device, searchAppearance)"
+                },
+                "operator": {
+                  "type": "string",
+                  "enum": [
+                    "contains",
+                    "equals",
+                    "notContains",
+                    "notEquals",
+                    "includingRegex",
+                    "excludingRegex"
+                  ],
+                  "default": "contains"
+                },
+                "expression": {
+                  "type": "string",
+                  "description": "Filter expression value"
+                }
+              },
+              "required": [
+                "dimension",
+                "expression"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Dimension filters to apply"
+          },
+          "rowLimit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 25000,
+            "default": 1000,
+            "description": "Maximum rows to return (1-25000)"
+          },
+          "dataState": {
+            "type": "string",
+            "enum": [
+              "all",
+              "final"
+            ],
+            "default": "all",
+            "description": "\"final\" = finalized data only (the API's own default; the newest days are simply absent until they settle), \"all\" = also includes the freshest days, whose numbers may still change"
+          },
+          "aggregationType": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "byPage",
+              "byProperty"
+            ],
+            "default": "auto"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "startDate",
+          "endDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 143,
+          "end_line": 245,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Forwards explicit dates, dimensions, filters, search type, data state, row limit and aggregation type to Search Analytics and formats rows and freshness limitations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_performance_summary",
+      "description": "Summarize clicks, impressions, CTR, and average position for one property against the previous period of the same length. Use when the user asks how search traffic is doing over a named period such as the last 28 days. Call compare_periods when they name two specific date ranges, and call get_search_analytics when they need the raw rows.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 250,
+          "end_line": 335,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Resolves a predefined period and queries current and previous aggregate Search Analytics metrics to calculate changes and recommendations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "compare_periods",
+      "description": "Compare Search Console clicks, impressions, CTR, and position between two explicit date ranges, optionally grouped by a dimension. Use when the user names a before and an after, such as a release or a season. Call get_performance_summary when they want the latest period against the one just before it, without choosing dates.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period1StartDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Period 1 start date (YYYY-MM-DD)"
+          },
+          "period1EndDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Period 1 end date (YYYY-MM-DD)"
+          },
+          "period2StartDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Period 2 start date (YYYY-MM-DD)"
+          },
+          "period2EndDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Period 2 end date (YYYY-MM-DD)"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "date",
+                "query",
+                "page",
+                "country",
+                "device",
+                "searchAppearance"
+              ],
+              "description": "Dimension to group results by"
+            },
+            "description": "Dimensions to group by"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "period1StartDate",
+          "period1EndDate",
+          "period2StartDate",
+          "period2EndDate"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 340,
+          "end_line": 477,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries two explicit date ranges using chosen dimensions and search type, computes metric differences and formats comparisons.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_top_queries",
+      "description": "List the top Search Console queries by clicks and score each query against the CTR benchmark for its position. Use when the user asks which queries bring traffic or which queries underperform their rank. Call get_top_pages for pages rather than queries, and call find_quick_wins for opportunity buckets instead of a plain ranking.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "DESKTOP",
+              "MOBILE",
+              "TABLET"
+            ],
+            "description": "Filter by device type"
+          },
+          "page": {
+            "type": "string",
+            "description": "Filter to a specific page URL (contains match)"
+          },
+          "country": {
+            "type": "string",
+            "description": "Filter by country code (e.g. \"USA\", \"GBR\")"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 25000,
+            "default": 20,
+            "description": "Number of top queries to return"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 482,
+          "end_line": 585,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query rows and aggregate totals, applies device/page/country filters and ranks the returned queries by search performance.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_top_pages",
+      "description": "List the top Search Console pages by clicks and score each page against the CTR benchmark for its position. Use when the user asks which URLs earn the search traffic. Call get_top_queries for queries, call get_traffic_by_device for a device split, and call find_ctr_opportunities for pages far below the benchmark.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "DESKTOP",
+              "MOBILE",
+              "TABLET"
+            ],
+            "description": "Filter by device type"
+          },
+          "query": {
+            "type": "string",
+            "description": "Filter to pages matching a specific query (contains match)"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 25000,
+            "default": 20,
+            "description": "Number of top pages to return"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 590,
+          "end_line": 696,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries page rows and aggregate totals with optional device and query filters, and formats top page metrics and recommendations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_traffic_by_device",
+      "description": "Split Search Console clicks, impressions, CTR, and average position across desktop, mobile, and tablet. Use when the user asks whether one device is underperforming the others. Call get_top_pages or get_top_queries when they want the pages or queries behind that device split.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/performance/index.ts",
+          "start_line": 701,
+          "end_line": 823,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries device-dimension Search Analytics rows and computes traffic shares and local device recommendations.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "analyze_query_landscape",
+      "description": "Classify the Search Console queries of a property by intent, branded versus non-branded demand, and position band. Use when the user wants the shape of search demand rather than a list of winners. Call find_new_queries for queries that just appeared, and call find_cannibalization when several pages share one query.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 5,
+            "description": "Minimum impressions for a query to be included"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/queries/index.ts",
+          "start_line": 147,
+          "end_line": 360,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query rows, filters minimum impressions and locally classifies intent, brand demand and position bands with metrics and distribution tables.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "find_new_queries",
+      "description": "Find queries that are new or rising fast by diffing this Search Console period against the previous one. Use when the user asks what people started searching recently. Call analyze_query_landscape for the overall mix of intent, and call find_what_to_build_next when they want those queries grouped into topics to write.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 5,
+            "description": "Minimum impressions in the current period to be included"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/queries/index.ts",
+          "start_line": 365,
+          "end_line": 587,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries current and previous query rows, compares query sets and growth, filters current impressions and formats new and rising demand.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "find_cannibalization",
+      "description": "Detect queries where more than one page of the property ranks, and name the page that wins the clicks. Use when the user asks whether their own pages compete for the same query. Call find_content_gaps when the query lands on the wrong page, and call get_top_pages for a plain page ranking.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "last7d",
+              "last28d",
+              "last3m",
+              "last6m",
+              "last12m",
+              "last16m"
+            ],
+            "description": "Predefined date range period",
+            "default": "last28d"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          },
+          "minImpressions": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 20,
+            "description": "Minimum total impressions for a query to be evaluated for cannibalization"
+          },
+          "minPageImpressions": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 30,
+            "description": "Minimum impressions one page needs before it counts as a real contender. Queries where only a single page clears this bar are reported as low-volume and get no consolidation advice."
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/queries/index.ts",
+          "start_line": 592,
+          "end_line": 784,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/analysis/cannibalization.ts",
+          "start_line": 55,
+          "end_line": 55,
+          "role": "schema default constant"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Queries query/page rows, filters total and per-page impressions and locally detects multiple competing pages, winning pages and low-volume exclusions.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query"
+      ],
+      "notes": []
+    },
+    {
+      "name": "weekly_seo_report",
+      "description": "Build a one-call weekly SEO digest with traffic versus last week, top growers and decliners, quick wins, sitemap health, and prioritized recommendations. Use when the user asks for a weekly report or a regular status update. Call seo_health_check for a letter grade, and call get_performance_summary when they only want the headline numbers.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/reports/index.ts",
+          "start_line": 136,
+          "end_line": 579,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Collects current and previous Search Analytics totals and breakdowns, opportunity and trend analyses plus sitemap status, then produces a Markdown weekly SEO report; individual report sections catch API errors.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query",
+        "Search Console webmasters v3 sitemaps.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "seo_health_check",
+      "description": "Score a Search Console property from A to F, with sub-scores for traffic trend, CTR efficiency, position distribution, and sitemap health. Use when the user asks how healthy the site is in search or wants a grade. Call weekly_seo_report for the narrative digest, and call find_declining_content when they already know traffic fell.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "searchType": {
+            "type": "string",
+            "enum": [
+              "web",
+              "image",
+              "video",
+              "news",
+              "discover",
+              "googleNews"
+            ],
+            "default": "web",
+            "description": "Search type to analyze"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/reports/index.ts",
+          "start_line": 585,
+          "end_line": 1056,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/search-analytics.ts",
+          "start_line": 1,
+          "end_line": 248,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        },
+        {
+          "path": "src/api/data-freshness.ts",
+          "start_line": 1,
+          "end_line": 141,
+          "role": "handler/helper"
+        }
+      ],
+      "behavior": "Collects Search Analytics breakdowns and sitemap status, computes local SEO health assessments and recommendations and formats a report; individual sections catch API errors.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 searchanalytics.query",
+        "Search Console webmasters v3 sitemaps.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "list_sitemaps",
+      "description": "List the sitemaps submitted for one Google Search Console property, with status, URL counts, and error flags. Use when the user asks which sitemaps are filed or whether Google reports sitemap problems. Call get_sitemap_details to open one feed, and call submit_sitemap only when they want to file a sitemap.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sitemaps/index.ts",
+          "start_line": 15,
+          "end_line": 76,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Lists submitted sitemaps and formats status, counts, warnings and errors.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 sitemaps.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_sitemap_details",
+      "description": "Read one submitted sitemap, including its type, last download, URL counts by content type, and error and warning totals. Use when the user names a sitemap and wants its processing status. Call list_sitemaps when they do not yet know which feed to open.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "The URL of the sitemap (e.g., \"https://example.com/sitemap.xml\")"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "feedpath"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sitemaps/index.ts",
+          "start_line": 79,
+          "end_line": 153,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Gets a sitemap by feedpath and formats submission/download timestamps, status and content counts.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 sitemaps.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "submit_sitemap",
+      "description": "Submit a sitemap URL to Google Search Console so Google can discover the pages of that property. Use when the user has published or moved a sitemap and asks to file it. Submitting the same feed again refreshes it and does not delete anything. Call delete_sitemap to withdraw a feed, and call get_sitemap_details to check processing afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "The URL of the sitemap (e.g., \"https://example.com/sitemap.xml\")"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "feedpath"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sitemaps/index.ts",
+          "start_line": 156,
+          "end_line": 189,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Submits or resubmits the sitemap feedpath to Search Console and invalidates related sitemap cache entries.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console webmasters v3 sitemaps.submit"
+      ],
+      "notes": []
+    },
+    {
+      "name": "delete_sitemap",
+      "description": "Withdraw a previously submitted sitemap from a Google Search Console property. Use when the user asks to remove a stale, duplicated, or broken sitemap. Removing the sitemap does not drop its URLs from the Google index. Call submit_sitemap to file that feed again, and call list_sitemaps to see what is still submitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "The URL of the sitemap (e.g., \"https://example.com/sitemap.xml\")"
+          }
+        },
+        "required": [
+          "siteUrl",
+          "feedpath"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sitemaps/index.ts",
+          "start_line": 192,
+          "end_line": 223,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sitemaps.ts",
+          "start_line": 1,
+          "end_line": 163,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Removes a submitted sitemap from Search Console and invalidates related cache entries; does not delete the hosted file.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console webmasters v3 sitemaps.delete"
+      ],
+      "notes": []
+    },
+    {
+      "name": "list_properties",
+      "description": "List every Google Search Console property the credentials can access, including each property type and permission level. Use when the user wants to see which sites they can query before choosing one. Call get_property_details for a single known property, and call add_property only when they ask to register a new site.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sites/index.ts",
+          "start_line": 17,
+          "end_line": 52,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sites.ts",
+          "start_line": 1,
+          "end_line": 123,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Lists accessible Search Console sites and permission levels using cached API results.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 sites.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "get_property_details",
+      "description": "Read the type, permission level, and verification state of one Google Search Console property. Use when the user names a specific site and wants to know how that property is registered. Call list_properties when the property URL is not known yet.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sites/index.ts",
+          "start_line": 55,
+          "end_line": 99,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sites.ts",
+          "start_line": 1,
+          "end_line": 123,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Reads one Search Console site and formats permission and verification advice.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console webmasters v3 sites.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "add_property",
+      "description": "Register a site URL or a domain as a Google Search Console property on the authenticated account. Use when the user asks to add a site to Search Console. Adding a property does not verify it. Call gsc_get_verification_token and then gsc_verify_site to prove ownership, and call list_properties to see sites that are already listed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sites/index.ts",
+          "start_line": 102,
+          "end_line": 137,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sites.ts",
+          "start_line": 1,
+          "end_line": 123,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Adds a Search Console site to the authenticated account and invalidates site cache entries; does not establish ownership verification.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console webmasters v3 sites.add"
+      ],
+      "notes": []
+    },
+    {
+      "name": "delete_property",
+      "description": "Remove a Google Search Console property from the authenticated account site list. Use when the user explicitly asks to drop a property. The property can be added back later, and this call does not erase historical data held by Google. Call delete_sitemap to withdraw a sitemap instead, and call add_property to register the site again.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "siteUrl": {
+            "type": "string",
+            "description": "The site URL exactly as it appears in Google Search Console (e.g., \"https://example.com/\" or \"sc-domain:example.com\")"
+          }
+        },
+        "required": [
+          "siteUrl"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/sites/index.ts",
+          "start_line": 140,
+          "end_line": 171,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/client.ts",
+          "start_line": 1,
+          "end_line": 205,
+          "role": "handler"
+        },
+        {
+          "path": "src/api/sites.ts",
+          "start_line": 1,
+          "end_line": 123,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Removes the Search Console site from the authenticated account and invalidates site cache entries.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Search Console webmasters v3 sites.delete"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_get_verification_token",
+      "description": "Request a site-verification token for FILE, DNS_TXT, META, or ANALYTICS, and the steps for placing that token. Use when the user needs the token before they can prove they own a site. Call gsc_verify_site only after the token is in place. Domain properties cannot use FILE or META; call this tool with DNS_TXT for those.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Site URL or domain to verify (e.g., \"https://example.com/\" or \"example.com\" for domain verification)"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "FILE",
+              "DNS_TXT",
+              "META",
+              "ANALYTICS"
+            ],
+            "description": "Verification method to use"
+          }
+        },
+        "required": [
+          "site_url",
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/verification/index.ts",
+          "start_line": 50,
+          "end_line": 93,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/verification-client.ts",
+          "start_line": 1,
+          "end_line": 62,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes URL-prefix, sc-domain and bare-domain sites, requests a verification token and formats method-specific placement instructions; does not publish the proof.",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Site Verification API v1 webResource.getToken"
+      ],
+      "notes": [
+        "Domain FILE and META restrictions are not enforced before the API call; warnings are added only after a successful response."
+      ]
+    },
+    {
+      "name": "gsc_verify_site",
+      "description": "Record Google site ownership for a URL or a domain once the verification token is already in place. Use when the user says the file, DNS record, meta tag, or Analytics tag is published and asks to finish verification. Call gsc_get_verification_token first if they do not have a token yet. This does not add the Search Console property; call add_property for that.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Site URL or domain to verify (e.g., \"https://example.com/\" or \"example.com\")"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "FILE",
+              "DNS_TXT",
+              "META",
+              "ANALYTICS"
+            ],
+            "description": "Verification method that was configured"
+          }
+        },
+        "required": [
+          "site_url",
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/tools/verification/index.ts",
+          "start_line": 96,
+          "end_line": 138,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/api/verification-client.ts",
+          "start_line": 1,
+          "end_line": 62,
+          "role": "handler"
+        },
+        {
+          "path": "src/tools/schemas.ts",
+          "start_line": 1,
+          "end_line": 87,
+          "role": "schema"
+        }
+      ],
+      "behavior": "Normalizes the site and inserts a Site Verification web resource using the requested verification method; formats returned ownership information.",
+      "scope": "adjacent",
+      "effect": "write",
+      "api_methods": [
+        "Site Verification API v1 webResource.insert"
+      ],
+      "notes": []
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list or live requests. All ten tool modules are registered unconditionally by createServer.",
+    "CLI authenticates before starting stdio or stateless Streamable HTTP; valid Google credentials and appropriate API access are required. No permission tiers or optional tool modules found. Search Console reads use cache and rate limiting; GA4 client performs rate-limited real API operations.",
+    "Schemas are source-derived representations of explicit Zod registrations, not runtime tools/list output. Object schemas use Zod default unknown-key stripping (additionalProperties false)."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently reconstructed all 39 Zod schemas, constraints and full descriptions exactly, including imported validators. Checked all ten modules registered by createServer and traced ten GA4 handlers into native Admin/Data clients. Only implemented GA4 provisioning/reporting drives placement."
+  }
+}

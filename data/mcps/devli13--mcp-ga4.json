@@ -1,0 +1,377 @@
+{
+  "repo": "devli13/mcp-ga4",
+  "revision": "30727d04fe681872700ba5bce5c9e06b876218a7",
+  "status": "included",
+  "reason": "Entrypoint registers five implemented GA4 Data API report tools and one local configured-property echo. The property-listing description overstates its implementation; no Admin API client or listing exists.",
+  "registration_sources": [
+    {
+      "path": "server.js",
+      "start_line": 59,
+      "end_line": 153
+    }
+  ],
+  "tool_count": 6,
+  "tools": [
+    {
+      "name": "ga4_run_report",
+      "description": "Run an arbitrary GA4 runReport query. Most flexible tool — use when the convenience tools below do not cover what you need.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property ID. Falls back to GA4_PROPERTY_ID env if not provided."
+          },
+          "metrics": {
+            "type": "array",
+            "description": "Metrics by name (e.g. [\"activeUsers\",\"sessions\",\"screenPageViews\",\"engagementRate\",\"eventCount\"]).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "description": "Dimensions by name (e.g. [\"date\",\"eventName\",\"country\",\"deviceCategory\"]).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dateRanges": {
+            "type": "array",
+            "description": "Date ranges. Each item is {startDate, endDate} with \"YYYY-MM-DD\" or relative \"NdaysAgo\" / \"today\" / \"yesterday\".",
+            "items": {
+              "type": "object",
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "properties": {
+                "startDate": {
+                  "type": "string"
+                },
+                "endDate": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "orderBy": {
+            "type": "string",
+            "description": "Metric name to sort desc by. Optional."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max rows (default 100)."
+          }
+        },
+        "required": [
+          "metrics",
+          "dateRanges"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 60,
+          "end_line": 95,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 172,
+          "end_line": 183,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Calls runReport on the selected property, maps metric/dimension name arrays to name objects, forwards dateRanges unchanged, optionally sorts a single metric descending, and uses args.limit || 100. Formats response rows using dimension and metric headers and returns property, the number of returned rows, and rows as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "The exposed request is a restricted runReport subset: no filters, pagination offset, metric aggregations, or cohortSpec are exposed. Date range objects are forwarded unchanged, including any additional fields allowed by the schema. limit uses a truthiness fallback, so zero becomes 100; no numeric constraints are registered."
+      ]
+    },
+    {
+      "name": "ga4_realtime",
+      "description": "Active users right now + top countries + events in the last 30 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 96,
+          "end_line": 105,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 185,
+          "end_line": 193,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Calls runRealtimeReport with activeUsers and country/deviceCategory dimensions. Returns property and formatted realtime rows as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Description promises events and top countries, but the handler requests only activeUsers grouped by country and deviceCategory, with no event metric/dimension or ranking."
+      ]
+    },
+    {
+      "name": "ga4_top_events",
+      "description": "Top events by count over last N days.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number",
+            "description": "Default 7."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Default 20."
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 106,
+          "end_line": 117,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 195,
+          "end_line": 208,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Calls runReport with eventCount by eventName over Number(args.days) || 7 daysAgo through today, descending eventCount sort, and Number(args.limit) || 20 rows. Returns property, days, and topEvents as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "days and limit are converted with Number and truthiness defaults: zero falls back; no positive/integer constraints are registered."
+      ]
+    },
+    {
+      "name": "ga4_daily_users",
+      "description": "Daily active users and sessions over last N days.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number",
+            "description": "Default 28."
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 118,
+          "end_line": 128,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 210,
+          "end_line": 222,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Calls runReport with activeUsers, sessions, and newUsers by date over Number(args.days) || 28 daysAgo through today, ascending date order, and days + 10 row limit. Returns property, days, and daily rows as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Also returns newUsers, beyond the description. days is converted with Number and truthiness default, so zero falls back; no positive/integer constraints are registered."
+      ]
+    },
+    {
+      "name": "ga4_retention",
+      "description": "Retention-style cohort view: active users by firstSessionDate (cohort) and date (day of return).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number",
+            "description": "How many days back to look. Default 28."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Default 500."
+          }
+        }
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 129,
+          "end_line": 140,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 224,
+          "end_line": 236,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Calls runReport with activeUsers by firstSessionDate and date over Number(args.days) || 28 daysAgo through today and Number(args.limit) || 500 row limit. Returns property, days, and retention rows as JSON text.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "This is a dimension-based report, not an Analytics Data API cohortSpec request or calculated retention rate. days and limit use Number and truthiness defaults; no positive/integer constraints are registered."
+      ]
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List GA4 properties accessible to the service account. Useful if the Property ID is unclear.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "server.js",
+          "start_line": 141,
+          "end_line": 145,
+          "role": "registration/schema"
+        },
+        {
+          "path": "server.js",
+          "start_line": 168,
+          "end_line": 171,
+          "role": "handler dispatch"
+        },
+        {
+          "path": "server.js",
+          "start_line": 238,
+          "end_line": 241,
+          "role": "handler"
+        },
+        {
+          "path": "server.js",
+          "start_line": 53,
+          "end_line": 57,
+          "role": "property resolution"
+        }
+      ],
+      "behavior": "Returns local JSON text containing DEFAULT_PROPERTY and a note suggesting the Admin API and asserting access to the default property. Makes no API request, does not enumerate accessible properties, and does not verify access.",
+      "scope": "support",
+      "effect": "local",
+      "api_methods": [],
+      "notes": [
+        "Misleading advertised description: this is a configured-ID echo, not an Admin API property listing. The claimed service-account access is unverified. Its empty input schema exposes no propertyId, yet the common dispatcher resolves a property before reaching this branch; without GA4_PROPERTY_ID (or an unadvertised propertyId argument), it throws before the try/catch."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution, or live requests performed. Git HEAD matches the supplied revision.",
+    "All six tools are unconditionally listed after successful credential initialization; no optional modules or permission tiers. Startup exits before registration when none of GOOGLE_APPLICATION_CREDENTIALS, GA4_SERVICE_ACCOUNT_JSON, or GA4_SERVICE_ACCOUNT_B64 is set, or when inline credentials cannot be parsed. package.json points main/bin/start to server.js and requires Node >=18.",
+    "Every call resolves args.propertyId or GA4_PROPERTY_ID before the handler try/catch. Missing/blank property throws outside the formatted GA4 error response. Non-prefixed IDs are prefixed with properties/.",
+    "Registered schemas omit additionalProperties, required lists except on ga4_run_report and its dateRanges items, and numeric bounds. Defaults mentioned in descriptions are not schema default keywords."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root compared every explicit schema, description and dispatcher, confirmed configured-ID echo and corrected promised realtime events; preserved schema omission of handler-only defaults."
+  }
+}

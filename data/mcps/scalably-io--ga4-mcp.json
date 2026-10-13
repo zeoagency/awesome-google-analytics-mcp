@@ -1,0 +1,1370 @@
+{
+  "repo": "scalably-io/ga4-mcp",
+  "revision": "90b8c28b4e62844fe1f1b765e3b95ce08367285b",
+  "status": "included",
+  "reason": "Seventeen unconditional callable tools implement GA4 Admin/Data API reads; console and module entrypoints run FastMCP.",
+  "registration_sources": [
+    {
+      "path": "src/scalably_ga4_mcp/server.py",
+      "start_line": 73,
+      "end_line": 116
+    },
+    {
+      "path": "src/scalably_ga4_mcp/server.py",
+      "start_line": 338,
+      "end_line": 906
+    }
+  ],
+  "tool_count": 17,
+  "tools": [
+    {
+      "name": "ga4_list_account_summaries",
+      "description": "List every GA4 account and its child properties accessible to this service account.\n\nCALL THIS FIRST to discover which property_id to pass into other tools. The SA\nonly sees accounts/properties where its email has been explicitly added as a user.\n\nResponse: {\"accounts\": [{account, display_name, property_summaries: [...], ...}]}.\nEach property_summary has property, display_name, property_type, parent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "title": "ga4_list_account_summariesArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 338,
+          "end_line": 351,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the account-summary pager and returns accounts plus count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listAccountSummaries"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_property_details",
+      "description": "Full metadata for a single GA4 property.\n\nReturns display_name, property_type, parent account, time_zone, currency_code,\nindustry_category, service_level, delete_time, expire_time, account reference,\ncreate_time, update_time.\n\nproperty_id: numeric (e.g. \"123456789\") or resource (e.g. \"properties/123456789\").",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_get_property_detailsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 354,
+          "end_line": 366,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Normalizes the property resource name and returns property metadata. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta getProperty"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List all data streams (web, iOS, Android) on a GA4 property.\n\nUseful for finding the Measurement ID (web), firebase_app_id (mobile),\nor the hostname of a web stream. Each stream has its creation/update timestamps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_data_streamsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 369,
+          "end_line": 379,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property data-stream pager; returns property, streams and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listDataStreams"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "List custom dimensions configured on a GA4 property.\n\nEach entry contains the parameter_name (how you query it, use prefix\n'customEvent:' or 'customUser:' when passing to get_metadata / run_report),\ndisplay_name, scope (EVENT|USER|ITEM), and description. Essential grounding\nbefore running reports that reference custom fields.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_custom_dimensionsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 382,
+          "end_line": 394,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property custom-dimension pager; returns property, dimensions and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listCustomDimensions"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "List custom metrics configured on a GA4 property.\n\nEach entry: parameter_name, display_name, measurement_unit, scope, restricted_metric_type.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_custom_metricsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 397,
+          "end_line": 406,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property custom-metric pager; returns property, metrics and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listCustomMetrics"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_key_events",
+      "description": "List key events (formerly conversions) on a GA4 property.\n\nThese are the events the client has marked as conversion-worthy. Query\nconversion metrics via `conversions` dimension or direct metric names.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_key_eventsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 409,
+          "end_line": 419,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property key-event pager; returns property, key events and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listKeyEvents"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_audiences",
+      "description": "List audiences defined on a GA4 property.\n\nEach audience has name, display_name, description, membership_duration_days,\nads_personalization_enabled, event_trigger, exclusion_duration_mode, filter_clauses.\nReference audienceId as a dimension in run_report for audience-based breakdowns.\n\nNOTE: Uses Admin v1alpha since audiences are still alpha in April 2026.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_audiencesArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 422,
+          "end_line": 435,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property audience pager; returns property, audiences and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha listAudiences"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_google_ads_links",
+      "description": "List Google Ads links attached to a GA4 property.\n\nReturns customer_id (the Ads account), can_manage_clients, ads_personalization_enabled,\nand creator_email. Useful to confirm Ads ↔ GA4 cross-reporting availability before\nquerying Ads-related dimensions like sessionGoogleAdsCampaignId.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_google_ads_linksArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 438,
+          "end_line": 449,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property Google Ads link pager; returns property, links and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta listGoogleAdsLinks"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_list_property_annotations",
+      "description": "List reporting annotations on a GA4 property.\n\nAnnotations are markers (user-added or Google-system) flagging important\nevents on a timeline: product launches, outages, marketing pushes, so\ndownstream analysis can correlate metric swings with known events.\n\nEach annotation has: name, title, description, annotation_date,\nannotation_date_range, color, creator_email, system_generated.\n\nNOTE: Uses Admin v1alpha since annotations are still alpha in April 2026.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_list_property_annotationsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 452,
+          "end_line": 468,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Exhausts the property annotation pager; returns property, annotations and count. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha listPropertyAnnotations"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern."
+      ]
+    },
+    {
+      "name": "ga4_run_access_report",
+      "description": "Audit log of who-read-what on a GA4 property (last 12 months).\n\ndimensions (common): userEmail, accessedPropertyName.\nmetrics: accessCount.\ndate_ranges: list of {start_date, end_date} (YYYY-MM-DD or relative). Defaults to last 7d.\n\nUse cases: identify usage of GA4 data by staff, confirm SA activity, compliance audits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions",
+            "default": null
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "default": null
+          },
+          "date_ranges": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Ranges",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 1000
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_run_access_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 471,
+          "end_line": 499,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds an access report with userEmail/accessCount and last seven days when selections are absent or empty; caps limit at 100000 and returns serialized response. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta runAccessReport"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints."
+      ]
+    },
+    {
+      "name": "ga4_get_metadata",
+      "description": "Fetch the full GA4 dimension + metric catalog for a property.\n\nIf property_id is omitted, returns the universal catalog (excludes\nproperty-specific custom fields). Pass a property_id to include custom\ndimensions and metrics like 'customEvent:foo' and 'customUser:signup_plan'.\n\nResponse: {\"dimensions\": [...], \"metrics\": [...]}. Each entry has api_name,\nui_name, description, category, custom_definition.\n\nCall this before run_report when the agent is uncertain about field names:\nGA4's catalog is large and custom fields require the property to resolve.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property Id",
+            "default": null
+          }
+        },
+        "required": [],
+        "title": "ga4_get_metadataArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 505,
+          "end_line": 524,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        }
+      ],
+      "behavior": "Retrieves property metadata or properties/0/metadata for the universal catalog. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": [
+        "Handler normalizes numeric IDs or properties/NNN; this restriction is not an input-schema pattern. Metadata permits omitted/empty property_id for the universal catalog."
+      ]
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a GA4 standard report. The workhorse tool.\n\nArgs:\n  property_id: numeric or 'properties/NNN'.\n  dimensions: list of dimension api_names (e.g. [\"country\", \"deviceCategory\", \"date\"]).\n    Custom dims require 'customEvent:' or 'customUser:' prefixes.\n  metrics: list of metric api_names (e.g. [\"activeUsers\", \"sessions\", \"totalRevenue\"]).\n  date_ranges: list of {start_date, end_date, name?}. Accepts 'YYYY-MM-DD',\n    'NdaysAgo', 'today', 'yesterday'. Up to 4 ranges.\n  dimension_filter / metric_filter: filter expression dicts. Shapes:\n    {\"filter\": {\"field_name\": \"country\", \"string_filter\": {\"value\": \"US\"}}}\n    {\"and_group\": {\"expressions\": [...]}}\n    {\"or_group\": {\"expressions\": [...]}}\n    {\"not_expression\": {...}}\n  order_bys: list of {metric: {metric_name}, desc} or {dimension: {...}}.\n  metric_aggregations: list of TOTAL|MINIMUM|MAXIMUM|COUNT.\n  limit: max rows (hard cap 250000 per response).\n  offset: pagination offset.\n  keep_empty_rows: include rows where all metrics are zero.\n  currency_code: override property default for revenue metrics.\n  cohort_spec / comparisons: advanced specs (see REST docs).\n\nGotchas surfaced in response.metadata:\n  - samplingMetadatas: present if query was sampled (&gt; 10M events scanned)\n  - dataLossFromOtherRow: true if high-cardinality dims collapsed into \"(other)\"\n  - schemaRestrictionResponse: active thresholding rules\n  - subjectToThresholding: true if user-privacy thresholding dropped rows\n\npropertyQuota always included so the agent can self-throttle.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions",
+            "default": null
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "default": null
+          },
+          "date_ranges": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Ranges",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Filter",
+            "default": null
+          },
+          "order_bys": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Bys",
+            "default": null
+          },
+          "metric_aggregations": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Aggregations",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10000
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "default": 0
+          },
+          "keep_empty_rows": {
+            "type": "boolean",
+            "title": "Keep Empty Rows",
+            "default": false
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code",
+            "default": null
+          },
+          "cohort_spec": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Spec",
+            "default": null
+          },
+          "comparisons": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comparisons",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_run_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 581,
+          "end_line": 647,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 526,
+          "end_line": 578,
+          "role": "request builder"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds dimensions, metrics, date ranges, filter expressions, ordering and aggregations; forwards cohort_spec/comparisons to RunReportRequest; caps limit at 250000 and always requests quota. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "Row limits are capped in handler without schema minimum/maximum; negative values are not rejected locally."
+      ]
+    },
+    {
+      "name": "ga4_batch_run_reports",
+      "description": "Run up to 5 GA4 reports in a single round-trip.\n\nrequests: list of run_report-shaped dicts. Same top-level parameters as\nga4_run_report (minus property_id, inferred from the batch). Each entry\naccepts: dimensions, metrics, date_ranges, dimension_filter, metric_filter,\norder_bys, metric_aggregations, limit, offset, keep_empty_rows, currency_code.\n\nUseful when the agent needs paired views (e.g. landing pages + referrers\nfor the same window) and wants them atomically + under one quota call.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Requests"
+          }
+        },
+        "required": [
+          "property_id",
+          "requests"
+        ],
+        "title": "ga4_batch_run_reportsArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 650,
+          "end_line": 690,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 526,
+          "end_line": 578,
+          "role": "request builder"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds up to five standard reports for the shared property using the same builder, including cohort_spec/comparisons; each report requests quota; returns batch response. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta batchRunReports"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "Maximum five requests is enforced only by handler; empty batches are not rejected locally."
+      ]
+    },
+    {
+      "name": "ga4_run_pivot_report",
+      "description": "Run a GA4 pivot report.\n\npivots: list of pivot specs, each with:\n  - field_names: list of dimension names to pivot on\n  - limit: max rows per pivot\n  - offset: pagination offset\n  - order_bys: list of OrderBy dicts (same shape as run_report's order_bys)\n  - metric_aggregations: list of TOTAL|MINIMUM|MAXIMUM|COUNT\n\nUse when you want a 2D view: e.g. rows=date, columns=device, values=sessions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions",
+            "default": null
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "default": null
+          },
+          "pivots": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pivots",
+            "default": null
+          },
+          "date_ranges": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Ranges",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Filter",
+            "default": null
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code",
+            "default": null
+          },
+          "keep_empty_rows": {
+            "type": "boolean",
+            "title": "Keep Empty Rows",
+            "default": false
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_run_pivot_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 693,
+          "end_line": 751,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds dimensions, metrics, date ranges, filters and Pivot objects with ordering/aggregations; caps each pivot limit at 250000 and requests quota. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runPivotReport"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "Row limits are capped in handler without schema minimum/maximum; negative values are not rejected locally."
+      ]
+    },
+    {
+      "name": "ga4_run_realtime_report",
+      "description": "Run a GA4 real-time report. Covers the last 30 minutes only.\n\nIMPORTANT: realtime uses a SEPARATE, smaller dimension/metric catalog. Do NOT\npass 'date', 'totalRevenue', etc: they don't exist in realtime. Common dims:\n'minutesAgo', 'country', 'deviceCategory', 'unifiedScreenName', 'eventName'.\nCommon metrics: 'activeUsers', 'screenPageViews', 'eventCount'.\n\nminute_ranges: list of {start_minutes_ago, end_minutes_ago, name?}. Max 2\nranges. Values are 0-29 (0 = now, 29 = 30 min ago).\n\nFor historical / batch reports use ga4_run_report instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions",
+            "default": null
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Filter",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10000
+          },
+          "minute_ranges": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minute Ranges",
+            "default": null
+          },
+          "order_bys": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Bys",
+            "default": null
+          },
+          "metric_aggregations": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Aggregations",
+            "default": null
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_run_realtime_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 754,
+          "end_line": 804,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds dimensions, metrics, filters, minute ranges, ordering and aggregations; caps limit at 250000 and requests quota. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "minute_ranges is annotated list[dict[str,int]], so a string name described in the docstring conflicts with its exposed integer value schema. Max two ranges and 0–29 bounds are documented but not checked locally.",
+        "Row limits are capped in handler without schema minimum/maximum; negative values are not rejected locally."
+      ]
+    },
+    {
+      "name": "ga4_check_compatibility",
+      "description": "Validate whether a dim/metric combo can be queried together. Cheap pre-flight.\n\ncompatibility_filter: 'COMPATIBLE' (default, returns only fields that work\nwith the provided selection) or 'INCOMPATIBLE' (returns only fields that\nwould conflict).\n\nUse before run_report when composing exploratory queries, cheaper than\ncatching a GoogleAdsException after a big failed report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions",
+            "default": null
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "metric_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Filter",
+            "default": null
+          },
+          "compatibility_filter": {
+            "type": "string",
+            "title": "Compatibility Filter",
+            "default": "COMPATIBLE"
+          }
+        },
+        "required": [
+          "property_id"
+        ],
+        "title": "ga4_check_compatibilityArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 807,
+          "end_line": 847,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds requested fields and filters, maps compatibility_filter case-insensitively to the API enum and returns compatibility response. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta checkCompatibility"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "Handler accepts COMPATIBILITY_UNSPECIFIED, COMPATIBLE or INCOMPATIBLE case-insensitively; input schema is a plain string."
+      ]
+    },
+    {
+      "name": "ga4_run_funnel_report",
+      "description": "Run a GA4 funnel report. v1alpha, API surface may change.\n\nfunnel: {\n  is_open_funnel: bool,\n  steps: [\n    {\n      name: str,\n      is_directly_followed_by: bool,\n      filter_expression: FunnelFilterExpression,\n      within_duration_from_prior_step: {seconds: int},\n    }, ...\n  ]\n}\nfunnel_breakdown: {dimension_name, limit}, optional per-step breakdown.\nfunnel_next_action: {dimension_name, limit}, optional \"what came after\".\n\nUse for drop-off analysis across a sequence of events. Behind an alpha flag\nbecause Google can change the shape, check the Feb 2026 release notes if\nthis fails with a validation error.\n\nRef: https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1alpha/properties/runFunnelReport",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "title": "Property Id"
+          },
+          "funnel": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "Funnel"
+          },
+          "date_ranges": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Ranges",
+            "default": null
+          },
+          "dimension_filter": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Filter",
+            "default": null
+          },
+          "funnel_breakdown": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funnel Breakdown",
+            "default": null
+          },
+          "funnel_next_action": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funnel Next Action",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10000
+          },
+          "return_property_quota": {
+            "type": "boolean",
+            "title": "Return Property Quota",
+            "default": true
+          }
+        },
+        "required": [
+          "property_id",
+          "funnel"
+        ],
+        "title": "ga4_run_funnel_reportArguments"
+      },
+      "schema_origin": "source-derived annotations",
+      "sources": [
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 850,
+          "end_line": 906,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 77,
+          "end_line": 116,
+          "role": "shared registration wrapper/response behavior"
+        },
+        {
+          "path": "src/scalably_ga4_mcp/server.py",
+          "start_line": 228,
+          "end_line": 322,
+          "role": "shared filter/order/aggregation helpers"
+        }
+      ],
+      "behavior": "Builds date ranges/filter and forwards loose funnel, funnel_breakdown and funnel_next_action dictionaries into protobuf constructors; rejects over ten steps, caps limit at 250000 and uses caller quota flag. Serializes protobufs to snake_case dictionaries; the shared registration wrapper returns a JSON string envelope with status, result, target, completeness/quality proof and recovery guidance, and redacts errors before raising RuntimeError.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1alpha runFunnelReport"
+      ],
+      "notes": [
+        "Handler requires numeric property_id or properties/NNN; this restriction is not an input-schema pattern.",
+        "Dictionary arguments intentionally expose arbitrary keys/values according to annotations; documented GA shapes and API protobuf validation are not nested input-schema constraints.",
+        "Unconditionally registered despite docstring claiming an alpha flag; no feature gate exists.",
+        "Row limits are capped in handler without schema minimum/maximum; negative values are not rejected locally."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, upstream execution or live requests. HEAD verified against supplied revision.",
+    "All seventeen decorators register unconditionally. Imported BatchRunPivotReportsRequest has no corresponding registered tool.",
+    "Schemas reconstructed from signatures, defaults and standard FastMCP/Pydantic annotation mapping; no Field, Annotated, custom models or injected Context. Docstrings are preserved as tool descriptions; parameter prose adds no schema bounds/enums.",
+    "Clients load service-account credentials or ADC lazily with analytics.readonly scope. Startup credential failures are logged and server still runs.",
+    "Wrapper completeness detection considers only top-level rows/row_count with a top-level limit; batch and nested funnel response quality/pagination may not be detected.",
+    "pyproject.toml pins google-analytics-data==0.21.0 and google-analytics-admin==0.28.0; imports and newer alpha method availability were not verified by running/installing dependencies."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently compared all 17 signatures, required sets, defaults and complete docstrings. Read the signature-preserving registration wrapper, protobuf request builders, Admin access reports, native funnel and realtime handlers; checked loose native object parameters and handler-only caps."
+  }
+}

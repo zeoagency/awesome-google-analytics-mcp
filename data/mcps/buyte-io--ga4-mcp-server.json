@@ -1,0 +1,341 @@
+{
+  "repo": "buyte-io/GA4-MCP-Server",
+  "revision": "0c828761972759a32432c36ed4b32e6af7677acd",
+  "status": "included",
+  "reason": "Four real GA4 tools registered by shared MCP factory, reachable from source tsx stdio CLI and Worker HTTP transport; defective compiled npm start does not invalidate these alternative entrypoints.",
+  "registration_sources": [
+    {
+      "path": "src/mcp/server.ts",
+      "start_line": 10,
+      "end_line": 24,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/mcp/server.ts",
+      "start_line": 52,
+      "end_line": 198,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/mcp/cli.ts",
+      "start_line": 1,
+      "end_line": 11,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/mcp/cli-entry.ts",
+      "start_line": 1,
+      "end_line": 27,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/mcp/worker-http.ts",
+      "start_line": 140,
+      "end_line": 160,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/api/handler.ts",
+      "start_line": 288,
+      "end_line": 297,
+      "role": "registration/schema/handler"
+    },
+    {
+      "path": "src/worker.ts",
+      "start_line": 79,
+      "end_line": 96,
+      "role": "registration/schema/handler"
+    }
+  ],
+  "tool_count": 4,
+  "tools": [
+    {
+      "name": "ga4_listAccounts",
+      "description": "Return the GA4 accounts visible to the configured service account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 108,
+          "end_line": 122,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.ts",
+          "start_line": 259,
+          "end_line": 310,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.worker.ts",
+          "start_line": 169,
+          "end_line": 204,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/rest-client.ts",
+          "start_line": 161,
+          "end_line": 178,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Returns cached or fetched account summaries and nested property summaries as JSON text and structured accounts. Node uses paginated Admin API async iterator; Worker calls REST accountSummaries once.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "No inputSchema supplied in registration; empty object represents SDK no-argument tool.",
+        "Worker ignores nextPageToken; results can omit later pages."
+      ]
+    },
+    {
+      "name": "ga4_listProperties",
+      "description": "List properties that belong to a given GA4 account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "GA4 account identifier, with or without the accounts/ prefix",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "accountId"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 124,
+          "end_line": 139,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 52,
+          "end_line": 56,
+          "role": "schema"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.ts",
+          "start_line": 317,
+          "end_line": 368,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.worker.ts",
+          "start_line": 206,
+          "end_line": 251,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/rest-client.ts",
+          "start_line": 183,
+          "end_line": 205,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Fetches/caches properties using Admin API parent account filter and returns normalized property summaries as JSON text and structured properties. Node normalizes optional accounts/ prefix.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.list"
+      ],
+      "notes": [
+        "Worker unconditionally prepends accounts/ in REST filter and parent output, so accountId accounts/123 yields parent:accounts/accounts/123 despite advertised prefix support.",
+        "Worker ignores nextPageToken; Node paginates with listPropertiesAsync."
+      ]
+    },
+    {
+      "name": "ga4_getMetadata",
+      "description": "Retrieve dimensions and metrics metadata for a GA4 property. If propertyId is omitted, falls back to config DEFAULT_GA4_PROPERTY_ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property identifier, with or without the properties/ prefix",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 141,
+          "end_line": 163,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 58,
+          "end_line": 63,
+          "role": "schema"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.ts",
+          "start_line": 375,
+          "end_line": 405,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.worker.ts",
+          "start_line": 253,
+          "end_line": 278,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/rest-client.ts",
+          "start_line": 123,
+          "end_line": 149,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Resolves propertyId or configured default, fails if neither exists, normalizes properties/ prefix and retrieves/caches property dimensions and metrics metadata; returns JSON text and structured metadata.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.getMetadata"
+      ],
+      "notes": [
+        "Omitted propertyId requires DEFAULT_GA4_PROPERTY_ID configured; no schema default exists."
+      ]
+    },
+    {
+      "name": "ga4_runReport",
+      "description": "Execute a GA4 report query for the provided property, metrics, and optional dimensions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "GA4 property identifier, with or without the properties/ prefix",
+            "minLength": 1
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "API name of the metric to include in the report",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "API name of the dimension to include in the report",
+              "minLength": 1
+            }
+          },
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "description": "Start date (YYYY-MM-DD or relative, e.g. 7daysAgo)"
+                },
+                "endDate": {
+                  "type": "string",
+                  "description": "End date (YYYY-MM-DD or relative, e.g. today)"
+                }
+              },
+              "required": [
+                "startDate",
+                "endDate"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "propertyId",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 165,
+          "end_line": 198,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/mcp/server.ts",
+          "start_line": 65,
+          "end_line": 92,
+          "role": "schema"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.ts",
+          "start_line": 160,
+          "end_line": 180,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/analytics.service.worker.ts",
+          "start_line": 98,
+          "end_line": 122,
+          "role": "handler"
+        },
+        {
+          "path": "src/features/ga4/services/rest-client.ts",
+          "start_line": 93,
+          "end_line": 121,
+          "role": "handler"
+        }
+      ],
+      "behavior": "Converts metric/dimension names to GA name objects; uses nonempty dateRanges or startDate/endDate with handler fallbacks 7daysAgo/today; forwards property, metrics, dimensions, dateRanges and limit to Data API runReport. Returns report structured content plus row/header summary and up to three sample rows.",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta properties.runReport"
+      ],
+      "notes": [
+        "Date strings have no format constraint; dateRanges may be empty and triggers handler fallback. Fallback dates are handler behavior, not schema defaults.",
+        "Underlying services support filters, offset, orderBys and quota options but MCP input schema does not expose them."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no upstream execution, tools/list, or live requests. Git HEAD matches supplied revision.",
+    "All four tools register unconditionally; service is constructed lazily on first call. No optional tool modules, permission-tier tool inventories, aliases, or further registerTool/tool calls found. REST endpoints in manifest.ts are not MCP tools.",
+    "package.json start/main targets dist/index.js, while tsconfig.json rootDir \".\" emits src/index.ts to dist/src/index.js. Plain tsc also retains extensionless ESM imports and tsconfig aliases. npm run mcp instead uses tsx src/mcp/cli-entry.ts; Worker transport uses the same shared factory and Workers-specific real REST clients.",
+    "Root wrangler.toml targets dist/src/worker.js. cloudflare/wrangler.toml instead says src/worker.ts relative to its own directory (which has no such source) and contains malformed stray inline-table entries; this alternate config is defective. Worker deployment/build not tested.",
+    "Schemas reconstructed from explicit Zod registration shapes; standard object schemas reject additional properties in JSON Schema conversion while Zod validation strips unknown keys. No runtime schema claim."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Root compared all four shared registrations with nested Zod validators, min/max/requiredness, and traced Node/Workers services; confirmed compiled-entrypoint limitation."
+  }
+}

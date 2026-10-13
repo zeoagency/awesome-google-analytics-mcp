@@ -1,0 +1,1026 @@
+{
+  "repo": "rablab-mtl/mcp-ga4-gsc",
+  "revision": "2fff5e4a0de1174116c6cb51f0061e388d03155b",
+  "status": "included",
+  "reason": "Cloudflare Worker registers callable read-only GA4 Admin/Data API tools alongside Search Console tools; handlers perform authenticated Google REST requests.",
+  "registration_sources": [
+    {
+      "path": "src/index.ts",
+      "start_line": 87,
+      "end_line": 430
+    }
+  ],
+  "tool_count": 22,
+  "tools": [
+    {
+      "name": "ga4_list_account_summaries",
+      "description": "List all Google Analytics 4 accounts and properties accessible to the authenticated user. Use this to discover property IDs needed for run_report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 92,
+          "end_line": 100,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta accountSummaries.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_get_property_details",
+      "description": "Get details about a specific GA4 property (timezone, currency, industry, etc.).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID, e.g. 123456789 or properties/123456789"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 102,
+          "end_line": 111,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_run_report",
+      "description": "Run a Google Analytics 4 report. Returns metrics broken down by dimensions for a date range. Common dimensions: date, country, deviceCategory, sessionDefaultChannelGroup, pagePath, landingPage. Common metrics: sessions, totalUsers, newUsers, screenPageViews, conversions, totalRevenue, engagementRate, averageSessionDuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD or relative like 7daysAgo, 30daysAgo, yesterday"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD or relative like today, yesterday"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of dimension names"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of metric names, at least one required"
+          },
+          "dimension_filter": {
+            "type": "string",
+            "description": "Optional JSON string with FilterExpression"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max rows, default 100, max 100000",
+            "default": 100
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date",
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 113,
+          "end_line": 137,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes property ID; builds one date range, metric name objects, optional dimension name objects, stringified limit and parsed dimensionFilter; POSTs the report request. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runReport"
+      ],
+      "notes": [
+        "Invalid dimension_filter JSON is silently ignored.",
+        "The description promises at least one metric and max 100000 rows, but schema/handler impose neither minimum array length nor numeric range/integer constraint."
+      ]
+    },
+    {
+      "name": "ga4_run_realtime_report",
+      "description": "Run a Google Analytics 4 realtime report. Returns active users data from the last 30 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Realtime metrics, e.g. activeUsers, screenPageViews"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id",
+          "metrics"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 142,
+          "end_line": 155,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes property ID; POSTs metric name objects and optional dimension name objects for realtime reporting. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runRealtimeReport"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_list_sites",
+      "description": "List all Search Console properties accessible to the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 164,
+          "end_line": 172,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Issues an authenticated GET to https://www.googleapis.com/webmasters/v3/sites. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 sites.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_query_search_analytics",
+      "description": "Query Search Console search analytics. Returns clicks, impressions, CTR, position for the given site, date range, and dimensions. Common dimensions: query, page, country, device, date, searchAppearance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Site URL, e.g. https://www.example.com/ or sc-domain:example.com"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Dimensions list"
+          },
+          "row_limit": {
+            "type": "number",
+            "default": 1000
+          },
+          "dimension_filter_groups": {
+            "type": "string",
+            "description": "Optional JSON array of dimensionFilterGroups"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "site_url",
+          "start_date",
+          "end_date"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 174,
+          "end_line": 197,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "URL-encodes site URL; POSTs startDate/endDate, rowLimit, optional dimensions and parsed dimensionFilterGroups. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 searchanalytics.query"
+      ],
+      "notes": [
+        "Invalid dimension_filter_groups JSON is silently ignored; parsed values receive no structural validation."
+      ]
+    },
+    {
+      "name": "gsc_list_sitemaps",
+      "description": "List sitemaps submitted to Search Console for a given site.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Site URL or sc-domain:"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "site_url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 202,
+          "end_line": 211,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "URL-encodes site URL; Issues an authenticated GET to https://www.googleapis.com/webmasters/v3/sites/${encoded}/sitemaps. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 sitemaps.list"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_inspect_url",
+      "description": "Inspect a specific URL in Search Console (indexation status, last crawl, mobile usability, etc.). Powered by Google's URL Inspection API.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Owned site URL or sc-domain:"
+          },
+          "inspection_url": {
+            "type": "string",
+            "description": "Full URL to inspect"
+          },
+          "language_code": {
+            "type": "string",
+            "default": "en-CA"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "site_url",
+          "inspection_url"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 213,
+          "end_line": 228,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "POSTs inspectionUrl, siteUrl and languageCode (default en-CA) to URL Inspection. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "URL Inspection API v1 index.inspect"
+      ],
+      "notes": []
+    },
+    {
+      "name": "gsc_get_sitemap",
+      "description": "Get details of a specific sitemap submitted to Search Console (status, last submitted, last downloaded, warnings, errors, contents).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "site_url": {
+            "type": "string",
+            "description": "Owned site URL or sc-domain:"
+          },
+          "feedpath": {
+            "type": "string",
+            "description": "Full URL of the sitemap, e.g. https://example.com/sitemap.xml"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "site_url",
+          "feedpath"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 233,
+          "end_line": 246,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "URL-encodes site URL and sitemap feedpath; Issues an authenticated GET to https://www.googleapis.com/webmasters/v3/sites/${encodedSite}/sitemaps/${encodedFeed}. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "adjacent",
+      "effect": "read",
+      "api_methods": [
+        "Search Console API v3 sitemaps.get"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_get_metadata",
+      "description": "List all dimensions and metrics available for a specific GA4 property (including custom dimensions/metrics). Use this to discover what you can query in run_report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "description": "GA4 property ID, e.g. 123456789"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 252,
+          "end_line": 261,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsdata.googleapis.com/v1beta/${pid}/metadata. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta getMetadata"
+      ],
+      "notes": []
+    },
+    {
+      "name": "ga4_check_compatibility",
+      "description": "Check which dimensions and metrics are compatible with a given report configuration. Useful for diagnosing why a runReport returns errors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "compatibility_filter": {
+            "type": "string",
+            "description": "COMPATIBLE or INCOMPATIBLE (default COMPATIBLE)"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 263,
+          "end_line": 278,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes property ID; POSTs compatibilityFilter (falls back to COMPATIBLE for absent or empty string) and optional dimension/metric name objects. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta checkCompatibility"
+      ],
+      "notes": [
+        "compatibility_filter is unrestricted string, not an enum; COMPATIBLE is a handler fallback rather than a schema default."
+      ]
+    },
+    {
+      "name": "ga4_run_pivot_report",
+      "description": "Run a GA4 pivot report (pivot tables with multiple pivots). Returns metrics aggregated by pivot dimensions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pivots": {
+            "type": "string",
+            "description": "JSON string of pivots array, e.g. '[{\"fieldNames\":[\"country\"],\"limit\":10}]'"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id",
+          "start_date",
+          "end_date",
+          "dimensions",
+          "metrics",
+          "pivots"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 283,
+          "end_line": 305,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes property ID; POSTs one date range, dimension and metric name objects, and the JSON-parsed pivots value. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta runPivotReport"
+      ],
+      "notes": [
+        "Invalid pivots JSON silently becomes []; parsed value receives no structural validation."
+      ]
+    },
+    {
+      "name": "ga4_batch_run_reports",
+      "description": "Run up to 5 GA4 reports in a single request, sharing the same property. Saves quota when you need several reports for the same property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          },
+          "requests_json": {
+            "type": "string",
+            "description": "JSON array of up to 5 request objects, each with dateRanges/dimensions/metrics"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id",
+          "requests_json"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 310,
+          "end_line": 323,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes property ID; JSON-parses requests_json and POSTs it as requests. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Data API v1beta batchRunReports"
+      ],
+      "notes": [
+        "Invalid requests_json silently becomes []; no array shape or five-request maximum is enforced locally."
+      ]
+    },
+    {
+      "name": "ga4_list_properties",
+      "description": "List GA4 properties belonging to an account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "description": "Account ID, e.g. 1234567 (without 'accounts/' prefix)"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "account_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 332,
+          "end_line": 341,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare account ID to accounts/ID; GETs properties filtered by parent with pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta properties.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_data_streams",
+      "description": "List data streams (web, iOS, Android) configured on a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 343,
+          "end_line": 352,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/dataStreams?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta dataStreams.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_key_events",
+      "description": "List the key events (conversions) configured on a GA4 property. Replaces the deprecated conversionEvents.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 354,
+          "end_line": 363,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/keyEvents?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta keyEvents.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_conversion_events",
+      "description": "List conversion events (legacy API, still active for older properties). Prefer list_key_events for new properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 365,
+          "end_line": 374,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/conversionEvents?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta conversionEvents.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_dimensions",
+      "description": "List custom dimensions configured on a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 376,
+          "end_line": 385,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/customDimensions?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta customDimensions.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_custom_metrics",
+      "description": "List custom metrics configured on a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 387,
+          "end_line": 396,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/customMetrics?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta customMetrics.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_audiences",
+      "description": "List audiences configured on a GA4 property. Uses v1alpha API.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 398,
+          "end_line": 407,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1alpha/${pid}/audiences?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1alpha audiences.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_google_ads_links",
+      "description": "List Google Ads accounts linked to a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 409,
+          "end_line": 418,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/googleAdsLinks?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta googleAdsLinks.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    },
+    {
+      "name": "ga4_list_firebase_links",
+      "description": "List Firebase projects linked to a GA4 property.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "property_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "property_id"
+        ]
+      },
+      "schema_origin": "explicit registration",
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "start_line": 420,
+          "end_line": 429,
+          "role": "registration/schema/handler"
+        },
+        {
+          "path": "src/index.ts",
+          "start_line": 8,
+          "end_line": 85,
+          "role": "shared handler/authentication/result formatting"
+        }
+      ],
+      "behavior": "Normalizes bare property ID to properties/ID. Issues an authenticated GET to https://analyticsadmin.googleapis.com/v1beta/${pid}/firebaseLinks?pageSize=200. Returns the API response as pretty-printed JSON text (or raw text).",
+      "scope": "ga4",
+      "effect": "read",
+      "api_methods": [
+        "Admin API v1beta firebaseLinks.list"
+      ],
+      "notes": [
+        "Returns a single page (pageSize=200); does not follow nextPageToken."
+      ]
+    }
+  ],
+  "notes": [
+    "Source review only; no tools/list, server execution or live requests. HEAD matches supplied revision.",
+    "All 22 tools register unconditionally in MyMCP.init; no optional tool modules or permission tiers. OAuth and aliases are HTTP endpoints, not tools.",
+    "ALIAS_PATHS changes connector routing, not tool names/inventory; optional PATH_EMAIL_MAP restricts who may open each exact path (src/index.ts:456-515,621-655).",
+    "Google OAuth requests analytics.readonly and webmasters.readonly scopes (src/google-handler.ts:128-129). Shared callGoogle refreshes expired tokens and retries once after HTTP 401 (src/index.ts:28-85).",
+    "Requires Cloudflare Durable Object MCP_OBJECT, OAUTH_KV, Google OAuth client secrets and deployment configuration; no definite entrypoint blocker established by source inspection.",
+    "Schemas reconstructed from Zod raw shapes; default object strip behavior represented with additionalProperties:false. String descriptions mentioning dates/URLs/enums and JSON structure do not impose schema formats or validation.",
+    "OAuth callback denies all accounts unless ALLOWED_EMAILS or ALLOWED_DOMAINS admits the email (src/google-handler.ts:23-39,190-195); COOKIE_ENCRYPTION_KEY is needed to sign approval cookies (src/google-handler.ts:109 and src/workers-oauth-utils.ts:48-64)."
+  ],
+  "review": {
+    "date": "2026-10-13",
+    "method": "Independently reconstructed all 22 Zod schemas and full descriptions exactly; read init registration, bearer-refresh client, native report/pivot/batch requests and Admin collection endpoints. Separate Search Console operations do not imply a joined GA4 report."
+  }
+}
